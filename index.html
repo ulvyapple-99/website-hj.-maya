@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sate Maranggi Hj. Maya Cimahi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Model Viewer for 3D Files -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&family=Montserrat:wght@400;700&family=Oswald:wght@400;700&family=Lora:wght@400;700&family=Raleway:wght@400;700&family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&family=Merriweather:wght@300;400;700&family=Source+Sans+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['var(--font-heading)', 'serif'],
+            sans: ['var(--font-body)', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              brown: 'var(--color-brand-brown)',
+              orange: 'var(--color-brand-orange)',
+              cream: 'var(--color-brand-cream)',
+              gold: 'var(--color-brand-gold)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      /* Colors */
+      --color-brand-brown: #3E2723;
+      --color-brand-orange: #D84315;
+      --color-brand-cream: #FFF8E1;
+      --color-brand-gold: #FFD700;
+      
+      /* Fonts Defaults */
+      --font-heading: 'Playfair Display';
+      --font-body: 'Lato';
+    }
+
+    /* DEFAULT: Hide cursor and use custom one */
+    body:not(.admin-mode), 
+    body:not(.admin-mode) a, 
+    body:not(.admin-mode) button, 
+    body:not(.admin-mode) input, 
+    body:not(.admin-mode) textarea, 
+    body:not(.admin-mode) select {
+      cursor: none !important;
+    }
+
+    /* ADMIN MODE: Restore cursor and hide custom cursor */
+    body.admin-mode {
+      cursor: auto !important;
+    }
+    body.admin-mode app-cursor {
+      display: none !important;
+    }
+    
+    body {
+      overflow-x: hidden;
+    }
+
+    /* Model Viewer Customization */
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "rxjs": "https://esm.sh/rxjs@^7.8.2?conditions=es2015",
+    "rxjs/operators": "https://esm.sh/rxjs@^7.8.2/operators?conditions=es2015",
+    "rxjs/ajax": "https://esm.sh/rxjs@^7.8.2/ajax?conditions=es2015",
+    "rxjs/webSocket": "https://esm.sh/rxjs@^7.8.2/webSocket?conditions=es2015",
+    "rxjs/testing": "https://esm.sh/rxjs@^7.8.2/testing?conditions=es2015",
+    "rxjs/fetch": "https://esm.sh/rxjs@^7.8.2/fetch?conditions=es2015",
+    "@angular/compiler": "https://esm.sh/@angular/compiler@^21.0.6?external=rxjs",
+    "@angular/common": "https://esm.sh/@angular/common@^21.0.6?external=rxjs",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0?external=rxjs",
+    "@angular/core": "https://esm.sh/@angular/core@^21.0.6?external=rxjs",
+    "@angular/forms": "https://esm.sh/@angular/forms@^21.0.6?external=rxjs",
+    "@angular/platform-browser": "https://esm.sh/@angular/platform-browser@^21.0.6?external=rxjs",
+    "@angular/router": "https://esm.sh/@angular/router@^21.0.6?external=rxjs"
+  }
+}
+</script>
+</head>
+<body class="bg-brand-cream text-brand-brown antialiased selection:bg-brand-orange selection:text-white font-sans">
+  <app-root></app-root>
+</body>
+</html>
