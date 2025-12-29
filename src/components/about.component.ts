@@ -51,23 +51,23 @@ import { ConfigService } from '../services/config.service';
               {{ config().about.title }}
             </h2>
             
-            <div class="prose leading-relaxed text-lg mb-8 text-justify opacity-80">
+            <div class="prose leading-relaxed text-lg mb-8 text-justify opacity-80 whitespace-pre-line">
               <p>{{ config().about.description }}</p>
             </div>
 
-            <!-- Stats -->
+            <!-- Stats Dynamic -->
             <div class="grid grid-cols-3 gap-4 border-t pt-8" [style.borderColor]="config().about.style.accentColor + '30'">
                <div class="text-center">
-                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">100%</span>
-                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">Daging Segar</span>
+                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">{{ config().about.stats.val1 }}</span>
+                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">{{ config().about.stats.label1 }}</span>
                </div>
                <div class="text-center">
-                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">4.9</span>
-                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">Rating Rasa</span>
+                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">{{ config().about.stats.val2 }}</span>
+                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">{{ config().about.stats.label2 }}</span>
                </div>
                <div class="text-center">
-                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">3</span>
-                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">Cabang</span>
+                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">{{ config().about.stats.val3 }}</span>
+                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">{{ config().about.stats.label3 }}</span>
                </div>
             </div>
           </div>

@@ -30,12 +30,11 @@ import { CommonModule } from '@angular/common';
            }
         </div>
         
-        <!-- Luxury Gradient Overlay (Improved Contrast) -->
+        <!-- Gradient Overlay -->
         <div 
           class="absolute inset-0 z-10" 
           [style.background]="'radial-gradient(circle at center, transparent 0%, ' + config().hero.style.backgroundColor + ' 90%)'"
         ></div>
-        <!-- Darker overlay for better text readability -->
         <div class="absolute inset-0 bg-black/50 z-10"></div>
       </div>
 
@@ -68,14 +67,14 @@ import { CommonModule } from '@angular/common';
              class="font-bold py-4 px-10 rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all transform hover:scale-105 hover:-translate-y-1 cursor-pointer no-underline border-none text-white relative overflow-hidden group"
              [style.backgroundColor]="config().hero.style.accentColor"
           >
-            <span class="relative z-10">Lihat Menu Kami</span>
+            <span class="relative z-10">{{ config().hero.buttonText1 }}</span>
             <div class="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
           </a>
           <a routerLink="/reservation" 
              class="font-bold py-4 px-10 rounded-full transition-all transform hover:scale-105 cursor-pointer no-underline border-2 border-white/30 backdrop-blur-sm hover:bg-white/10 hover:border-white"
              [style.color]="'#fff'"
           >
-            Reservasi Meja
+            {{ config().hero.buttonText2 }}
           </a>
         </div>
       </div>

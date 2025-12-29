@@ -66,6 +66,8 @@ export interface AppConfig {
     title: string;
     highlight: string;
     subtitle: string;
+    buttonText1: string; // NEW
+    buttonText2: string; // NEW
     bgImage: string;
     style: PageStyle;
   };
@@ -73,6 +75,11 @@ export interface AppConfig {
     title: string;
     description: string;
     image: string;
+    stats: {
+      val1: string; label1: string;
+      val2: string; label2: string;
+      val3: string; label3: string;
+    };
     style: PageStyle;
   };
   menuPage: {
@@ -93,6 +100,7 @@ export interface AppConfig {
     style: PageStyle;
   };
   footer: {
+    description: string; // NEW
     instagramLink: string;
     facebookLink: string;
     tiktokLink: string;
@@ -160,6 +168,8 @@ export class ConfigService {
       title: 'Sate Maranggi',
       highlight: 'Asli Hj. Maya',
       subtitle: 'Legenda Kuliner Cimahi. Nikmati sensasi Sate Jando yang lumer dan Sate Sapi empuk dengan sambal oncom khas yang bikin nagih.',
+      buttonText1: 'Lihat Menu Kami',
+      buttonText2: 'Reservasi Meja',
       bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920&auto=format&fit=crop',
       style: {
         backgroundColor: '#2D1810',
@@ -172,6 +182,11 @@ export class ConfigService {
       title: 'Resep Warisan Keluarga',
       description: 'Sate Maranggi Hj. Maya Cimahi menghadirkan cita rasa otentik yang telah melegenda.',
       image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=1000&auto=format&fit=crop',
+      stats: {
+        val1: '100%', label1: 'Daging Segar',
+        val2: '4.9', label2: 'Rating Rasa',
+        val3: '1980', label3: 'Sejak'
+      },
       style: {
         backgroundColor: '#FFF8E1',
         textColor: '#4E342E',
@@ -212,6 +227,7 @@ export class ConfigService {
       }
     },
     footer: {
+      description: 'Menyajikan cita rasa Sate Maranggi asli Cimahi sejak 1980. Bumbu meresap, daging empuk, sambal nikmat.',
       instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/',
       facebookLink: 'https://facebook.com',
       tiktokLink: 'https://tiktok.com',
@@ -328,12 +344,25 @@ export class ConfigService {
             ...current,
             ...data,
             global: { ...current.global, ...(data.global || {}) },
-            hero: { ...current.hero, ...(data.hero || {}) },
+            hero: { 
+                ...current.hero, 
+                ...(data.hero || {}),
+                buttonText1: data.hero?.buttonText1 || current.hero.buttonText1,
+                buttonText2: data.hero?.buttonText2 || current.hero.buttonText2
+            },
             menuPage: { ...current.menuPage, ...(data.menuPage || {}) },
-            about: { ...current.about, ...(data.about || {}) },
+            about: { 
+                ...current.about, 
+                ...(data.about || {}),
+                stats: { ...current.about.stats, ...(data.about?.stats || {}) }
+            },
             reservation: { ...current.reservation, ...(data.reservation || {}) },
             locationPage: { ...current.locationPage, ...(data.locationPage || {}) },
-            footer: { ...current.footer, ...(data.footer || {}) },
+            footer: { 
+                ...current.footer, 
+                ...(data.footer || {}),
+                description: data.footer?.description || current.footer.description
+            },
             instagramProfile: data.instagramProfile || current.instagramProfile,
             branches: data.branches || current.branches,
             gallery: data.gallery || current.gallery,
@@ -345,7 +374,7 @@ export class ConfigService {
         console.log("Config doc missing, using default.");
       }
     }, (error) => {
-      // Handle Permission Error - INI YANG ANDA ALAMI
+      // Handle Permission Error
       if (error.code === 'permission-denied') {
          this.firestoreError.set("PERMISSION_DENIED: Database terkunci. Harap deploy 'firestore.rules' di Firebase Console.");
       } else {
@@ -365,7 +394,6 @@ export class ConfigService {
 
     try {
        await setDoc(doc(this.db, 'settings', this.DOC_ID), newConfig);
-       // Jika sukses, alert ini muncul
        alert("Data berhasil disimpan ke Server Firebase!"); 
     } catch (error: any) {
       console.error("Error saving config:", error);
@@ -377,12 +405,9 @@ export class ConfigService {
     }
   }
   
-  // --- LOCAL FILE HANDLING (Helper for upload) ---
+  // --- LOCAL FILE HANDLING ---
   
   async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
-    // Note: Idealnya upload ke Firebase Storage. 
-    // Untuk saat ini kita convert ke Base64 agar tetap jalan tanpa setup Storage yang kompleks
-    // Tapi jika rules storage sudah benar, bisa diganti ke uploadBytes
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -393,8 +418,8 @@ export class ConfigService {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                const MAX_WIDTH = 800;
-                const MAX_HEIGHT = 800;
+                const MAX_WIDTH = 1000;
+                const MAX_HEIGHT = 1000;
                 if (width > height) {
                     if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                 } else {
@@ -405,7 +430,7 @@ export class ConfigService {
                 const ctx = canvas.getContext('2d');
                 if (!ctx) { reject(new Error("Canvas error")); return; }
                 ctx.drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/jpeg', 0.7));
+                resolve(canvas.toDataURL('image/jpeg', 0.8));
             };
             img.onerror = () => reject(new Error("Invalid image"));
         };
