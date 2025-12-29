@@ -124,18 +124,16 @@ export class ConfigService {
   private db: Firestore | undefined;
   
   private DOC_ID = 'main_config';
-  private LOCAL_CONTENT_KEY = 'sate_maranggi_content_v1';
 
   // Auth State
   currentUser = signal<User | null>(null);
   isAdmin = computed(() => this.currentUser() !== null);
   isFirebaseReady = signal(false);
-  isDemoMode = signal(false);
   
   // Error State
   firestoreError = signal<string | null>(null);
 
-  // Kredensial Firebase Default (Placeholder)
+  // Kredensial Default
   private defaultFirebaseConfig: FirebaseConfig = {
     apiKey: "AIzaSyDKnk7ypRSI5UFB-eI3WW-ZwakRfMSbz0U", 
     authDomain: "sate-maranggi-app.firebaseapp.com",
@@ -256,7 +254,6 @@ export class ConfigService {
   });
 
   constructor() {
-    this.loadLocalConfig();
     this.initFirebase();
 
     effect(() => {
@@ -264,21 +261,6 @@ export class ConfigService {
        const root = document.documentElement;
        root.style.setProperty('--color-brand-brown', c.hero.style.backgroundColor);
     });
-  }
-
-  // Load config from LocalStorage first (Robustness)
-  private loadLocalConfig() {
-    try {
-      const local = localStorage.getItem(this.LOCAL_CONTENT_KEY);
-      if (local) {
-        const parsed = JSON.parse(local);
-        // Merge with default to ensure new fields exist
-        this.config.set({ ...this.config(), ...parsed });
-        console.log("Loaded config from LocalStorage");
-      }
-    } catch (e) {
-      console.warn("Failed to load local config", e);
-    }
   }
 
   getStoredFirebaseConfig(): FirebaseConfig | null {
@@ -301,16 +283,12 @@ export class ConfigService {
       const customConfig = this.getStoredFirebaseConfig();
       const configToUse = customConfig || this.defaultFirebaseConfig;
 
-      // Detect Demo Project
-      if (configToUse.projectId === 'sate-maranggi-app' || !customConfig) {
-         this.isDemoMode.set(true);
-      }
-
       this.app = initializeApp(configToUse);
       this.auth = getAuth(this.app);
       this.db = getFirestore(this.app);
       
       this.isFirebaseReady.set(true);
+      console.log(`✅ Firebase initialized with project: ${configToUse.projectId}`);
       
       onAuthStateChanged(this.auth, (user) => {
           this.currentUser.set(user);
@@ -319,34 +297,19 @@ export class ConfigService {
       this.subscribeToConfig();
 
     } catch (e) {
-      console.error("Firebase Init Error (Falling back to local only):", e);
+      console.error("❌ Firebase Init Error:", e);
       this.isFirebaseReady.set(false);
-      this.isDemoMode.set(true);
     }
   }
 
   async loginAdmin(email: string, pass: string) {
-    if (this.isDemoMode()) {
-       // Mock Login for Demo
-       if (email === 'admin@demo.com' && pass === 'demo') {
-          // Fake user object
-          this.currentUser.set({ email: 'admin@demo.com', uid: 'demo-user' } as User);
-          return;
-       }
-       if (!this.auth) throw new Error("Firebase belum terhubung.");
-    }
-    
-    if (this.auth) {
-        await signInWithEmailAndPassword(this.auth, email, pass);
-    }
+    if (!this.auth) throw new Error("Firebase belum terhubung.");
+    await signInWithEmailAndPassword(this.auth, email, pass);
   }
 
   async logoutAdmin() {
-    if (this.isDemoMode()) {
-        this.currentUser.set(null);
-        return;
-    }
-    if (this.auth) await signOut(this.auth);
+    if (!this.auth) return;
+    await signOut(this.auth);
   }
 
   subscribeToConfig() {
@@ -355,28 +318,36 @@ export class ConfigService {
     const docRef = doc(this.db, 'settings', this.DOC_ID);
     
     onSnapshot(docRef, (docSnap) => {
-      this.firestoreError.set(null); 
+      this.firestoreError.set(null); // Clear error on success
 
       if (docSnap.exists()) {
         const data = docSnap.data() as AppConfig;
-        // Merge strategy
-        const merged = {
-            ...this.config(),
+        
+        // Merge with existing config structure to ensure no undefined errors
+        this.config.update(current => ({
+            ...current,
             ...data,
-            global: { ...this.config().global, ...(data.global || {}) },
-            hero: { ...this.config().hero, ...(data.hero || {}) },
-            // ... deeper merge if needed
-        };
-        this.config.set(merged);
-        // Also update local storage to keep them in sync
-        localStorage.setItem(this.LOCAL_CONTENT_KEY, JSON.stringify(merged));
+            global: { ...current.global, ...(data.global || {}) },
+            hero: { ...current.hero, ...(data.hero || {}) },
+            menuPage: { ...current.menuPage, ...(data.menuPage || {}) },
+            about: { ...current.about, ...(data.about || {}) },
+            reservation: { ...current.reservation, ...(data.reservation || {}) },
+            locationPage: { ...current.locationPage, ...(data.locationPage || {}) },
+            footer: { ...current.footer, ...(data.footer || {}) },
+            instagramProfile: data.instagramProfile || current.instagramProfile,
+            branches: data.branches || current.branches,
+            gallery: data.gallery || current.gallery,
+            testimonials: data.testimonials || current.testimonials,
+            ai: { ...current.ai, ...(data.ai || {}) }
+        }));
+      } else {
+        // Document doesn't exist yet, we can try to create it with default
+        console.log("Config doc missing, using default.");
       }
     }, (error) => {
-      // HANDLE PERMISSION ERRORS GRACEFULLY
-      if (error.code === 'permission-denied' || error.code === 'unavailable') {
-        console.warn("Firestore blocked. Switching to Local/Demo mode.");
-        this.isDemoMode.set(true);
-        this.firestoreError.set(null); // Clear error so UI doesn't block user
+      // Handle Permission Error - INI YANG ANDA ALAMI
+      if (error.code === 'permission-denied') {
+         this.firestoreError.set("PERMISSION_DENIED: Database terkunci. Harap deploy 'firestore.rules' di Firebase Console.");
       } else {
         console.error("Firestore Listen Error:", error);
         this.firestoreError.set(error.message);
@@ -386,36 +357,36 @@ export class ConfigService {
 
   async updateConfig(newConfig: AppConfig) {
     this.config.set(newConfig);
-    // ALWAYS save to local storage first
-    localStorage.setItem(this.LOCAL_CONTENT_KEY, JSON.stringify(newConfig));
 
-    if (this.isDemoMode() || !this.db) {
-        alert("Disimpan ke Browser (Mode Demo/Offline). Perubahan tidak akan hilang saat refresh.");
+    if (!this.db) {
+        alert("Error: Tidak terhubung ke database.");
         return;
     }
 
     try {
        await setDoc(doc(this.db, 'settings', this.DOC_ID), newConfig);
-       alert("Berhasil disimpan ke Server Cloud!");
+       // Jika sukses, alert ini muncul
+       alert("Data berhasil disimpan ke Server Firebase!"); 
     } catch (error: any) {
-      console.error("Cloud save failed:", error);
+      console.error("Error saving config:", error);
       if (error.code === 'permission-denied') {
-          // Fallback gracefully
-          this.isDemoMode.set(true);
-          alert("Gagal akses Cloud (Permission Denied). Tersimpan di Browser saja.");
+          alert("GAGAL MENYIMPAN: Akses Ditolak! Pastikan Rules sudah benar dan Anda sudah Login.");
       } else {
           alert("Gagal menyimpan ke server: " + error.message);
       }
     }
   }
   
-  // --- LOCAL FILE HANDLING ---
+  // --- LOCAL FILE HANDLING (Helper for upload) ---
+  
   async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
+    // Note: Idealnya upload ke Firebase Storage. 
+    // Untuk saat ini kita convert ke Base64 agar tetap jalan tanpa setup Storage yang kompleks
+    // Tapi jika rules storage sudah benar, bisa diganti ke uploadBytes
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = (event: any) => {
-            // Compress Image Logic (Simple Canvas resize)
             const img = new Image();
             img.src = event.target.result;
             img.onload = () => {
@@ -434,7 +405,6 @@ export class ConfigService {
                 const ctx = canvas.getContext('2d');
                 if (!ctx) { reject(new Error("Canvas error")); return; }
                 ctx.drawImage(img, 0, 0, width, height);
-                // Return Data URL (Base64)
                 resolve(canvas.toDataURL('image/jpeg', 0.7));
             };
             img.onerror = () => reject(new Error("Invalid image"));
