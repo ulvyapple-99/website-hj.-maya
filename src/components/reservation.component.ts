@@ -236,6 +236,8 @@ export class ReservationComponent {
        }
     });
     msg += `\n*Total: ${this.formatRupiah(this.grandTotal())}*`;
-    window.open(`https://wa.me/${b.whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+
+    const phone = this.configService.formatPhoneNumber(b.whatsappNumber);
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   }
 }

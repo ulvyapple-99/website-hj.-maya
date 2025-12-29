@@ -1,7 +1,19 @@
 
 import { Injectable, signal, effect, computed } from '@angular/core';
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, Auth, User } from 'firebase/auth';
+import { getFirestore, doc, setDoc, Firestore, onSnapshot } from 'firebase/firestore';
 
 // INTERFACES
+export interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+}
+
 export interface MenuItem {
   name: string;
   desc: string;
@@ -86,6 +98,14 @@ export interface AppConfig {
     tiktokLink: string;
     style: PageStyle;
   };
+  instagramProfile: {
+    username: string;
+    postsCount: string;
+    followersCount: string;
+    followingCount: string;
+    bio: string;
+    profilePic: string;
+  };
   branches: Branch[]; 
   gallery: string[];
   testimonials: Testimonial[];
@@ -99,24 +119,41 @@ export interface AppConfig {
   providedIn: 'root'
 })
 export class ConfigService {
-  private STORAGE_KEY = 'app_config_data_local_v2';
-  private USER_KEY = 'app_user_session_local';
+  private app: FirebaseApp | undefined;
+  private auth: Auth | undefined;
+  private db: Firestore | undefined;
+  
+  private DOC_ID = 'main_config';
+  private LOCAL_CONTENT_KEY = 'sate_maranggi_content_v1';
 
-  // Auth State (Mocked for Local Mode)
-  currentUser = signal<{email: string} | null>(null);
+  // Auth State
+  currentUser = signal<User | null>(null);
   isAdmin = computed(() => this.currentUser() !== null);
+  isFirebaseReady = signal(false);
+  isDemoMode = signal(false);
+  
+  // Error State
+  firestoreError = signal<string | null>(null);
 
-  // Initial State - PRE-FILLED WITH COMPLETE DATA
-  // This ensures the site looks good on Mobile immediately after deployment
+  // Kredensial Firebase Default (Placeholder)
+  private defaultFirebaseConfig: FirebaseConfig = {
+    apiKey: "AIzaSyDKnk7ypRSI5UFB-eI3WW-ZwakRfMSbz0U", 
+    authDomain: "sate-maranggi-app.firebaseapp.com",
+    projectId: "sate-maranggi-app",
+    storageBucket: "sate-maranggi-app.firebasestorage.app",
+    messagingSenderId: "463298798562",
+    appId: "1:463298798562:web:1f409a1aceb1e9cacb0fbb"
+  };
+
   config = signal<AppConfig>({
     global: {
-      logoText: 'Hj. Maya',
+      logoText: 'Hj. Maya Cimahi',
       logoImage: '', 
       navbarColor: '#FFFFFF',
-      navbarTextColor: '#4E342E'
+      navbarTextColor: '#3E2723'
     },
     intro: {
-      enabled: false, // Disabled by default for faster loading
+      enabled: false,
       videoUrl: '', 
       duration: 5,
       fadeOut: 'fade'
@@ -124,19 +161,19 @@ export class ConfigService {
     hero: {
       title: 'Sate Maranggi',
       highlight: 'Asli Hj. Maya',
-      subtitle: 'Kelembutan daging pilihan dengan bumbu rempah warisan yang meresap sempurna. Legenda kuliner Cimahi & Bandung.',
-      bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920&auto=format&fit=crop', // High quality BBQ image
+      subtitle: 'Legenda Kuliner Cimahi. Nikmati sensasi Sate Jando yang lumer dan Sate Sapi empuk dengan sambal oncom khas yang bikin nagih.',
+      bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920&auto=format&fit=crop',
       style: {
-        backgroundColor: '#3E2723',
+        backgroundColor: '#2D1810',
         textColor: '#FFFFFF',
-        accentColor: '#FF6F00', // Amber-900
+        accentColor: '#FF6F00',
         fontFamily: 'Playfair Display'
       }
     },
     about: {
-      title: 'Cita Rasa Legendaris',
-      description: 'Sate Maranggi Hj. Maya berdiri sejak tahun 1980-an, bermula dari resep keluarga yang dijaga keasliannya. Kami menggunakan daging sapi dan ayam pilihan yang dimarinasi (direndam) dengan bumbu rempah rahasia selama berjam-jam sebelum dibakar. Tanpa saus kacang pun, sate kami sudah nikmat luar biasa. Disajikan dengan ketan bakar, sambal oncom, dan sambal tomat segar.',
-      image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?q=80&w=800&auto=format&fit=crop', // Chef grilling image
+      title: 'Resep Warisan Keluarga',
+      description: 'Sate Maranggi Hj. Maya Cimahi menghadirkan cita rasa otentik yang telah melegenda.',
+      image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=1000&auto=format&fit=crop',
       style: {
         backgroundColor: '#FFF8E1',
         textColor: '#4E342E',
@@ -145,8 +182,8 @@ export class ConfigService {
       }
     },
     menuPage: {
-      title: 'Menu Favorit',
-      subtitle: 'Pesan sekarang untuk makan di tempat atau bawa pulang.',
+      title: 'Menu Andalan',
+      subtitle: 'Pilihan menu favorit pelanggan setia Hj. Maya',
       style: {
         backgroundColor: '#FFFFFF', 
         textColor: '#3E2723',
@@ -156,9 +193,9 @@ export class ConfigService {
     },
     reservation: {
       title: 'Reservasi Tempat',
-      subtitle: 'Pastikan ketersediaan tempat untuk acara spesial Anda.',
-      minPaxRegular: 20,
-      minPaxRamadan: 10,
+      subtitle: 'Booking meja untuk acara keluarga, arisan, atau buka bersama.',
+      minPaxRegular: 5,
+      minPaxRamadan: 5,
       style: {
         backgroundColor: '#EFEBE9',
         textColor: '#3E2723', 
@@ -167,8 +204,8 @@ export class ConfigService {
       }
     },
     locationPage: {
-      title: 'Lokasi Cabang',
-      subtitle: 'Kunjungi cabang terdekat Sate Maranggi Hj. Maya.',
+      title: 'Kunjungi Kami',
+      subtitle: 'Nikmati suasana makan yang nyaman di lokasi kami.',
       style: {
         backgroundColor: '#3E2723',
         textColor: '#FFF8E1',
@@ -181,69 +218,47 @@ export class ConfigService {
       facebookLink: 'https://facebook.com',
       tiktokLink: 'https://tiktok.com',
       style: {
-        backgroundColor: '#271C19',
-        textColor: '#A1887F',
+        backgroundColor: '#1A120B',
+        textColor: '#D7CCC8',
         accentColor: '#FF6F00',
         fontFamily: 'Lato'
       }
     },
+    instagramProfile: {
+      username: 'satemaranggihjmayacimahi',
+      postsCount: '1,245',
+      followersCount: '15.4K',
+      followingCount: '89',
+      bio: 'Sate Maranggi Asli Hj. Maya 🍢',
+      profilePic: 'https://ui-avatars.com/api/?name=Hj+Maya&background=D84315&color=fff&size=128'
+    },
     branches: [
       {
         id: 'pusat',
-        name: 'Pusat: Cimahi',
-        address: 'Jl. Mahar Martanegara No.123, Utama, Kec. Cimahi Sel., Kota Cimahi',
-        googleMapsUrl: 'https://goo.gl/maps/xyz',
-        phone: '0812-3456-7890',
-        whatsappNumber: '6281234567890',
-        hours: '10.00 - 22.00 WIB',
+        name: 'Pusat Cimahi',
+        address: 'Jl. Mahar Martanegara No.123, Utama, Kec. Cimahi Sel., Kota Cimahi, Jawa Barat',
+        googleMapsUrl: 'https://maps.app.goo.gl/xxx',
+        phone: '0812-2233-4455',
+        whatsappNumber: '6281222334455',
+        hours: '09.00 - 22.00 WIB',
         mapImage: 'https://picsum.photos/seed/mapcimahi/600/400',
         menu: [
-           { name: 'Sate Maranggi Sapi (10 Tsk)', desc: 'Daging sapi has dalam, empuk, bumbu meresap.', price: 'Rp 50.000', category: 'Makanan', image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=800&auto=format&fit=crop', favorite: true },
-           { name: 'Sate Maranggi Ayam (10 Tsk)', desc: 'Daging ayam fillet juicy dengan bumbu khas.', price: 'Rp 40.000', category: 'Makanan', image: 'https://images.unsplash.com/photo-1532634960-936d5c64366e?q=80&w=800&auto=format&fit=crop', favorite: false },
-           { name: 'Sate Maranggi Kambing (10 Tsk)', desc: 'Kambing muda, tidak prengus, super empuk.', price: 'Rp 60.000', category: 'Makanan', image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?q=80&w=800&auto=format&fit=crop', favorite: true },
-           { name: 'Ketan Bakar', desc: 'Pendamping wajib sate, gurih dengan serundeng.', price: 'Rp 10.000', category: 'Pelengkap', image: 'https://picsum.photos/seed/ketan/800/600', favorite: true },
-           { name: 'Nasi Timbel Komplit', desc: 'Nasi, ayam goreng, tahu, tempe, sambal, lalap.', price: 'Rp 35.000', category: 'Makanan', image: 'https://picsum.photos/seed/timbel/800/600', favorite: false },
-           { name: 'Sop Iga Sapi', desc: 'Kuah kaldu bening segar, daging iga lepas tulang.', price: 'Rp 55.000', category: 'Makanan', image: 'https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=800&auto=format&fit=crop', favorite: true },
-           { name: 'Es Kelapa Muda', desc: 'Kelapa murni langsung dari batoknya.', price: 'Rp 15.000', category: 'Minuman', image: 'https://images.unsplash.com/photo-1625943553852-781c6dd46faa?q=80&w=800&auto=format&fit=crop', favorite: false },
+           { name: 'Sate Maranggi Campur', desc: 'Sate Sapi + Jando', price: 'Rp 45.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?w=800', favorite: true }
         ]
-      },
-      {
-         id: 'pasteur',
-         name: 'Cabang: Pasteur',
-         address: 'Jl. Dr. Djunjunan No.155, Sukagalih, Kec. Sukajadi, Kota Bandung',
-         googleMapsUrl: 'https://goo.gl/maps/abc',
-         phone: '0821-9988-7766',
-         whatsappNumber: '6282199887766',
-         hours: '11.00 - 23.00 WIB',
-         mapImage: 'https://picsum.photos/seed/mappasteur/600/400',
-         menu: [
-            { name: 'Paket Hemat Berdua', desc: '20 Sate Sapi + 2 Nasi + 2 Es Teh.', price: 'Rp 120.000', category: 'Paket', image: 'https://picsum.photos/seed/paket1/800/600', favorite: true },
-            { name: 'Sate Maranggi Sapi (10 Tsk)', desc: 'Daging sapi has dalam.', price: 'Rp 55.000', category: 'Makanan', image: 'https://picsum.photos/seed/sate1/800/600', favorite: true },
-         ]
       }
     ],
-    gallery: [
-      'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1544025162-d76690b6d015?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=800&auto=format&fit=crop'
-    ],
-    testimonials: [
-      { name: 'Ridwan Kamil', text: 'Salah satu sate maranggi terbaik di Bandung Raya. Bumbunya nendang!', rating: 5, role: 'Tokoh Publik' },
-      { name: 'Nagita Slavina', text: 'Suka banget sama sambal oncomnya, beda dari yang lain.', rating: 5, role: 'Artis' },
-      { name: 'Budi Santoso', text: 'Tempatnya luas, cocok buat bukber atau makan keluarga besar.', rating: 4, role: 'Local Guide' }
-    ],
+    gallery: [],
+    testimonials: [],
     ai: {
-      systemInstruction: `Anda adalah asisten virtual "Si Maya", maskot dari restoran Sate Maranggi Hj. Maya. Gaya bicara Anda ramah, sunda halus, dan membantu. Anda bertugas merekomendasikan menu.`,
-      initialMessage: 'Sampurasun! Cari sate yang empuk atau mau rekomendasi menu best seller?'
+      systemInstruction: 'Anda adalah asisten restoran.',
+      initialMessage: 'Halo, ada yang bisa dibantu?'
     }
   });
 
   constructor() {
-    this.initializeAuth();
-    this.loadFromStorage();
+    this.loadLocalConfig();
+    this.initFirebase();
 
-    // Effect for CSS vars fallback
     effect(() => {
        const c = this.config();
        const root = document.documentElement;
@@ -251,98 +266,201 @@ export class ConfigService {
     });
   }
 
-  initializeAuth() {
-    // Check if we have a fake session
-    const storedUser = localStorage.getItem(this.USER_KEY);
-    if (storedUser) {
-      this.currentUser.set(JSON.parse(storedUser));
+  // Load config from LocalStorage first (Robustness)
+  private loadLocalConfig() {
+    try {
+      const local = localStorage.getItem(this.LOCAL_CONTENT_KEY);
+      if (local) {
+        const parsed = JSON.parse(local);
+        // Merge with default to ensure new fields exist
+        this.config.set({ ...this.config(), ...parsed });
+        console.log("Loaded config from LocalStorage");
+      }
+    } catch (e) {
+      console.warn("Failed to load local config", e);
     }
   }
 
-  // --- AUTH LOGIC (MOCKED - No Firebase) ---
+  getStoredFirebaseConfig(): FirebaseConfig | null {
+    const stored = localStorage.getItem('custom_firebase_config');
+    return stored ? JSON.parse(stored) : null;
+  }
+
+  saveStoredFirebaseConfig(config: FirebaseConfig) {
+    localStorage.setItem('custom_firebase_config', JSON.stringify(config));
+    window.location.reload(); 
+  }
+
+  resetStoredFirebaseConfig() {
+    localStorage.removeItem('custom_firebase_config');
+    window.location.reload();
+  }
+
+  private initFirebase() {
+    try {
+      const customConfig = this.getStoredFirebaseConfig();
+      const configToUse = customConfig || this.defaultFirebaseConfig;
+
+      // Detect Demo Project
+      if (configToUse.projectId === 'sate-maranggi-app' || !customConfig) {
+         this.isDemoMode.set(true);
+      }
+
+      this.app = initializeApp(configToUse);
+      this.auth = getAuth(this.app);
+      this.db = getFirestore(this.app);
+      
+      this.isFirebaseReady.set(true);
+      
+      onAuthStateChanged(this.auth, (user) => {
+          this.currentUser.set(user);
+      });
+
+      this.subscribeToConfig();
+
+    } catch (e) {
+      console.error("Firebase Init Error (Falling back to local only):", e);
+      this.isFirebaseReady.set(false);
+      this.isDemoMode.set(true);
+    }
+  }
 
   async loginAdmin(email: string, pass: string) {
-    // Simple simulation
-    if (pass.length > 3) {
-      const user = { email };
-      this.currentUser.set(user);
-      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-      return true;
-    } else {
-      throw new Error("Password salah (min 4 karakter)");
+    if (this.isDemoMode()) {
+       // Mock Login for Demo
+       if (email === 'admin@demo.com' && pass === 'demo') {
+          // Fake user object
+          this.currentUser.set({ email: 'admin@demo.com', uid: 'demo-user' } as User);
+          return;
+       }
+       if (!this.auth) throw new Error("Firebase belum terhubung.");
+    }
+    
+    if (this.auth) {
+        await signInWithEmailAndPassword(this.auth, email, pass);
     }
   }
 
   async logoutAdmin() {
-    this.currentUser.set(null);
-    localStorage.removeItem(this.USER_KEY);
-  }
-
-  // --- DATA LOGIC (LocalStorage Only) ---
-
-  async loadFromStorage() {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const stored = localStorage.getItem(this.STORAGE_KEY);
-        if (stored) {
-          const data = JSON.parse(stored) as AppConfig;
-          // Merge stored data with defaults (careful not to overwrite if structure changed)
-          this.config.update(current => ({...current, ...data}));
-        }
-      }
-    } catch (error) {
-      console.warn("Error loading config:", error);
+    if (this.isDemoMode()) {
+        this.currentUser.set(null);
+        return;
     }
+    if (this.auth) await signOut(this.auth);
   }
 
-  async updateConfig(newConfig: AppConfig) {
-    // 1. Update Local Signal
-    this.config.set(newConfig);
+  subscribeToConfig() {
+    if (!this.db) return; 
 
-    // 2. Persist to LocalStorage
-    try {
-       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(newConfig));
-       console.log("Config saved to LocalStorage!");
-    } catch (error) {
-      console.error("Error saving config:", error);
-      alert("Gagal menyimpan (Mungkin kuota LocalStorage penuh).");
-    }
-  }
+    const docRef = doc(this.db, 'settings', this.DOC_ID);
+    
+    onSnapshot(docRef, (docSnap) => {
+      this.firestoreError.set(null); 
 
-  // --- FILE HANDLING (Base64 only - No Firebase Storage) ---
-  async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
-    return new Promise((resolve, reject) => {
-      // Limit file size to avoid LocalStorage quota exceeded (approx 5MB limit usually)
-      if (file.size > 500000) { // 500KB limit recommended for base64 in localstorage
-         if(!confirm("Ukuran gambar cukup besar (>500KB). Ini mungkin memenuhi penyimpanan browser. Lanjut?")) {
-            reject("File too big");
-            return;
-         }
+      if (docSnap.exists()) {
+        const data = docSnap.data() as AppConfig;
+        // Merge strategy
+        const merged = {
+            ...this.config(),
+            ...data,
+            global: { ...this.config().global, ...(data.global || {}) },
+            hero: { ...this.config().hero, ...(data.hero || {}) },
+            // ... deeper merge if needed
+        };
+        this.config.set(merged);
+        // Also update local storage to keep them in sync
+        localStorage.setItem(this.LOCAL_CONTENT_KEY, JSON.stringify(merged));
       }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
-      reader.onerror = (error) => {
-        reject(error);
-      };
-      reader.readAsDataURL(file);
+    }, (error) => {
+      // HANDLE PERMISSION ERRORS GRACEFULLY
+      if (error.code === 'permission-denied' || error.code === 'unavailable') {
+        console.warn("Firestore blocked. Switching to Local/Demo mode.");
+        this.isDemoMode.set(true);
+        this.firestoreError.set(null); // Clear error so UI doesn't block user
+      } else {
+        console.error("Firestore Listen Error:", error);
+        this.firestoreError.set(error.message);
+      }
     });
   }
 
-  // --- HELPERS ---
+  async updateConfig(newConfig: AppConfig) {
+    this.config.set(newConfig);
+    // ALWAYS save to local storage first
+    localStorage.setItem(this.LOCAL_CONTENT_KEY, JSON.stringify(newConfig));
+
+    if (this.isDemoMode() || !this.db) {
+        alert("Disimpan ke Browser (Mode Demo/Offline). Perubahan tidak akan hilang saat refresh.");
+        return;
+    }
+
+    try {
+       await setDoc(doc(this.db, 'settings', this.DOC_ID), newConfig);
+       alert("Berhasil disimpan ke Server Cloud!");
+    } catch (error: any) {
+      console.error("Cloud save failed:", error);
+      if (error.code === 'permission-denied') {
+          // Fallback gracefully
+          this.isDemoMode.set(true);
+          alert("Gagal akses Cloud (Permission Denied). Tersimpan di Browser saja.");
+      } else {
+          alert("Gagal menyimpan ke server: " + error.message);
+      }
+    }
+  }
+  
+  // --- LOCAL FILE HANDLING ---
+  async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event: any) => {
+            // Compress Image Logic (Simple Canvas resize)
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 800;
+                const MAX_HEIGHT = 800;
+                if (width > height) {
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                } else {
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) { reject(new Error("Canvas error")); return; }
+                ctx.drawImage(img, 0, 0, width, height);
+                // Return Data URL (Base64)
+                resolve(canvas.toDataURL('image/jpeg', 0.7));
+            };
+            img.onerror = () => reject(new Error("Invalid image"));
+        };
+        reader.onerror = (e) => reject(e);
+    });
+  }
+
+  formatPhoneNumber(phone: string): string {
+    if (!phone) return '628123456789';
+    let p = phone.replace(/[^0-9]/g, ''); 
+    if (p.startsWith('08')) p = '62' + p.substring(1);
+    return p;
+  }
 
   getMenuContext(): string {
     return this.config().branches.map(b => 
       `CABANG: ${b.name}\n` + 
-      b.menu.map((m, i) => `  - ${m.name} (${m.category}) : ${m.desc} [${m.price}] ${m.favorite ? '(FAVORIT)' : ''}`).join('\n')
+      b.menu.map(m => `  - ${m.name} (${m.price})`).join('\n')
     ).join('\n\n');
   }
 
   isVideo(url: string): boolean {
     if (!url) return false;
-    return url.startsWith('data:video') || url.endsWith('.mp4') || url.endsWith('.webm');
+    if (url.startsWith('data:video')) return true;
+    return url.endsWith('.mp4') || url.endsWith('.webm') || (url.includes('firebasestorage') && (url.includes('video')));
   }
 
   is3D(url: string): boolean {

@@ -1,5 +1,5 @@
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ConfigService } from '../services/config.service';
 import { CommonModule } from '@angular/common';
@@ -10,64 +10,103 @@ import { CommonModule } from '@angular/common';
   imports: [RouterLink, CommonModule],
   template: `
     <section 
-      class="relative overflow-hidden min-h-[90vh] flex items-center justify-center transition-colors duration-500"
+      class="relative overflow-hidden min-h-[95vh] flex items-center justify-center transition-colors duration-500"
       [style.backgroundColor]="config().hero.style.backgroundColor"
       [style.color]="config().hero.style.textColor"
       [style.fontFamily]="config().hero.style.fontFamily"
     >
-      <!-- Background overlay image -->
-      <div class="absolute inset-0">
-        @if (isVideo(config().hero.bgImage)) {
-           <video 
-             [src]="config().hero.bgImage" 
-             autoplay muted loop playsinline
-             class="w-full h-full object-cover opacity-40"
-           ></video>
-        } @else {
-           <img [src]="config().hero.bgImage" alt="Hero Background" class="w-full h-full object-cover opacity-40">
-        }
-        <!-- Gradient matching bg color -->
+      <!-- Background overlay image with Parallax -->
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute inset-0 scale-110 will-change-transform" 
+             [style.transform]="'translateY(' + scrollY() * 0.5 + 'px)'">
+           @if (isVideo(config().hero.bgImage)) {
+              <video 
+                [src]="config().hero.bgImage" 
+                autoplay muted loop playsinline
+                class="w-full h-full object-cover opacity-60"
+              ></video>
+           } @else {
+              <img [src]="config().hero.bgImage" alt="Hero Background" class="w-full h-full object-cover opacity-60">
+           }
+        </div>
+        
+        <!-- Luxury Gradient Overlay (Improved Contrast) -->
         <div 
-          class="absolute inset-0" 
-          [style.background]="'linear-gradient(to top, ' + config().hero.style.backgroundColor + ', transparent)'"
+          class="absolute inset-0 z-10" 
+          [style.background]="'radial-gradient(circle at center, transparent 0%, ' + config().hero.style.backgroundColor + ' 90%)'"
         ></div>
+        <!-- Darker overlay for better text readability -->
+        <div class="absolute inset-0 bg-black/50 z-10"></div>
       </div>
 
-      <div class="relative max-w-6xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-        <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4 animate-fade-in-up">
-          {{ config().hero.title }} <span [style.color]="config().hero.style.accentColor">{{ config().hero.highlight }}</span>
+      <div class="relative z-20 max-w-5xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+        <!-- Badge -->
+        <div class="mb-6 animate-fade-in-down opacity-0" style="animation-delay: 0.1s; animation-fill-mode: forwards;">
+           <span class="px-5 py-2 rounded-full text-xs font-bold tracking-[0.25em] uppercase border border-white/40 backdrop-blur-md shadow-lg"
+                 [style.color]="config().hero.style.accentColor"
+                 [style.borderColor]="config().hero.style.accentColor">
+              Est. 1980
+           </span>
+        </div>
+
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 animate-fade-in-up leading-tight drop-shadow-2xl">
+          {{ config().hero.title }} <br/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-200"
+                [style.backgroundImage]="'linear-gradient(to right, ' + config().hero.style.accentColor + ', #FFD54F)'">
+            {{ config().hero.highlight }}
+          </span>
         </h1>
-        <p class="text-lg md:text-xl max-w-2xl mb-8 font-light animate-fade-in-up delay-100 opacity-90">
+        
+        <div class="w-24 h-1.5 bg-white/60 mb-8 rounded-full animate-width-grow shadow-lg"></div>
+
+        <p class="text-lg md:text-2xl max-w-2xl mb-10 font-light animate-fade-in-up opacity-0 text-gray-100 leading-relaxed drop-shadow-md" style="animation-delay: 0.3s; animation-fill-mode: forwards;">
           {{ config().hero.subtitle }}
         </p>
-        <div class="flex gap-4 animate-fade-in-up delay-200">
+        
+        <div class="flex flex-col sm:flex-row gap-5 animate-fade-in-up opacity-0" style="animation-delay: 0.5s; animation-fill-mode: forwards;">
           <a routerLink="/menu" 
-             class="font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 cursor-pointer no-underline border-none text-white"
+             class="font-bold py-4 px-10 rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all transform hover:scale-105 hover:-translate-y-1 cursor-pointer no-underline border-none text-white relative overflow-hidden group"
              [style.backgroundColor]="config().hero.style.accentColor"
           >
-            Lihat Menu
+            <span class="relative z-10">Lihat Menu Kami</span>
+            <div class="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
           </a>
-          <a routerLink="/location" 
-             class="font-bold py-3 px-8 rounded-full transition cursor-pointer no-underline border-2"
-             [style.borderColor]="config().hero.style.textColor"
-             [style.color]="config().hero.style.textColor"
+          <a routerLink="/reservation" 
+             class="font-bold py-4 px-10 rounded-full transition-all transform hover:scale-105 cursor-pointer no-underline border-2 border-white/30 backdrop-blur-sm hover:bg-white/10 hover:border-white"
+             [style.color]="'#fff'"
           >
-            Lokasi
+            Reservasi Meja
           </a>
         </div>
+      </div>
+      
+      <!-- Scroll Indicator -->
+      <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce opacity-60 z-20 text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
       </div>
     </section>
   `,
   styles: [`
-    @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade-in-up { animation: fade-in-up 1s ease-out forwards; }
-    .delay-100 { animation-delay: 0.1s; opacity: 0; }
-    .delay-200 { animation-delay: 0.2s; opacity: 0; }
+    @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fade-in-down { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes width-grow { from { width: 0; } to { width: 6rem; } }
+    
+    .animate-fade-in-up { animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-fade-in-down { animation: fade-in-down 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-width-grow { animation: width-grow 1s ease-out forwards; animation-delay: 0.2s; }
   `]
 })
 export class HeroComponent {
   configService = inject(ConfigService);
   config = this.configService.config;
+  scrollY = signal(0);
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    this.scrollY.set(window.scrollY);
+  }
 
   isVideo(url: string) {
     return this.configService.isVideo(url);

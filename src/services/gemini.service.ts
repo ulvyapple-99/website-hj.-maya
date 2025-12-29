@@ -7,29 +7,42 @@ import { ConfigService } from './config.service';
   providedIn: 'root'
 })
 export class GeminiService {
-  private ai: GoogleGenAI;
+  private ai: GoogleGenAI | null = null;
   private configService = inject(ConfigService);
+  
+  // GANTI DENGAN API KEY GOOGLE AI STUDIO ANDA JIKA 'process.env' ERROR DI DEPLOYMENT
+  private HARDCODED_API_KEY = ''; 
 
   constructor() {
-    let apiKey = '';
+    this.initAI();
+  }
+
+  private initAI() {
+    let apiKey = this.HARDCODED_API_KEY;
+    
+    // Try to get from env if available (local dev)
     try {
-      // Safety check for browser environments where process might not be defined
-      apiKey = process.env['API_KEY'] || '';
+      if (!apiKey && typeof process !== 'undefined' && process.env) {
+        apiKey = process.env['API_KEY'] || '';
+      }
     } catch (e) {
-      console.warn('Environment variable process.env.API_KEY not found.');
+      // Ignore env errors
     }
-    this.ai = new GoogleGenAI({ apiKey });
+
+    if (apiKey) {
+      this.ai = new GoogleGenAI({ apiKey });
+    }
   }
 
   async getRecommendation(query: string): Promise<string> {
-    try {
-      let apiKey = '';
-      try { apiKey = process.env['API_KEY'] || ''; } catch (e) {}
-      
-      if (!apiKey) {
-        return "Maaf, sistem AI sedang offline (API Key missing). Silakan tanya pelayan kami langsung!";
+    if (!this.ai) {
+      this.initAI(); // Try to init again
+      if (!this.ai) {
+         return "Maaf, sistem AI belum dikonfigurasi (API Key Missing). Silakan hubungi admin.";
       }
+    }
 
+    try {
       const config = this.configService.config();
       const menuList = this.configService.getMenuContext();
 
