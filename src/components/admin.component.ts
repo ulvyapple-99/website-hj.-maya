@@ -501,6 +501,26 @@ import { ConfigService, MenuItem, Branch } from '../services/config.service';
                               <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Nama Cabang</label>
                               <input [(ngModel)]="config().branches[selectedBranchIndex()].name" class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none shadow-sm transition-all font-bold text-lg" placeholder="Nama Cabang" style="background-color: #ffffff !important; color: #000000 !important;">
                            </div>
+                           
+                           <!-- NEW 3D/IMAGE UPLOAD SECTION -->
+                           <div>
+                             <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Foto Lokasi / Model 3D (.glb)</label>
+                             <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50 text-center group hover:border-blue-400 transition-colors">
+                                @if (configService.is3D(config().branches[selectedBranchIndex()].mapImage)) {
+                                   <div class="h-32 bg-gray-200 rounded flex items-center justify-center mb-4 border border-gray-300">
+                                      <div class="text-center">
+                                        <div class="text-4xl mb-2">📦</div>
+                                        <span class="text-xs font-bold text-gray-500">File 3D Loaded</span>
+                                      </div>
+                                   </div>
+                                } @else {
+                                   <img [src]="config().branches[selectedBranchIndex()].mapImage" class="h-32 mx-auto object-cover rounded-lg mb-4 shadow-md group-hover:scale-105 transition-transform">
+                                }
+                                <input type="file" (change)="onFileSelected($event, 'branchMap')" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer w-auto mx-auto" style="background-color: #ffffff !important;">
+                                <p class="text-[10px] text-gray-400 mt-2">Support: JPG, PNG, GLB, GLTF</p>
+                             </div>
+                           </div>
+
                            <div>
                               <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Alamat Lengkap</label>
                               <textarea [(ngModel)]="config().branches[selectedBranchIndex()].address" rows="3" class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none shadow-sm transition-all" placeholder="Alamat" style="background-color: #ffffff !important; color: #000000 !important;"></textarea>
@@ -720,6 +740,7 @@ export class AdminComponent {
         if (type === 'heroBg') c.hero.bgImage = res;
         if (type === 'aboutImage') c.about.image = res;
         if (type === 'introVideo') c.intro.videoUrl = res;
+        if (type === 'branchMap') c.branches[this.selectedBranchIndex()].mapImage = res;
         if (type === 'menuItem' && typeof index === 'number') {
            c.branches[this.selectedBranchIndex()].menu[index].image = res;
         }
