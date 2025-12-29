@@ -33,6 +33,7 @@ import { ConfigService } from '../services/config.service';
             <a routerLink="/" routerLinkActive="text-brand-orange font-bold" [routerLinkActiveOptions]="{exact: true}" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Beranda</a>
             <a routerLink="/about" routerLinkActive="text-brand-orange font-bold" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Tentang</a>
             <a routerLink="/menu" routerLinkActive="text-brand-orange font-bold" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Menu</a>
+            <a routerLink="/reservation" routerLinkActive="text-brand-orange font-bold" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Reservasi</a>
             <a routerLink="/location" routerLinkActive="text-brand-orange font-bold" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Lokasi</a>
           </div>
 
@@ -58,6 +59,7 @@ import { ConfigService } from '../services/config.service';
             <a routerLink="/" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" [routerLinkActiveOptions]="{exact: true}" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Beranda</a>
             <a routerLink="/about" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Tentang</a>
             <a routerLink="/menu" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Menu</a>
+            <a routerLink="/reservation" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Reservasi</a>
             <a routerLink="/location" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Lokasi</a>
           </div>
         </div>
