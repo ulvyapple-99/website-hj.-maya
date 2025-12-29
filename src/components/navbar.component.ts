@@ -9,37 +9,45 @@ import { ConfigService } from '../services/config.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
-    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-md border-b border-brand-orange/20">
+    <nav 
+      class="sticky top-0 z-50 backdrop-blur-sm shadow-md transition-colors duration-300"
+      [style.backgroundColor]="config().global.navbarColor"
+      [style.color]="config().global.navbarTextColor"
+    >
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
           <!-- Logo -->
           <div routerLink="/" class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-             @if (config().branding.logoImage) {
-               @if (isVideo(config().branding.logoImage)) {
-                  <video [src]="config().branding.logoImage" class="h-10 w-auto object-contain" autoplay muted loop></video>
+             @if (config().global.logoImage) {
+               @if (isVideo(config().global.logoImage)) {
+                  <video [src]="config().global.logoImage" class="h-10 w-auto object-contain" autoplay muted loop></video>
                } @else {
-                  <img [src]="config().branding.logoImage" class="h-10 w-auto object-contain" alt="Logo">
+                  <img [src]="config().global.logoImage" class="h-10 w-auto object-contain" alt="Logo">
                }
              } @else {
-               <div class="w-8 h-8 bg-brand-orange rounded-full flex items-center justify-center text-white font-serif font-bold text-lg">
-                 {{ config().branding.logoText.charAt(0) }}
+               <div 
+                 class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg"
+                 [style.backgroundColor]="config().global.navbarTextColor"
+                 [style.color]="config().global.navbarColor"
+               >
+                 {{ config().global.logoText.charAt(0) }}
                </div>
              }
-             <span class="font-serif font-bold text-xl text-brand-brown tracking-wide">{{ config().branding.logoText }}</span>
+             <span class="font-bold text-xl tracking-wide">{{ config().global.logoText }}</span>
           </div>
 
           <!-- Desktop Menu -->
           <div class="hidden md:flex space-x-8">
-            <a routerLink="/" routerLinkActive="text-brand-orange font-bold" [routerLinkActiveOptions]="{exact: true}" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Beranda</a>
-            <a routerLink="/about" routerLinkActive="text-brand-orange font-bold" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Tentang</a>
-            <a routerLink="/menu" routerLinkActive="text-brand-orange font-bold" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Menu</a>
-            <a routerLink="/reservation" routerLinkActive="text-brand-orange font-bold" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Reservasi</a>
-            <a routerLink="/location" routerLinkActive="text-brand-orange font-bold" class="text-brand-brown hover:text-brand-orange transition-colors font-medium cursor-pointer">Lokasi</a>
+            <a routerLink="/" routerLinkActive="font-bold underline" [routerLinkActiveOptions]="{exact: true}" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Beranda</a>
+            <a routerLink="/about" routerLinkActive="font-bold underline" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Tentang</a>
+            <a routerLink="/menu" routerLinkActive="font-bold underline" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Menu</a>
+            <a routerLink="/reservation" routerLinkActive="font-bold underline" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Reservasi</a>
+            <a routerLink="/location" routerLinkActive="font-bold underline" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Lokasi</a>
           </div>
 
           <!-- Mobile Button -->
           <div class="md:hidden flex items-center">
-            <button (click)="toggleMenu()" class="text-brand-brown hover:text-brand-orange focus:outline-none">
+            <button (click)="toggleMenu()" class="focus:outline-none" [style.color]="config().global.navbarTextColor">
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 @if (!isOpen()) {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -54,13 +62,13 @@ import { ConfigService } from '../services/config.service';
 
       <!-- Mobile Menu -->
       @if (isOpen()) {
-        <div class="md:hidden bg-white border-t border-gray-100">
+        <div class="md:hidden border-t" [style.backgroundColor]="config().global.navbarColor">
           <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a routerLink="/" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" [routerLinkActiveOptions]="{exact: true}" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Beranda</a>
-            <a routerLink="/about" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Tentang</a>
-            <a routerLink="/menu" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Menu</a>
-            <a routerLink="/reservation" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Reservasi</a>
-            <a routerLink="/location" (click)="closeMenu()" routerLinkActive="bg-brand-cream text-brand-orange" class="block px-3 py-2 text-brand-brown hover:bg-brand-cream hover:text-brand-orange rounded-md text-base font-medium">Lokasi</a>
+            <a routerLink="/" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Beranda</a>
+            <a routerLink="/about" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Tentang</a>
+            <a routerLink="/menu" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Menu</a>
+            <a routerLink="/reservation" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Reservasi</a>
+            <a routerLink="/location" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Lokasi</a>
           </div>
         </div>
       }

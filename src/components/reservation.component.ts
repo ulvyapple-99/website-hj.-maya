@@ -4,171 +4,155 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfigService, MenuItem } from '../services/config.service';
 
+interface GuestOrder {
+  id: number;
+  name: string;
+  cart: Map<MenuItem, number>;
+}
+
 @Component({
   selector: 'app-reservation',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="py-16 bg-brand-cream min-h-screen relative">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+    <section class="py-10 min-h-screen relative transition-colors duration-500"
+      [style.backgroundColor]="config().reservation.style.backgroundColor"
+      [style.color]="config().reservation.style.textColor"
+      [style.fontFamily]="config().reservation.style.fontFamily"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         
         <!-- Header -->
-        <div class="text-center mb-10">
-          <h2 class="text-3xl md:text-4xl font-serif font-bold text-brand-brown mb-2">Reservasi Tempat</h2>
-          <div class="h-1 w-24 bg-brand-orange mx-auto rounded"></div>
-          <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
-            Booking tempat untuk acara buka bersama atau gathering. <br>
-            Silakan isi data diri dan pilih menu yang ingin disiapkan.
+        <div class="text-center mb-8">
+          <h2 class="text-3xl md:text-4xl font-bold mb-2" [style.color]="config().reservation.style.accentColor">{{ config().reservation.title }}</h2>
+          <div class="h-1 w-24 mx-auto rounded" [style.backgroundColor]="config().reservation.style.accentColor"></div>
+          <p class="mt-4 opacity-80 max-w-3xl mx-auto">
+            {{ config().reservation.subtitle }}
           </p>
         </div>
 
-        <div class="grid lg:grid-cols-3 gap-8">
+        <div class="grid lg:grid-cols-12 gap-6">
           
-          <!-- LEFT COLUMN: Reservation Form -->
-          <div class="lg:col-span-1 h-fit sticky top-24">
-            <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
-              <h3 class="text-xl font-bold text-brand-brown mb-4 border-b pb-2">Data Reservasi</h3>
+          <!-- COLUMN 1: Reservation Info -->
+          <div class="lg:col-span-3 space-y-6 text-gray-800">
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 h-fit sticky top-24">
+              <h3 class="text-lg font-bold border-b pb-2 mb-4" [style.color]="config().reservation.style.accentColor">Data Reservasi</h3>
               
               <div class="space-y-4">
-                <!-- Branch Selection -->
                 <div>
-                  <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Pilih Cabang</label>
-                  <select 
-                    [ngModel]="selectedBranchIndex()" 
-                    (ngModelChange)="setBranch($event)"
-                    class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-brand-orange outline-none"
-                  >
+                  <label class="block text-xs font-bold mb-1 uppercase">Pilih Cabang</label>
+                  <select [ngModel]="selectedBranchIndex()" (ngModelChange)="setBranch($event)" class="w-full border rounded px-3 py-2 text-sm font-bold bg-white">
                     @for (branch of config().branches; track $index) {
                       <option [value]="$index">{{ branch.name }}</option>
                     }
                   </select>
                 </div>
 
-                <!-- Personal Data -->
                 <div>
-                  <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Nama Pemesan</label>
-                  <input type="text" [(ngModel)]="formName" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-orange outline-none" placeholder="Contoh: Bpk. Budi">
+                  <label class="block text-xs font-bold mb-1 uppercase">Nama Pemesan</label>
+                  <input type="text" [(ngModel)]="formName" class="w-full border rounded px-3 py-2 text-sm bg-white" placeholder="Bpk. Budi">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Tanggal</label>
-                    <input type="date" [(ngModel)]="formDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-orange outline-none">
+                    <label class="block text-xs font-bold mb-1 uppercase">Tanggal</label>
+                    <input type="date" [(ngModel)]="formDate" class="w-full border rounded px-3 py-2 text-sm bg-white">
                   </div>
                   <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Jam</label>
-                    <input type="time" [(ngModel)]="formTime" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-orange outline-none">
+                    <label class="block text-xs font-bold mb-1 uppercase">Jam</label>
+                    <input type="time" [(ngModel)]="formTime" class="w-full border rounded px-3 py-2 text-sm bg-white">
                   </div>
                 </div>
 
-                <!-- Type Selection (Ramadan/Regular) -->
-                <div class="bg-brand-cream/50 p-3 rounded-lg border border-brand-orange/20">
-                   <label class="block text-xs font-bold text-brand-brown mb-2 uppercase">Jenis Acara</label>
-                   <div class="flex items-center gap-4">
+                <div class="bg-gray-50 p-3 rounded-lg border">
+                   <label class="block text-xs font-bold mb-2 uppercase" [style.color]="config().reservation.style.accentColor">Jenis Acara</label>
+                   <div class="flex flex-col gap-2">
                      <label class="flex items-center gap-2 cursor-pointer">
-                       <input type="radio" name="evtType" [value]="false" [(ngModel)]="isRamadan" class="text-brand-orange focus:ring-brand-orange">
-                       <span class="text-sm font-medium">Reguler</span>
+                       <input type="radio" name="evtType" [value]="false" [(ngModel)]="isRamadan">
+                       <span class="text-sm font-medium">Reguler (Min {{ config().reservation.minPaxRegular }})</span>
                      </label>
                      <label class="flex items-center gap-2 cursor-pointer">
-                       <input type="radio" name="evtType" [value]="true" [(ngModel)]="isRamadan" class="text-brand-orange focus:ring-brand-orange">
-                       <span class="text-sm font-medium">Buka Puasa (Ramadan)</span>
+                       <input type="radio" name="evtType" [value]="true" [(ngModel)]="isRamadan">
+                       <span class="text-sm font-medium">Buka Puasa (Min {{ config().reservation.minPaxRamadan }})</span>
                      </label>
                    </div>
                 </div>
 
-                <!-- Pax Input with Validation -->
                 <div>
-                  <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Jumlah Orang</label>
-                  <input type="number" [(ngModel)]="formPax" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-orange outline-none" placeholder="Minimal {{ minPax() }} orang">
-                  
-                  @if (formPax() > 0 && formPax() < minPax()) {
-                    <p class="text-red-500 text-xs mt-1 font-bold">
-                      *Minimal {{ minPax() }} orang untuk {{ isRamadan() ? 'Buka Puasa' : 'Hari Biasa' }}.
-                    </p>
-                  }
+                  <label class="block text-xs font-bold mb-1 uppercase">Jumlah Pax</label>
+                  <input type="number" [(ngModel)]="formPax" class="w-full border rounded px-3 py-2 text-sm bg-white">
                 </div>
                 
-                <div>
-                   <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Catatan Tambahan</label>
-                   <textarea [(ngModel)]="formNotes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-orange outline-none" placeholder="Request khusus..."></textarea>
-                </div>
-
-                <!-- Sticky Mobile Summary (Only shows logic here, but visually hidden on large screens if needed, keeping it simple for now) -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
-                   <div class="flex justify-between text-sm mb-2">
-                     <span>Estimasi Menu:</span>
-                     <span class="font-bold">{{ formatRupiah(totalPrice()) }}</span>
-                   </div>
-                   <button 
-                     (click)="submitReservation()" 
-                     [disabled]="!isValid()"
-                     class="w-full bg-brand-orange hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg shadow transition flex justify-center items-center gap-2"
-                   >
-                     <span>Kirim Reservasi via WA</span>
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                <!-- Submit Box -->
+                <div class="text-white p-4 rounded-lg mt-4" [style.backgroundColor]="config().reservation.style.accentColor">
+                   <div class="flex justify-between text-sm mb-1 opacity-90">Total:</div>
+                   <div class="text-2xl font-bold mb-4">{{ formatRupiah(grandTotal()) }}</div>
+                   <button (click)="submitReservation()" [disabled]="!isValid()"
+                     class="w-full bg-white text-black font-bold py-3 rounded shadow transition hover:bg-gray-100 disabled:opacity-50">
+                     Kirim WhatsApp
                    </button>
-                   @if (!isValid()) {
-                     <p class="text-[10px] text-center text-red-500 mt-2">
-                       Lengkapi data & penuhi minimal jumlah orang.
-                     </p>
-                   }
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- RIGHT COLUMN: Menu Selection -->
-          <div class="lg:col-span-2">
-             <div class="flex items-center justify-between mb-4">
-               <h3 class="text-xl font-bold text-brand-brown">Pilih Menu (Pre-order)</h3>
-               <span class="text-xs bg-white px-2 py-1 rounded border shadow-sm text-gray-500">
-                 Dipilih: {{ cartTotalItems() }} item
-               </span>
+          <!-- COLUMN 2 & 3: Guest & Menu (Combined for brevity in styles, kept logical structure) -->
+          <div class="lg:col-span-4 text-gray-800">
+             <div class="bg-white p-6 rounded-xl shadow-lg h-full flex flex-col">
+                <h3 class="text-lg font-bold mb-4 border-b pb-2 flex justify-between items-center" [style.color]="config().reservation.style.accentColor">
+                   <span>Pesanan Tamu</span>
+                   <button (click)="addGuest()" class="text-xs bg-green-600 text-white px-2 py-1 rounded font-bold">+ Tambah</button>
+                </h3>
+                <div class="flex-1 overflow-y-auto space-y-3 max-h-[600px]">
+                   @for (guest of guests(); track guest.id) {
+                      <div (click)="setActiveGuest(guest.id)" class="p-4 rounded border-2 cursor-pointer transition"
+                         [style.borderColor]="activeGuestId() === guest.id ? config().reservation.style.accentColor : '#eee'"
+                         [class.bg-orange-50]="activeGuestId() === guest.id">
+                         <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                               [style.backgroundColor]="activeGuestId() === guest.id ? config().reservation.style.accentColor : '#ccc'">
+                               {{ $index + 1 }}
+                            </div>
+                            <input type="text" [(ngModel)]="guest.name" class="flex-1 bg-transparent border-b font-bold text-sm outline-none" placeholder="Nama Tamu">
+                         </div>
+                         <div class="text-xs pl-11 opacity-70">
+                            Subtotal: {{ formatRupiah(getGuestTotal(guest)) }}
+                         </div>
+                      </div>
+                   }
+                </div>
              </div>
+          </div>
 
-             @if (currentBranchMenu().length > 0) {
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                @for (item of currentBranchMenu(); track $index) {
-                  <div class="bg-white rounded-xl shadow border border-gray-100 flex overflow-hidden group">
-                    <!-- Image Small -->
-                    <div class="w-24 h-full bg-gray-100 relative">
-                       @if (isVideo(item.image)) {
-                          <video [src]="item.image" class="w-full h-full object-cover" muted loop></video>
-                       } @else {
-                          <img [src]="item.image" class="w-full h-full object-cover">
-                       }
-                    </div>
-                    
-                    <!-- Content -->
-                    <div class="p-3 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h4 class="font-bold text-gray-800 text-sm line-clamp-1">{{ item.name }}</h4>
-                        <p class="text-brand-orange text-xs font-bold">{{ item.price }}</p>
+          <div class="lg:col-span-5 text-gray-800">
+             <div class="bg-white p-6 rounded-xl shadow-lg h-full">
+                <h3 class="text-lg font-bold mb-4 border-b pb-2" [style.color]="config().reservation.style.accentColor">Pilih Menu</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[800px] overflow-y-auto">
+                   @for (item of currentBranchMenu(); track $index) {
+                      <div class="border rounded-lg overflow-hidden flex flex-col">
+                         <div class="h-32 bg-gray-100 relative">
+                            <img [src]="item.image" class="w-full h-full object-cover">
+                            <span class="absolute bottom-0 left-0 bg-black/60 text-white text-xs px-2 py-1">{{ item.price }}</span>
+                         </div>
+                         <div class="p-3 flex-1 flex flex-col justify-between">
+                            <h4 class="font-bold text-sm leading-tight mb-1">{{ item.name }}</h4>
+                            <div class="mt-2 flex justify-between items-center">
+                               @if (getActiveGuestQty(item) === 0) {
+                                  <button (click)="addToActiveGuest(item)" class="text-xs text-white px-3 py-1 rounded font-bold"
+                                     [style.backgroundColor]="config().reservation.style.accentColor">+ Pesan</button>
+                               } @else {
+                                  <div class="flex items-center bg-gray-100 rounded">
+                                     <button (click)="removeFromActiveGuest(item)" class="px-2 font-bold">-</button>
+                                     <span class="px-2 font-bold">{{ getActiveGuestQty(item) }}</span>
+                                     <button (click)="addToActiveGuest(item)" class="px-2 font-bold">+</button>
+                                  </div>
+                               }
+                            </div>
+                         </div>
                       </div>
-                      
-                      <!-- Controls -->
-                      <div class="flex justify-end mt-2">
-                        @if (getQty(item) === 0) {
-                          <button (click)="addToCart(item)" class="px-3 py-1 bg-brand-brown text-white text-xs rounded shadow hover:bg-brand-orange transition">
-                            + Tambah
-                          </button>
-                        } @else {
-                          <div class="flex items-center bg-gray-100 rounded text-xs">
-                            <button (click)="removeFromCart(item)" class="px-2 py-1 hover:bg-gray-200 font-bold">-</button>
-                            <span class="px-2 font-bold">{{ getQty(item) }}</span>
-                            <button (click)="addToCart(item)" class="px-2 py-1 hover:bg-gray-200 font-bold">+</button>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            } @else {
-              <div class="text-center py-10 bg-white rounded-xl border border-dashed">
-                Menu belum tersedia di cabang ini.
-              </div>
-            }
+                   }
+                </div>
+             </div>
           </div>
 
         </div>
@@ -180,10 +164,7 @@ export class ReservationComponent {
   configService = inject(ConfigService);
   config = this.configService.config;
 
-  // --- State ---
   selectedBranchIndex = signal(0);
-  
-  // Form Data
   formName = signal('');
   formDate = signal('');
   formTime = signal('');
@@ -191,120 +172,70 @@ export class ReservationComponent {
   formNotes = signal('');
   isRamadan = signal(false);
 
-  // Cart Data
-  cart = signal<Map<MenuItem, number>>(new Map());
+  guests = signal<GuestOrder[]>([{ id: 1, name: 'Pemesan', cart: new Map() }]);
+  activeGuestId = signal<number>(1);
 
-  // --- Computed ---
   currentBranch = computed(() => this.config().branches[this.selectedBranchIndex()]);
   currentBranchMenu = computed(() => this.currentBranch().menu);
+  minPax = computed(() => this.isRamadan() ? this.config().reservation.minPaxRamadan : this.config().reservation.minPaxRegular);
 
-  // Logic: Min Pax based on Ramadan mode
-  minPax = computed(() => this.isRamadan() ? 10 : 25);
+  isValid = computed(() => this.formName() !== '' && this.formDate() !== '' && this.formPax() >= this.minPax());
 
-  // Validation
-  isValid = computed(() => {
-    return (
-      this.formName().trim() !== '' &&
-      this.formDate() !== '' &&
-      this.formTime() !== '' &&
-      this.formPax() >= this.minPax()
-    );
-  });
-
-  // Price Calcs
-  parsePrice(priceStr: string): number {
-    const num = parseInt(priceStr.replace(/[^0-9]/g, ''));
-    return isNaN(num) ? 0 : num;
-  }
-
-  cartTotalItems = computed(() => {
-    let count = 0;
-    for (const qty of this.cart().values()) count += qty;
-    return count;
-  });
-
-  totalPrice = computed(() => {
+  grandTotal = computed(() => {
     let total = 0;
-    this.cart().forEach((qty, item) => {
-      total += this.parsePrice(item.price) * qty;
-    });
+    this.guests().forEach(g => total += this.getGuestTotal(g));
     return total;
   });
 
-  // --- Actions ---
+  addGuest() {
+    this.guests.update(l => [...l, { id: Date.now(), name: `Tamu ${l.length + 1}`, cart: new Map() }]);
+  }
+  removeGuest(id: number) { this.guests.update(l => l.filter(g => g.id !== id)); }
+  setActiveGuest(id: number) { this.activeGuestId.set(id); }
+  getActiveGuestName() { return this.guests().find(g => g.id === this.activeGuestId())?.name || '-'; }
 
-  setBranch(index: any) { // ngModelChange emits value, captured as any/number
-    const idx = Number(index);
-    if (this.selectedBranchIndex() !== idx) {
-      this.selectedBranchIndex.set(idx);
-      this.cart.set(new Map()); // Reset cart on branch change
-    }
+  addToActiveGuest(item: MenuItem) {
+    this.guests.update(list => list.map(g => {
+       if (g.id !== this.activeGuestId()) return g;
+       const nc = new Map<MenuItem, number>(g.cart);
+       nc.set(item, (nc.get(item) || 0) + 1);
+       return { ...g, cart: nc };
+    }));
+  }
+  
+  removeFromActiveGuest(item: MenuItem) {
+    this.guests.update(list => list.map(g => {
+       if (g.id !== this.activeGuestId()) return g;
+       const nc = new Map<MenuItem, number>(g.cart);
+       const q = nc.get(item) || 0;
+       if (q > 1) nc.set(item, q - 1); else nc.delete(item);
+       return { ...g, cart: nc };
+    }));
   }
 
-  addToCart(item: MenuItem) {
-    this.cart.update(currentMap => {
-      const newMap = new Map<MenuItem, number>(currentMap);
-      const currentQty = newMap.get(item) || 0;
-      newMap.set(item, currentQty + 1);
-      return newMap;
-    });
+  getActiveGuestQty(item: MenuItem) {
+     return this.guests().find(g => g.id === this.activeGuestId())?.cart.get(item) || 0;
   }
 
-  removeFromCart(item: MenuItem) {
-    this.cart.update(currentMap => {
-      const newMap = new Map<MenuItem, number>(currentMap);
-      const currentQty = newMap.get(item) || 0;
-      if (currentQty > 1) {
-        newMap.set(item, currentQty - 1);
-      } else {
-        newMap.delete(item);
-      }
-      return newMap;
-    });
+  getGuestTotal(g: GuestOrder) {
+     let t = 0; g.cart.forEach((q, i) => t += this.parsePrice(i.price) * q); return t;
   }
 
-  getQty(item: MenuItem): number {
-    return this.cart().get(item) || 0;
-  }
-
-  formatRupiah(amount: number): string {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-  }
-
-  isVideo(url: string) {
-    return this.configService.isVideo(url);
-  }
+  parsePrice(s: string) { return parseInt(s.replace(/[^0-9]/g, '')) || 0; }
+  formatRupiah(n: number) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n); }
+  
+  setBranch(i: any) { this.selectedBranchIndex.set(Number(i)); this.guests.update(l => l.map(g => ({...g, cart: new Map()}))); }
 
   submitReservation() {
-    if (!this.isValid()) return;
-
-    const branch = this.currentBranch();
-    const type = this.isRamadan() ? "BUKA PUASA (Ramadan)" : "REGULER";
-    
-    let message = `*FORMULIR RESERVASI TEMPAT*\n`;
-    message += `Cabang: ${branch.name}\n\n`;
-    message += `*Data Pemesan:*\n`;
-    message += `Nama: ${this.formName()}\n`;
-    message += `Tanggal: ${this.formDate()}\n`;
-    message += `Jam: ${this.formTime()}\n`;
-    message += `Jumlah Orang: ${this.formPax()} pax\n`;
-    message += `Jenis Acara: ${type}\n`;
-    message += `Catatan: ${this.formNotes() || '-'}\n\n`;
-
-    message += `*Pre-order Menu:*\n`;
-    if (this.cartTotalItems() > 0) {
-      this.cart().forEach((qty, item) => {
-        message += `- ${qty}x ${item.name} (@ ${item.price})\n`;
-      });
-      message += `\nEstimasi Menu: ${this.formatRupiah(this.totalPrice())}\n`;
-    } else {
-      message += `(Belum ada menu dipilih)\n`;
-    }
-
-    message += `\nMohon konfirmasi ketersediaan tempat. Terima kasih.`;
-
-    const encodedMsg = encodeURIComponent(message);
-    const phone = branch.whatsappNumber || '628123456789';
-    window.open(`https://wa.me/${phone}?text=${encodedMsg}`, '_blank');
+    const b = this.currentBranch();
+    let msg = `*RESERVASI ${b.name}*\nNama: ${this.formName()}\nTanggal: ${this.formDate()} ${this.formTime()}\nPax: ${this.formPax()}\n\n`;
+    this.guests().forEach((g, i) => {
+       if (g.cart.size > 0) {
+          msg += `*${i+1}. ${g.name}*\n`;
+          g.cart.forEach((q, m) => msg += `  ${q}x ${m.name}\n`);
+       }
+    });
+    msg += `\n*Total: ${this.formatRupiah(this.grandTotal())}*`;
+    window.open(`https://wa.me/${b.whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
   }
 }

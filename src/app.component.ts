@@ -24,7 +24,14 @@ import { ConfigService } from './services/config.service';
     
     <!-- Intro Video Overlay -->
     @if (showIntro()) {
-      <div class="fixed inset-0 z-[10000] bg-black flex flex-col items-center justify-center">
+      <div 
+        class="fixed inset-0 z-[10000] bg-black flex flex-col items-center justify-center transition-all duration-1000 ease-in-out"
+        [class.opacity-0]="isClosing() && (config().intro.fadeOut === 'fade' || config().intro.fadeOut === 'zoom-out')"
+        [class.-translate-y-full]="isClosing() && config().intro.fadeOut === 'slide-up'"
+        [class.translate-y-full]="isClosing() && config().intro.fadeOut === 'slide-down'"
+        [class.scale-0]="isClosing() && config().intro.fadeOut === 'zoom-out'"
+        [class.pointer-events-none]="isClosing()"
+      >
         @if (config().intro.videoUrl) {
           <video 
             autoplay 
@@ -66,6 +73,7 @@ export class AppComponent {
   configService = inject(ConfigService);
   config = this.configService.config;
   showIntro = signal(false);
+  isClosing = signal(false);
 
   constructor() {
     // Initialize state logic for Intro
@@ -81,6 +89,24 @@ export class AppComponent {
   }
 
   closeIntro() {
-    this.showIntro.set(false);
+    // If it's already closing, do nothing
+    if (this.isClosing()) return;
+
+    // Check fade out setting
+    const fadeOutType = this.config().intro.fadeOut;
+
+    if (fadeOutType === 'none') {
+      this.showIntro.set(false);
+      return;
+    }
+
+    // Trigger Animation
+    this.isClosing.set(true);
+
+    // Wait for animation to finish (1s matches CSS duration-1000)
+    setTimeout(() => {
+      this.showIntro.set(false);
+      this.isClosing.set(false);
+    }, 1000);
   }
 }
