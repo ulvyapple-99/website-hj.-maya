@@ -11,12 +11,22 @@ export class GeminiService {
   private configService = inject(ConfigService);
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env['API_KEY'] || '' });
+    let apiKey = '';
+    try {
+      // Safety check for browser environments where process might not be defined
+      apiKey = process.env['API_KEY'] || '';
+    } catch (e) {
+      console.warn('Environment variable process.env.API_KEY not found.');
+    }
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
   async getRecommendation(query: string): Promise<string> {
     try {
-      if (!process.env['API_KEY']) {
+      let apiKey = '';
+      try { apiKey = process.env['API_KEY'] || ''; } catch (e) {}
+      
+      if (!apiKey) {
         return "Maaf, sistem AI sedang offline (API Key missing). Silakan tanya pelayan kami langsung!";
       }
 

@@ -183,7 +183,8 @@ export class MenuComponent {
   config = this.configService.config;
   
   selectedBranchIndex = signal(0);
-  cart = signal<Map<MenuItem, number>>(new Map());
+  // Changed: Use string (item name) as key to be resilient against object reference changes during data reload
+  cart = signal<Map<string, number>>(new Map());
   showCartModal = signal(false);
 
   currentBranch = computed(() => this.config().branches[this.selectedBranchIndex()]);
@@ -191,7 +192,17 @@ export class MenuComponent {
   
   cartItemsList = computed(() => {
     const list: {menu: MenuItem, qty: number}[] = [];
-    this.cart().forEach((qty, menu) => { if (qty > 0) list.push({menu, qty}); });
+    const currentMenu = this.currentBranchMenu();
+    
+    this.cart().forEach((qty, name) => { 
+        if (qty > 0) {
+            // Find the item in the current menu list by name
+            const item = currentMenu.find(m => m.name === name);
+            if (item) {
+                list.push({menu: item, qty});
+            }
+        } 
+    });
     return list;
   });
 
@@ -208,7 +219,13 @@ export class MenuComponent {
 
   totalPrice = computed(() => {
     let total = 0;
-    this.cart().forEach((qty, item) => { total += this.parsePrice(item.price) * qty; });
+    const currentMenu = this.currentBranchMenu();
+    this.cart().forEach((qty, name) => { 
+        const item = currentMenu.find(m => m.name === name);
+        if (item) {
+            total += this.parsePrice(item.price) * qty;
+        }
+    });
     return Math.floor(total * 1.1); // +Tax
   });
 
@@ -221,24 +238,24 @@ export class MenuComponent {
 
   addToCart(item: MenuItem) {
     this.cart.update(currentMap => {
-      const newMap = new Map<MenuItem, number>(currentMap);
-      newMap.set(item, (newMap.get(item) || 0) + 1);
+      const newMap = new Map<string, number>(currentMap);
+      newMap.set(item.name, (newMap.get(item.name) || 0) + 1);
       return newMap;
     });
   }
 
   removeFromCart(item: MenuItem) {
     this.cart.update(currentMap => {
-      const newMap = new Map<MenuItem, number>(currentMap);
-      const currentQty = newMap.get(item) || 0;
-      if (currentQty > 1) newMap.set(item, currentQty - 1);
-      else newMap.delete(item);
+      const newMap = new Map<string, number>(currentMap);
+      const currentQty = newMap.get(item.name) || 0;
+      if (currentQty > 1) newMap.set(item.name, currentQty - 1);
+      else newMap.delete(item.name);
       return newMap;
     });
   }
 
   getQty(item: MenuItem): number {
-    return this.cart().get(item) || 0;
+    return this.cart().get(item.name) || 0;
   }
 
   toggleCartModal() {

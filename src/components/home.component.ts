@@ -5,6 +5,8 @@ import { AssistantComponent } from './assistant.component';
 import { AboutComponent } from './about.component';
 import { MenuComponent } from './menu.component';
 import { LocationComponent } from './location.component';
+import { GalleryComponent } from './gallery.component';
+import { TestimonialsComponent } from './testimonials.component';
 
 @Component({
   selector: 'app-home',
@@ -14,12 +16,16 @@ import { LocationComponent } from './location.component';
     AboutComponent,
     MenuComponent,
     LocationComponent,
-    AssistantComponent
+    AssistantComponent,
+    GalleryComponent,
+    TestimonialsComponent
   ],
   template: `
     <app-hero></app-hero>
     <app-about></app-about>
     <app-menu></app-menu>
+    <app-testimonials></app-testimonials>
+    <app-gallery></app-gallery>
     <app-location></app-location>
     <app-assistant></app-assistant>
   `

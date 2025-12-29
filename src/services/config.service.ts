@@ -1,6 +1,7 @@
 
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, signal, effect, computed } from '@angular/core';
 
+// INTERFACES
 export interface MenuItem {
   name: string;
   desc: string;
@@ -22,10 +23,17 @@ export interface Branch {
   menu: MenuItem[];
 }
 
+export interface Testimonial {
+  name: string;
+  text: string;
+  rating: number; // 1-5
+  role: string;
+}
+
 export interface PageStyle {
   backgroundColor: string;
   textColor: string;
-  accentColor: string; // Used for buttons, highlights
+  accentColor: string;
   fontFamily: string;
 }
 
@@ -33,7 +41,7 @@ export interface AppConfig {
   global: {
     logoText: string;
     logoImage: string;
-    navbarColor: string; // Navbar bg
+    navbarColor: string;
     navbarTextColor: string;
   };
   intro: {
@@ -42,7 +50,6 @@ export interface AppConfig {
     duration: number;
     fadeOut: 'none' | 'fade' | 'slide-up' | 'slide-down' | 'zoom-out';
   };
-  // Page Specific Configs (Content + Style)
   hero: {
     title: string;
     highlight: string;
@@ -80,6 +87,8 @@ export interface AppConfig {
     style: PageStyle;
   };
   branches: Branch[]; 
+  gallery: string[];
+  testimonials: Testimonial[];
   ai: {
     systemInstruction: string;
     initialMessage: string;
@@ -90,131 +99,239 @@ export interface AppConfig {
   providedIn: 'root'
 })
 export class ConfigService {
-  // Initial State
+  private STORAGE_KEY = 'app_config_data_local_v2';
+  private USER_KEY = 'app_user_session_local';
+
+  // Auth State (Mocked for Local Mode)
+  currentUser = signal<{email: string} | null>(null);
+  isAdmin = computed(() => this.currentUser() !== null);
+
+  // Initial State - PRE-FILLED WITH COMPLETE DATA
+  // This ensures the site looks good on Mobile immediately after deployment
   config = signal<AppConfig>({
     global: {
       logoText: 'Hj. Maya',
       logoImage: '', 
       navbarColor: '#FFFFFF',
-      navbarTextColor: '#3E2723'
+      navbarTextColor: '#4E342E'
     },
     intro: {
-      enabled: true,
+      enabled: false, // Disabled by default for faster loading
       videoUrl: '', 
-      duration: 10,
+      duration: 5,
       fadeOut: 'fade'
     },
     hero: {
       title: 'Sate Maranggi',
-      highlight: 'Hj. Maya',
-      subtitle: 'Cita rasa legendaris dengan 3 cabang di Bandung Raya.',
-      bgImage: 'https://picsum.photos/seed/bbq1/1600/900',
+      highlight: 'Asli Hj. Maya',
+      subtitle: 'Kelembutan daging pilihan dengan bumbu rempah warisan yang meresap sempurna. Legenda kuliner Cimahi & Bandung.',
+      bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920&auto=format&fit=crop', // High quality BBQ image
       style: {
         backgroundColor: '#3E2723',
         textColor: '#FFFFFF',
-        accentColor: '#D84315',
+        accentColor: '#FF6F00', // Amber-900
         fontFamily: 'Playfair Display'
       }
     },
     about: {
-      title: 'Warisan Kuliner Legendaris',
-      description: 'Bermula dari resep keluarga yang diwariskan turun-temurun...',
-      image: 'https://picsum.photos/seed/chef/800/600',
+      title: 'Cita Rasa Legendaris',
+      description: 'Sate Maranggi Hj. Maya berdiri sejak tahun 1980-an, bermula dari resep keluarga yang dijaga keasliannya. Kami menggunakan daging sapi dan ayam pilihan yang dimarinasi (direndam) dengan bumbu rempah rahasia selama berjam-jam sebelum dibakar. Tanpa saus kacang pun, sate kami sudah nikmat luar biasa. Disajikan dengan ketan bakar, sambal oncom, dan sambal tomat segar.',
+      image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?q=80&w=800&auto=format&fit=crop', // Chef grilling image
       style: {
-        backgroundColor: '#FFFFFF',
-        textColor: '#4B5563', // Gray-600
-        accentColor: '#3E2723',
+        backgroundColor: '#FFF8E1',
+        textColor: '#4E342E',
+        accentColor: '#D84315',
         fontFamily: 'Lato'
       }
     },
     menuPage: {
-      title: 'Menu & Pesanan',
-      subtitle: 'Pilih cabang, pilih menu, dan pesan langsung via WhatsApp!',
+      title: 'Menu Favorit',
+      subtitle: 'Pesan sekarang untuk makan di tempat atau bawa pulang.',
       style: {
-        backgroundColor: '#FFF8E1', // Cream
+        backgroundColor: '#FFFFFF', 
         textColor: '#3E2723',
         accentColor: '#D84315',
         fontFamily: 'Playfair Display'
       }
     },
     reservation: {
-      title: 'Reservasi & Pesan Menu',
-      subtitle: 'Isi data reservasi, masukkan nama tamu, dan pilih menu.',
-      minPaxRegular: 25,
+      title: 'Reservasi Tempat',
+      subtitle: 'Pastikan ketersediaan tempat untuk acara spesial Anda.',
+      minPaxRegular: 20,
       minPaxRamadan: 10,
       style: {
-        backgroundColor: '#F3F4F6', // Gray-100
-        textColor: '#1F2937', // Gray-800
+        backgroundColor: '#EFEBE9',
+        textColor: '#3E2723', 
         accentColor: '#D84315',
         fontFamily: 'Lato'
       }
     },
     locationPage: {
       title: 'Lokasi Cabang',
-      subtitle: 'Nikmati kelezatan Sate Maranggi Hj. Maya di cabang terdekat.',
+      subtitle: 'Kunjungi cabang terdekat Sate Maranggi Hj. Maya.',
       style: {
         backgroundColor: '#3E2723',
         textColor: '#FFF8E1',
-        accentColor: '#D84315',
+        accentColor: '#FFD54F',
         fontFamily: 'Playfair Display'
       }
     },
     footer: {
       instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/',
-      facebookLink: '#',
-      tiktokLink: '#',
+      facebookLink: 'https://facebook.com',
+      tiktokLink: 'https://tiktok.com',
       style: {
-        backgroundColor: '#3E2723',
-        textColor: '#FFF8E1',
-        accentColor: '#D84315',
+        backgroundColor: '#271C19',
+        textColor: '#A1887F',
+        accentColor: '#FF6F00',
         fontFamily: 'Lato'
       }
     },
     branches: [
       {
         id: 'pusat',
-        name: 'Cabang 1: Cimahi Pusat',
-        address: 'Jl. Jend. Amir Machmud No. 123, Cimahi Tengah',
-        googleMapsUrl: 'https://maps.google.com',
+        name: 'Pusat: Cimahi',
+        address: 'Jl. Mahar Martanegara No.123, Utama, Kec. Cimahi Sel., Kota Cimahi',
+        googleMapsUrl: 'https://goo.gl/maps/xyz',
         phone: '0812-3456-7890',
         whatsappNumber: '6281234567890',
         hours: '10.00 - 22.00 WIB',
-        mapImage: 'https://picsum.photos/seed/map1/400/300',
+        mapImage: 'https://picsum.photos/seed/mapcimahi/600/400',
         menu: [
-           { name: 'Sate Maranggi Sapi', desc: 'Daging sapi murni.', price: 'Rp 50.000', category: 'Makanan', image: 'https://picsum.photos/seed/sate1/800/600', favorite: true },
+           { name: 'Sate Maranggi Sapi (10 Tsk)', desc: 'Daging sapi has dalam, empuk, bumbu meresap.', price: 'Rp 50.000', category: 'Makanan', image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=800&auto=format&fit=crop', favorite: true },
+           { name: 'Sate Maranggi Ayam (10 Tsk)', desc: 'Daging ayam fillet juicy dengan bumbu khas.', price: 'Rp 40.000', category: 'Makanan', image: 'https://images.unsplash.com/photo-1532634960-936d5c64366e?q=80&w=800&auto=format&fit=crop', favorite: false },
+           { name: 'Sate Maranggi Kambing (10 Tsk)', desc: 'Kambing muda, tidak prengus, super empuk.', price: 'Rp 60.000', category: 'Makanan', image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?q=80&w=800&auto=format&fit=crop', favorite: true },
+           { name: 'Ketan Bakar', desc: 'Pendamping wajib sate, gurih dengan serundeng.', price: 'Rp 10.000', category: 'Pelengkap', image: 'https://picsum.photos/seed/ketan/800/600', favorite: true },
+           { name: 'Nasi Timbel Komplit', desc: 'Nasi, ayam goreng, tahu, tempe, sambal, lalap.', price: 'Rp 35.000', category: 'Makanan', image: 'https://picsum.photos/seed/timbel/800/600', favorite: false },
+           { name: 'Sop Iga Sapi', desc: 'Kuah kaldu bening segar, daging iga lepas tulang.', price: 'Rp 55.000', category: 'Makanan', image: 'https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=800&auto=format&fit=crop', favorite: true },
+           { name: 'Es Kelapa Muda', desc: 'Kelapa murni langsung dari batoknya.', price: 'Rp 15.000', category: 'Minuman', image: 'https://images.unsplash.com/photo-1625943553852-781c6dd46faa?q=80&w=800&auto=format&fit=crop', favorite: false },
         ]
       },
       {
-         id: 'cibabat',
-         name: 'Cabang 2: Cibabat',
-         address: 'Jl. Raya Cibabat No. 456',
-         googleMapsUrl: '',
-         phone: '-',
-         whatsappNumber: '62',
-         hours: '10.00-22.00',
-         mapImage: '',
-         menu: []
+         id: 'pasteur',
+         name: 'Cabang: Pasteur',
+         address: 'Jl. Dr. Djunjunan No.155, Sukagalih, Kec. Sukajadi, Kota Bandung',
+         googleMapsUrl: 'https://goo.gl/maps/abc',
+         phone: '0821-9988-7766',
+         whatsappNumber: '6282199887766',
+         hours: '11.00 - 23.00 WIB',
+         mapImage: 'https://picsum.photos/seed/mappasteur/600/400',
+         menu: [
+            { name: 'Paket Hemat Berdua', desc: '20 Sate Sapi + 2 Nasi + 2 Es Teh.', price: 'Rp 120.000', category: 'Paket', image: 'https://picsum.photos/seed/paket1/800/600', favorite: true },
+            { name: 'Sate Maranggi Sapi (10 Tsk)', desc: 'Daging sapi has dalam.', price: 'Rp 55.000', category: 'Makanan', image: 'https://picsum.photos/seed/sate1/800/600', favorite: true },
+         ]
       }
     ],
+    gallery: [
+      'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1544025162-d76690b6d015?q=80&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=800&auto=format&fit=crop'
+    ],
+    testimonials: [
+      { name: 'Ridwan Kamil', text: 'Salah satu sate maranggi terbaik di Bandung Raya. Bumbunya nendang!', rating: 5, role: 'Tokoh Publik' },
+      { name: 'Nagita Slavina', text: 'Suka banget sama sambal oncomnya, beda dari yang lain.', rating: 5, role: 'Artis' },
+      { name: 'Budi Santoso', text: 'Tempatnya luas, cocok buat bukber atau makan keluarga besar.', rating: 4, role: 'Local Guide' }
+    ],
     ai: {
-      systemInstruction: `Anda adalah asisten virtual restoran Sate Maranggi Hj. Maya.`,
-      initialMessage: 'Halo! Mau cari Sate di cabang mana?'
+      systemInstruction: `Anda adalah asisten virtual "Si Maya", maskot dari restoran Sate Maranggi Hj. Maya. Gaya bicara Anda ramah, sunda halus, dan membantu. Anda bertugas merekomendasikan menu.`,
+      initialMessage: 'Sampurasun! Cari sate yang empuk atau mau rekomendasi menu best seller?'
     }
   });
 
   constructor() {
-    // Effect removed or simplified since we use direct style bindings now for flexibility
+    this.initializeAuth();
+    this.loadFromStorage();
+
+    // Effect for CSS vars fallback
     effect(() => {
        const c = this.config();
-       // Global CSS variables can still be used for common utility classes if needed
        const root = document.documentElement;
-       root.style.setProperty('--color-brand-brown', c.hero.style.backgroundColor); // Fallback
+       root.style.setProperty('--color-brand-brown', c.hero.style.backgroundColor);
     });
   }
 
-  updateConfig(newConfig: AppConfig) {
-    this.config.set(newConfig);
+  initializeAuth() {
+    // Check if we have a fake session
+    const storedUser = localStorage.getItem(this.USER_KEY);
+    if (storedUser) {
+      this.currentUser.set(JSON.parse(storedUser));
+    }
   }
+
+  // --- AUTH LOGIC (MOCKED - No Firebase) ---
+
+  async loginAdmin(email: string, pass: string) {
+    // Simple simulation
+    if (pass.length > 3) {
+      const user = { email };
+      this.currentUser.set(user);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      return true;
+    } else {
+      throw new Error("Password salah (min 4 karakter)");
+    }
+  }
+
+  async logoutAdmin() {
+    this.currentUser.set(null);
+    localStorage.removeItem(this.USER_KEY);
+  }
+
+  // --- DATA LOGIC (LocalStorage Only) ---
+
+  async loadFromStorage() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(this.STORAGE_KEY);
+        if (stored) {
+          const data = JSON.parse(stored) as AppConfig;
+          // Merge stored data with defaults (careful not to overwrite if structure changed)
+          this.config.update(current => ({...current, ...data}));
+        }
+      }
+    } catch (error) {
+      console.warn("Error loading config:", error);
+    }
+  }
+
+  async updateConfig(newConfig: AppConfig) {
+    // 1. Update Local Signal
+    this.config.set(newConfig);
+
+    // 2. Persist to LocalStorage
+    try {
+       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(newConfig));
+       console.log("Config saved to LocalStorage!");
+    } catch (error) {
+      console.error("Error saving config:", error);
+      alert("Gagal menyimpan (Mungkin kuota LocalStorage penuh).");
+    }
+  }
+
+  // --- FILE HANDLING (Base64 only - No Firebase Storage) ---
+  async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
+    return new Promise((resolve, reject) => {
+      // Limit file size to avoid LocalStorage quota exceeded (approx 5MB limit usually)
+      if (file.size > 500000) { // 500KB limit recommended for base64 in localstorage
+         if(!confirm("Ukuran gambar cukup besar (>500KB). Ini mungkin memenuhi penyimpanan browser. Lanjut?")) {
+            reject("File too big");
+            return;
+         }
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // --- HELPERS ---
 
   getMenuContext(): string {
     return this.config().branches.map(b => 
