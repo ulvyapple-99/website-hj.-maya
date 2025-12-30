@@ -27,10 +27,14 @@ interface GuestOrder {
         <!-- Header -->
         <div class="text-center mb-8">
           <h2 class="font-bold mb-2" 
-              [style.color]="config().reservation.style.accentColor"
-              [style.fontSize]="config().reservation.style.titleFontSize">{{ config().reservation.title }}</h2>
+              [style.color]="config().reservation.titleStyle.color"
+              [style.fontFamily]="config().reservation.titleStyle.fontFamily"
+              [style.fontSize]="config().reservation.titleStyle.fontSize">{{ config().reservation.title }}</h2>
           <div class="h-1 w-24 mx-auto rounded" [style.backgroundColor]="config().reservation.style.accentColor"></div>
-          <p class="mt-4 opacity-80 max-w-3xl mx-auto">
+          <p class="mt-4 opacity-80 max-w-3xl mx-auto"
+             [style.color]="config().reservation.subtitleStyle.color"
+             [style.fontFamily]="config().reservation.subtitleStyle.fontFamily"
+             [style.fontSize]="config().reservation.subtitleStyle.fontSize">
             {{ config().reservation.subtitle }}
           </p>
         </div>

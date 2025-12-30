@@ -138,22 +138,24 @@ export interface AppConfig {
     badgeText: string;
     badgeStyle: TextStyle;
     title: string;
-    titleStyle: TextStyle; // NEW
+    titleStyle: TextStyle; 
     highlight: string;
-    highlightStyle: TextStyle; // NEW
+    highlightStyle: TextStyle; 
     subtitle: string;
-    subtitleStyle: TextStyle; // NEW
+    subtitleStyle: TextStyle; 
     buttonText1: string;
-    button1Style: TextStyle; // NEW
+    button1Style: TextStyle; 
     buttonText2: string;
-    button2Style: TextStyle; // NEW
+    button2Style: TextStyle; 
     bgImage: string;
     overlayOpacity: number; 
     style: PageStyle;
   };
   about: {
     title: string;
+    titleStyle: TextStyle; 
     description: string;
+    descriptionStyle: TextStyle; 
     image: string;
     imagePosition: 'left' | 'right'; 
     stats: {
@@ -165,7 +167,9 @@ export interface AppConfig {
   };
   menuPage: {
     title: string;
+    titleStyle: TextStyle; 
     subtitle: string;
+    subtitleStyle: TextStyle; 
     style: PageStyle;
     cardImageHeight: string;
     cardBorderRadius: string;
@@ -175,13 +179,17 @@ export interface AppConfig {
   };
   packagesPage: { 
     title: string;
+    titleStyle: TextStyle; 
     subtitle: string;
+    subtitleStyle: TextStyle; 
     style: PageStyle;
     cardBorderRadius: string;
   };
   reservation: {
     title: string;
+    titleStyle: TextStyle; // NEW
     subtitle: string;
+    subtitleStyle: TextStyle; // NEW
     minPaxRegular: number;
     minPaxRamadan: number;
     whatsappTemplate: string; 
@@ -193,14 +201,24 @@ export interface AppConfig {
   };
   locationPage: {
     title: string;
+    titleStyle: TextStyle; // NEW
     subtitle: string;
+    subtitleStyle: TextStyle; // NEW
     style: PageStyle;
     cardBorderRadius: string;
     mapHeight: string;
   };
+  testimonialStyles: { // NEW SECTION
+    reviewStyle: TextStyle;
+    nameStyle: TextStyle;
+    roleStyle: TextStyle;
+  };
   footer: {
     description: string;
-    copyrightText: string; 
+    descriptionStyle: TextStyle; // NEW
+    copyrightText: string;
+    copyrightStyle: TextStyle; // NEW
+    brandStyle: TextStyle; // NEW
     instagramLink: string;
     facebookLink: string;
     tiktokLink: string;
@@ -318,7 +336,9 @@ export class ConfigService {
     },
     about: {
       title: 'Resep Warisan Keluarga',
+      titleStyle: { fontFamily: 'Lato', fontSize: '3rem', color: '#D84315' },
       description: 'Sate Maranggi Hj. Maya Cimahi menghadirkan cita rasa otentik yang telah melegenda.',
+      descriptionStyle: { fontFamily: 'Lato', fontSize: '1.125rem', color: '#4E342E' },
       image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=1000&auto=format&fit=crop',
       imagePosition: 'left',
       stats: {
@@ -339,7 +359,9 @@ export class ConfigService {
     },
     menuPage: {
       title: 'Menu Andalan',
+      titleStyle: { fontFamily: 'Playfair Display', fontSize: '3rem', color: '#D84315' },
       subtitle: 'Pilihan menu favorit pelanggan setia Hj. Maya',
+      subtitleStyle: { fontFamily: 'Playfair Display', fontSize: '1.125rem', color: '#3E2723' },
       style: {
         backgroundColor: '#FFFFFF', 
         textColor: '#3E2723',
@@ -356,7 +378,9 @@ export class ConfigService {
     },
     packagesPage: {
       title: 'Paket Hemat',
+      titleStyle: { fontFamily: 'Playfair Display', fontSize: '2.5rem', color: '#D84315' },
       subtitle: 'Pilihan paket makan bersama untuk keluarga dan rombongan.',
+      subtitleStyle: { fontFamily: 'Playfair Display', fontSize: '1rem', color: '#3E2723' },
       style: {
         backgroundColor: '#FFF3E0', 
         textColor: '#3E2723',
@@ -369,7 +393,9 @@ export class ConfigService {
     },
     reservation: {
       title: 'Reservasi Tempat',
+      titleStyle: { fontFamily: 'Lato', fontSize: '2.25rem', color: '#D84315' }, // Default
       subtitle: 'Booking meja untuk acara keluarga, arisan, atau buka bersama.',
+      subtitleStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#3E2723' }, // Default
       minPaxRegular: 5,
       minPaxRamadan: 5,
       whatsappTemplate: 'Halo Admin {branch}, saya mau reservasi meja untuk {pax} orang pada tanggal {date} jam {time} a.n {name}.',
@@ -388,7 +414,9 @@ export class ConfigService {
     },
     locationPage: {
       title: 'Kunjungi Kami',
+      titleStyle: { fontFamily: 'Playfair Display', fontSize: '2.25rem', color: '#3E2723' }, // Default
       subtitle: 'Nikmati suasana makan yang nyaman di lokasi kami.',
+      subtitleStyle: { fontFamily: 'Playfair Display', fontSize: '1rem', color: '#3E2723' }, // Default
       style: {
         backgroundColor: '#3E2723',
         textColor: '#FFF8E1',
@@ -400,9 +428,17 @@ export class ConfigService {
       cardBorderRadius: '16px',
       mapHeight: '200px'
     },
+    testimonialStyles: {
+      reviewStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#4B5563' },
+      nameStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#111827' },
+      roleStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#D84315' }
+    },
     footer: {
       description: 'Menyajikan cita rasa Sate Maranggi asli Cimahi sejak 1980. Bumbu meresap, daging empuk, sambal nikmat.',
+      descriptionStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#9CA3AF' }, // Default
       copyrightText: 'All Rights Reserved.',
+      copyrightStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#6B7280' }, // Default
+      brandStyle: { fontFamily: 'Playfair Display', fontSize: '1.5rem', color: '#E5E7EB' }, // Default
       instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/', 
       facebookLink: 'https://facebook.com',
       tiktokLink: 'https://tiktok.com',
@@ -680,32 +716,51 @@ export class ConfigService {
             about: { 
                 ...current.about, 
                 ...(data.about || {}),
+                titleStyle: mergeText(current.about.titleStyle, data.about?.titleStyle),
+                descriptionStyle: mergeText(current.about.descriptionStyle, data.about?.descriptionStyle),
                 stats: { ...current.about.stats, ...(data.about?.stats || {}) },
                 style: mergeStyle(current.about.style, data.about?.style)
             },
             menuPage: { 
                 ...current.menuPage, 
                 ...(data.menuPage || {}),
+                titleStyle: mergeText(current.menuPage.titleStyle, data.menuPage?.titleStyle),
+                subtitleStyle: mergeText(current.menuPage.subtitleStyle, data.menuPage?.subtitleStyle),
                 style: mergeStyle(current.menuPage.style, data.menuPage?.style)
             },
             packagesPage: {
                 ...current.packagesPage,
                 ...(data.packagesPage || {}),
+                titleStyle: mergeText(current.packagesPage?.titleStyle, data.packagesPage?.titleStyle),
+                subtitleStyle: mergeText(current.packagesPage?.subtitleStyle, data.packagesPage?.subtitleStyle),
                 style: mergeStyle(current.packagesPage?.style || {}, data.packagesPage?.style || {})
             },
             reservation: { 
                 ...current.reservation, 
                 ...(data.reservation || {}),
+                titleStyle: mergeText(current.reservation.titleStyle, data.reservation?.titleStyle),
+                subtitleStyle: mergeText(current.reservation.subtitleStyle, data.reservation?.subtitleStyle),
                 style: mergeStyle(current.reservation.style, data.reservation?.style)
             },
             locationPage: { 
                 ...current.locationPage, 
                 ...(data.locationPage || {}),
+                titleStyle: mergeText(current.locationPage.titleStyle, data.locationPage?.titleStyle),
+                subtitleStyle: mergeText(current.locationPage.subtitleStyle, data.locationPage?.subtitleStyle),
                 style: mergeStyle(current.locationPage.style, data.locationPage?.style)
+            },
+            testimonialStyles: {
+               ...current.testimonialStyles,
+               reviewStyle: mergeText(current.testimonialStyles?.reviewStyle, data.testimonialStyles?.reviewStyle),
+               nameStyle: mergeText(current.testimonialStyles?.nameStyle, data.testimonialStyles?.nameStyle),
+               roleStyle: mergeText(current.testimonialStyles?.roleStyle, data.testimonialStyles?.roleStyle),
             },
             footer: { 
                 ...current.footer, 
                 ...(data.footer || {}),
+                descriptionStyle: mergeText(current.footer.descriptionStyle, data.footer?.descriptionStyle),
+                copyrightStyle: mergeText(current.footer.copyrightStyle, data.footer?.copyrightStyle),
+                brandStyle: mergeText(current.footer.brandStyle, data.footer?.brandStyle),
                 style: mergeStyle(current.footer.style, data.footer?.style)
             },
             branches: data.branches || current.branches,

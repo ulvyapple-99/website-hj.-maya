@@ -18,11 +18,14 @@ import { ConfigService, PackageItem } from '../services/config.service';
         <!-- Header -->
         <div class="text-center mb-12">
            <h2 class="font-bold mb-4" 
-               [style.color]="config().packagesPage?.style?.accentColor || '#D84315'"
-               [style.fontSize]="config().packagesPage?.style?.titleFontSize || '2.5rem'"
+               [style.fontFamily]="config().packagesPage?.titleStyle?.fontFamily"
+               [style.fontSize]="config().packagesPage?.titleStyle?.fontSize"
+               [style.color]="config().packagesPage?.titleStyle?.color"
            >{{ config().packagesPage?.title || 'Paket Hemat' }}</h2>
            <p class="max-w-2xl mx-auto opacity-80"
-              [style.fontSize]="config().packagesPage?.style?.subtitleFontSize || '1rem'">
+              [style.fontFamily]="config().packagesPage?.subtitleStyle?.fontFamily"
+              [style.fontSize]="config().packagesPage?.subtitleStyle?.fontSize"
+              [style.color]="config().packagesPage?.subtitleStyle?.color">
               {{ config().packagesPage?.subtitle || 'Pilihan terbaik untuk makan bersama.' }}
            </p>
         </div>

@@ -32,15 +32,30 @@ import { ConfigService } from '../services/config.service';
                   }
                 </div>
 
-                <p class="text-gray-600 mb-6 leading-relaxed italic relative z-10">{{ review.text }}</p>
+                <p class="mb-6 leading-relaxed italic relative z-10"
+                   [style.color]="config().testimonialStyles?.reviewStyle?.color"
+                   [style.fontFamily]="config().testimonialStyles?.reviewStyle?.fontFamily"
+                   [style.fontSize]="config().testimonialStyles?.reviewStyle?.fontSize">
+                   {{ review.text }}
+                </p>
 
                 <div class="flex items-center gap-4 mt-auto">
                    <div class="w-10 h-10 rounded-full bg-brand-brown text-white flex items-center justify-center font-bold text-sm">
                       {{ review.name.charAt(0) }}
                    </div>
                    <div>
-                      <h4 class="font-bold text-gray-900 text-sm">{{ review.name }}</h4>
-                      <p class="text-xs text-brand-orange font-medium uppercase tracking-wide">{{ review.role }}</p>
+                      <h4 class="font-bold text-sm"
+                          [style.color]="config().testimonialStyles?.nameStyle?.color"
+                          [style.fontFamily]="config().testimonialStyles?.nameStyle?.fontFamily"
+                          [style.fontSize]="config().testimonialStyles?.nameStyle?.fontSize">
+                          {{ review.name }}
+                      </h4>
+                      <p class="font-medium uppercase tracking-wide"
+                         [style.color]="config().testimonialStyles?.roleStyle?.color"
+                         [style.fontFamily]="config().testimonialStyles?.roleStyle?.fontFamily"
+                         [style.fontSize]="config().testimonialStyles?.roleStyle?.fontSize">
+                         {{ review.role }}
+                      </p>
                    </div>
                 </div>
              </div>

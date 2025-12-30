@@ -59,13 +59,16 @@ import { ConfigService } from '../services/config.service';
             </div>
             
             <h2 class="font-bold mb-6 leading-tight"
-                [style.color]="config().about.style.accentColor"
-                [style.fontSize]="config().about.style.titleFontSize">
+                [style.fontFamily]="config().about.titleStyle.fontFamily"
+                [style.fontSize]="config().about.titleStyle.fontSize"
+                [style.color]="config().about.titleStyle.color">
               {{ config().about.title }}
             </h2>
             
             <div class="prose leading-relaxed mb-8 text-justify opacity-80 whitespace-pre-line"
-                 [style.fontSize]="config().about.style.bodyFontSize">
+                 [style.fontFamily]="config().about.descriptionStyle.fontFamily"
+                 [style.fontSize]="config().about.descriptionStyle.fontSize"
+                 [style.color]="config().about.descriptionStyle.color">
               <p>{{ config().about.description }}</p>
             </div>
 

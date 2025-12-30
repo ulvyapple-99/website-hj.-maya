@@ -20,8 +20,14 @@ import { ConfigService } from '../services/config.service';
         
         <div class="text-center mb-10">
           <span class="font-bold tracking-widest uppercase text-xs mb-2 block" [style.color]="config().locationPage.style.accentColor">Temukan Kami</span>
-          <h2 class="font-bold mb-4" [style.fontSize]="config().locationPage.style.titleFontSize">{{ config().locationPage.title }}</h2>
-          <p class="opacity-70 max-w-2xl mx-auto">
+          <h2 class="font-bold mb-4" 
+              [style.color]="config().locationPage.titleStyle.color"
+              [style.fontFamily]="config().locationPage.titleStyle.fontFamily"
+              [style.fontSize]="config().locationPage.titleStyle.fontSize">{{ config().locationPage.title }}</h2>
+          <p class="opacity-70 max-w-2xl mx-auto"
+             [style.color]="config().locationPage.subtitleStyle.color"
+             [style.fontFamily]="config().locationPage.subtitleStyle.fontFamily"
+             [style.fontSize]="config().locationPage.subtitleStyle.fontSize">
             {{ config().locationPage.subtitle }}
           </p>
         </div>

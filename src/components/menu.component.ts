@@ -19,11 +19,17 @@ import { ToastService } from '../services/toast.service';
         <!-- Section Title -->
         <div class="text-center mb-12">
           <h2 class="font-bold mb-4" 
-              [style.color]="config().menuPage.style.accentColor"
-              [style.fontSize]="config().menuPage.style.titleFontSize"
+              [style.fontFamily]="config().menuPage.titleStyle.fontFamily"
+              [style.fontSize]="config().menuPage.titleStyle.fontSize"
+              [style.color]="config().menuPage.titleStyle.color"
           >{{ config().menuPage.title }}</h2>
           <div class="h-1 w-24 mx-auto rounded mb-6" [style.backgroundColor]="config().menuPage.style.accentColor"></div>
-          <p class="max-w-2xl mx-auto opacity-70 font-light" [style.fontSize]="config().menuPage.style.subtitleFontSize">{{ config().menuPage.subtitle }}</p>
+          <p class="max-w-2xl mx-auto opacity-70 font-light" 
+             [style.fontFamily]="config().menuPage.subtitleStyle.fontFamily"
+             [style.fontSize]="config().menuPage.subtitleStyle.fontSize"
+             [style.color]="config().menuPage.subtitleStyle.color">
+             {{ config().menuPage.subtitle }}
+          </p>
         </div>
 
         <!-- Branch Tabs -->
@@ -204,13 +210,7 @@ import { ToastService } from '../services/toast.service';
         </div>
       }
     </section>
-  `,
-  styles: [`
-    .animate-bounce-in { animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
-    .animate-scale-up { animation: scaleUp 0.3s ease-out; }
-    @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  `]
+  `
 })
 export class MenuComponent {
   configService = inject(ConfigService);

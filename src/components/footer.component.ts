@@ -20,8 +20,14 @@ import { CommonModule } from '@angular/common';
         
         <!-- Brand -->
         <div class="md:w-1/3">
-          <h3 class="font-bold mb-2" [style.fontSize]="config().footer.style.titleFontSize">{{ config().global.logoText }}</h3>
-          <p class="opacity-70 leading-relaxed whitespace-pre-line" [style.fontSize]="config().footer.style.bodyFontSize">
+          <h3 class="font-bold mb-2" 
+              [style.color]="config().footer.brandStyle.color"
+              [style.fontFamily]="config().footer.brandStyle.fontFamily"
+              [style.fontSize]="config().footer.brandStyle.fontSize">{{ config().global.logoText }}</h3>
+          <p class="opacity-70 leading-relaxed whitespace-pre-line" 
+             [style.color]="config().footer.descriptionStyle.color"
+             [style.fontFamily]="config().footer.descriptionStyle.fontFamily"
+             [style.fontSize]="config().footer.descriptionStyle.fontSize">
             {{ config().footer.description }}
           </p>
         </div>
@@ -60,7 +66,10 @@ import { CommonModule } from '@angular/common';
 
       </div>
       
-      <div class="text-center mt-10 pt-6 border-t border-white/10 text-xs opacity-50">
+      <div class="text-center mt-10 pt-6 border-t border-white/10 opacity-50"
+           [style.color]="config().footer.copyrightStyle.color"
+           [style.fontFamily]="config().footer.copyrightStyle.fontFamily"
+           [style.fontSize]="config().footer.copyrightStyle.fontSize">
           &copy; {{ year }} {{ config().global.logoText }}. {{ config().footer.copyrightText }}
       </div>
     </footer>
