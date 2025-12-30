@@ -8,22 +8,30 @@ import { ConfigService } from '../services/config.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section id="about" class="relative py-20 overflow-hidden"
+    <section id="about" class="relative overflow-hidden"
       [style.backgroundColor]="config().about.style.backgroundColor"
       [style.color]="config().about.style.textColor"
       [style.fontFamily]="config().about.style.fontFamily"
+      [style.paddingTop]="config().about.style.sectionPaddingY"
+      [style.paddingBottom]="config().about.style.sectionPaddingY"
     >
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
         <div class="grid md:grid-cols-2 gap-12 items-center">
           
           <!-- Image Section -->
-          <div class="relative order-2 md:order-1">
+          <div class="relative" 
+              [class.order-2]="config().about.imagePosition === 'right'"
+              [class.md:order-1]="config().about.imagePosition === 'left'"
+              [class.md:order-2]="config().about.imagePosition === 'right'"
+          >
              <!-- Border Frame -->
-             <div class="absolute top-4 left-4 w-full h-full border-2 rounded-2xl z-0 transform translate-x-2 translate-y-2"
-                  [style.borderColor]="config().about.style.accentColor"></div>
+             <div class="absolute top-4 left-4 w-full h-full border-2 z-0 transform translate-x-2 translate-y-2"
+                  [style.borderColor]="config().about.style.accentColor"
+                  [style.borderRadius]="config().about.style.borderRadius"></div>
              
              <!-- Main Image Container -->
-             <div class="relative rounded-2xl overflow-hidden shadow-2xl h-[450px] bg-gray-200 z-10">
+             <div class="relative overflow-hidden shadow-2xl h-[450px] bg-gray-200 z-10"
+                  [style.borderRadius]="config().about.style.borderRadius">
                 @if (hasImage()) {
                    @if (isVideo(config().about.image)) {
                      <video [src]="config().about.image" autoplay muted loop playsinline class="w-full h-full object-cover"></video>
@@ -35,7 +43,11 @@ import { ConfigService } from '../services/config.service';
           </div>
 
           <!-- Content Section -->
-          <div class="order-1 md:order-2">
+          <div 
+              [class.order-1]="config().about.imagePosition === 'right'"
+              [class.md:order-2]="config().about.imagePosition === 'left'"
+              [class.md:order-1]="config().about.imagePosition === 'right'"
+          >
             <!-- Dynamic Logo/Badge -->
             <div class="mb-6 inline-block">
               <span class="px-3 py-1 text-xs font-bold tracking-widest uppercase rounded-full mb-2 inline-block"
@@ -46,12 +58,14 @@ import { ConfigService } from '../services/config.service';
               </span>
             </div>
             
-            <h2 class="text-4xl md:text-5xl font-bold mb-6 leading-tight"
-                [style.color]="config().about.style.accentColor">
+            <h2 class="font-bold mb-6 leading-tight"
+                [style.color]="config().about.style.accentColor"
+                [style.fontSize]="config().about.style.titleFontSize">
               {{ config().about.title }}
             </h2>
             
-            <div class="prose leading-relaxed text-lg mb-8 text-justify opacity-80 whitespace-pre-line">
+            <div class="prose leading-relaxed mb-8 text-justify opacity-80 whitespace-pre-line"
+                 [style.fontSize]="config().about.style.bodyFontSize">
               <p>{{ config().about.description }}</p>
             </div>
 

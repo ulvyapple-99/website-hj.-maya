@@ -98,6 +98,33 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                         {{ tab.label }}
                      </button>
                   </nav>
+
+                  <!-- Quick Visibility Toggles -->
+                  <div class="p-4 border-t mt-auto">
+                     <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Visibility Control</h4>
+                     <div class="space-y-2">
+                        <label class="flex items-center justify-between text-sm">
+                           <span>Hero</span>
+                           <input type="checkbox" [(ngModel)]="config().features.showHero">
+                        </label>
+                        <label class="flex items-center justify-between text-sm">
+                           <span>About</span>
+                           <input type="checkbox" [(ngModel)]="config().features.showAbout">
+                        </label>
+                        <label class="flex items-center justify-between text-sm">
+                           <span>Menu</span>
+                           <input type="checkbox" [(ngModel)]="config().features.showMenu">
+                        </label>
+                        <label class="flex items-center justify-between text-sm">
+                           <span>Reservation</span>
+                           <input type="checkbox" [(ngModel)]="config().features.showReservation">
+                        </label>
+                        <label class="flex items-center justify-between text-sm">
+                           <span>Instagram Feed</span>
+                           <input type="checkbox" [(ngModel)]="config().features.showGallery">
+                        </label>
+                     </div>
+                  </div>
                </div>
 
                <!-- Main Content Area -->
@@ -107,9 +134,13 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                   @if (currentTab() === 'global') {
                      <div class="space-y-6 max-w-3xl">
                         <div class="section-box">
-                           <h3 class="section-title">Identitas Website</h3>
+                           <h3 class="section-title">Identitas Website & SEO</h3>
                            <div class="grid grid-cols-2 gap-4">
                               <div><label class="label">Nama Website / Logo Text</label><input type="text" [(ngModel)]="config().global.logoText" class="input"></div>
+                              <div>
+                                 <label class="label">Meta Description (SEO)</label>
+                                 <textarea [(ngModel)]="config().global.metaDescription" class="input h-10" placeholder="Deskripsi untuk Google..."></textarea>
+                              </div>
                               <div>
                                  <label class="label">Logo Image</label>
                                  <div class="flex gap-2">
@@ -117,14 +148,23 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                                     <button *ngIf="config().global.logoImage" (click)="config().global.logoImage=''" class="text-red-500 text-xs font-bold">Hapus</button>
                                  </div>
                               </div>
+                              <div>
+                                 <label class="label">Favicon (Icon Browser)</label>
+                                 <input type="file" (change)="onFileSelected($event, 'favicon')" class="input text-xs">
+                                 <img *ngIf="config().global.favicon" [src]="config().global.favicon" class="h-6 w-6 mt-1">
+                              </div>
                            </div>
                         </div>
 
                         <div class="section-box">
-                           <h3 class="section-title">Navbar Style</h3>
+                           <h3 class="section-title">Navbar Style & Dimensions</h3>
                            <div class="grid grid-cols-2 gap-4">
-                              <div><label class="label">Warna Background Navbar</label><input type="color" [(ngModel)]="config().global.navbarColor" class="w-full h-10"></div>
-                              <div><label class="label">Warna Teks Navbar</label><input type="color" [(ngModel)]="config().global.navbarTextColor" class="w-full h-10"></div>
+                              <div><label class="label">Warna Background</label><input type="color" [(ngModel)]="config().global.navbarColor" class="w-full h-10"></div>
+                              <div><label class="label">Warna Teks</label><input type="color" [(ngModel)]="config().global.navbarTextColor" class="w-full h-10"></div>
+                              <div><label class="label">Tinggi Navbar</label><input type="text" [(ngModel)]="config().global.navHeight" class="input" placeholder="80px"></div>
+                              <div><label class="label">Tinggi Logo</label><input type="text" [(ngModel)]="config().global.navLogoHeight" class="input" placeholder="40px"></div>
+                              <div><label class="label">Ukuran Font Link</label><input type="text" [(ngModel)]="config().global.navLinkFontSize" class="input" placeholder="16px"></div>
+                              <div><label class="label">Jarak Antar Link</label><input type="text" [(ngModel)]="config().global.navLinkGap" class="input" placeholder="32px"></div>
                            </div>
                         </div>
 
@@ -144,7 +184,9 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                                     <select [(ngModel)]="config().intro.fadeOut" class="input bg-white">
                                        <option value="fade">Fade Out</option>
                                        <option value="slide-up">Slide Up</option>
+                                       <option value="slide-down">Slide Down</option>
                                        <option value="zoom-out">Zoom Out</option>
+                                       <option value="none">None</option>
                                     </select>
                                  </div>
                               </div>
@@ -176,6 +218,13 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                               <input type="file" (change)="onFileSelected($event, 'heroBg')" class="input text-xs mb-2">
                               <input type="text" [(ngModel)]="config().hero.bgImage" class="input text-xs text-gray-400" placeholder="URL Gambar">
                            </div>
+                           <div class="mb-4">
+                              <label class="label flex justify-between">
+                                <span>Overlay Opacity (Gelap/Terang)</span>
+                                <span>{{ config().hero.overlayOpacity | percent }}</span>
+                              </label>
+                              <input type="range" min="0" max="1" step="0.1" [(ngModel)]="config().hero.overlayOpacity" class="w-full">
+                           </div>
                            <div class="grid grid-cols-2 gap-4">
                               <div><label class="label">Background Color (Fallback)</label><input type="color" [(ngModel)]="config().hero.style.backgroundColor" class="w-full h-10"></div>
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().hero.style.textColor" class="w-full h-10"></div>
@@ -186,8 +235,19 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                                     <option value="Playfair Display">Playfair Display</option>
                                     <option value="Oswald">Oswald</option>
                                     <option value="Montserrat">Montserrat</option>
+                                    <option value="Lora">Lora</option>
                                  </select>
                               </div>
+                           </div>
+                           
+                           <!-- NEW: Granular Hero Settings -->
+                           <h4 class="text-xs font-bold text-gray-500 uppercase mt-4 mb-2">Detail Ukuran</h4>
+                           <div class="grid grid-cols-3 gap-4">
+                             <div><label class="label">Ukuran Judul</label><input type="text" [(ngModel)]="config().hero.style.titleFontSize" class="input" placeholder="4.5rem"></div>
+                             <div><label class="label">Ukuran Subjudul</label><input type="text" [(ngModel)]="config().hero.style.subtitleFontSize" class="input" placeholder="1.25rem"></div>
+                             <div><label class="label">Radius Tombol</label><input type="text" [(ngModel)]="config().hero.style.buttonRadius" class="input" placeholder="50px"></div>
+                             <div><label class="label">Padding X Tombol</label><input type="text" [(ngModel)]="config().hero.style.buttonPaddingX" class="input" placeholder="40px"></div>
+                             <div><label class="label">Padding Y Tombol</label><input type="text" [(ngModel)]="config().hero.style.buttonPaddingY" class="input" placeholder="16px"></div>
                            </div>
                         </div>
                      </div>
@@ -202,30 +262,29 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                               <div><label class="label">Judul</label><input type="text" [(ngModel)]="config().about.title" class="input font-bold"></div>
                               <div><label class="label">Deskripsi Lengkap</label><textarea [(ngModel)]="config().about.description" class="input h-32"></textarea></div>
                               <div><label class="label">Gambar / Video</label><input type="file" (change)="onFileSelected($event, 'aboutImage')" class="input text-xs"></div>
+                              <div>
+                                <label class="label">Posisi Gambar</label>
+                                <select [(ngModel)]="config().about.imagePosition" class="input bg-white">
+                                  <option value="left">Kiri (Teks Kanan)</option>
+                                  <option value="right">Kanan (Teks Kiri)</option>
+                                </select>
+                              </div>
                            </div>
                         </div>
 
                         <div class="section-box">
-                           <h3 class="section-title">Statistik (Angka di Bawah)</h3>
-                           <div class="grid grid-cols-3 gap-4">
-                              <div><label class="label">Angka 1</label><input type="text" [(ngModel)]="config().about.stats.val1" class="input font-bold"></div>
-                              <div><label class="label">Label 1</label><input type="text" [(ngModel)]="config().about.stats.label1" class="input text-xs"></div>
-                              
-                              <div><label class="label">Angka 2</label><input type="text" [(ngModel)]="config().about.stats.val2" class="input font-bold"></div>
-                              <div><label class="label">Label 2</label><input type="text" [(ngModel)]="config().about.stats.label2" class="input text-xs"></div>
-                              
-                              <div><label class="label">Angka 3</label><input type="text" [(ngModel)]="config().about.stats.val3" class="input font-bold"></div>
-                              <div><label class="label">Label 3</label><input type="text" [(ngModel)]="config().about.stats.label3" class="input text-xs"></div>
-                           </div>
-                        </div>
-
-                        <div class="section-box">
-                           <h3 class="section-title">Style Section About</h3>
+                           <h3 class="section-title">Style & Ukuran</h3>
                            <div class="grid grid-cols-2 gap-4">
                               <div><label class="label">Background Color</label><input type="color" [(ngModel)]="config().about.style.backgroundColor" class="w-full h-10"></div>
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().about.style.textColor" class="w-full h-10"></div>
                               <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().about.style.accentColor" class="w-full h-10"></div>
                               <div><label class="label">Font Family</label><select [(ngModel)]="config().about.style.fontFamily" class="input bg-white"><option value="Lato">Lato</option><option value="Open Sans">Open Sans</option></select></div>
+                           </div>
+                           <div class="grid grid-cols-3 gap-4 mt-4">
+                              <div><label class="label">Ukuran Judul</label><input type="text" [(ngModel)]="config().about.style.titleFontSize" class="input" placeholder="3rem"></div>
+                              <div><label class="label">Ukuran Deskripsi</label><input type="text" [(ngModel)]="config().about.style.bodyFontSize" class="input" placeholder="1.125rem"></div>
+                              <div><label class="label">Radius Gambar</label><input type="text" [(ngModel)]="config().about.style.borderRadius" class="input" placeholder="16px"></div>
+                              <div><label class="label">Padding Section Y</label><input type="text" [(ngModel)]="config().about.style.sectionPaddingY" class="input" placeholder="80px"></div>
                            </div>
                         </div>
                      </div>
@@ -235,7 +294,7 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                   @if (currentTab() === 'menu') {
                      <div class="space-y-6 h-full flex flex-col">
                         <div class="section-box">
-                           <h3 class="section-title">Header Halaman Menu</h3>
+                           <h3 class="section-title">Konfigurasi Tampilan Menu</h3>
                            <div class="grid grid-cols-2 gap-4 mb-4">
                               <div><label class="label">Judul</label><input type="text" [(ngModel)]="config().menuPage.title" class="input"></div>
                               <div><label class="label">Sub Judul</label><input type="text" [(ngModel)]="config().menuPage.subtitle" class="input"></div>
@@ -245,6 +304,15 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().menuPage.style.textColor" class="w-full h-8"></div>
                               <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().menuPage.style.accentColor" class="w-full h-8"></div>
                               <div><label class="label">Font</label><select [(ngModel)]="config().menuPage.style.fontFamily" class="input h-8 text-xs"><option value="Playfair Display">Playfair</option></select></div>
+                           </div>
+                           
+                           <h4 class="text-xs font-bold text-gray-500 uppercase mt-4 mb-2">Detail Ukuran Card</h4>
+                           <div class="grid grid-cols-3 gap-4">
+                              <div><label class="label">Ukuran Judul Item</label><input type="text" [(ngModel)]="config().menuPage.itemTitleSize" class="input" placeholder="1.125rem"></div>
+                              <div><label class="label">Ukuran Harga</label><input type="text" [(ngModel)]="config().menuPage.itemPriceSize" class="input" placeholder="0.875rem"></div>
+                              <div><label class="label">Radius Card</label><input type="text" [(ngModel)]="config().menuPage.cardBorderRadius" class="input" placeholder="12px"></div>
+                              <div><label class="label">Grid Gap</label><input type="text" [(ngModel)]="config().menuPage.gridGap" class="input" placeholder="24px"></div>
+                              <div><label class="label">Ukuran Judul Hal</label><input type="text" [(ngModel)]="config().menuPage.style.titleFontSize" class="input" placeholder="3rem"></div>
                            </div>
                         </div>
 
@@ -269,22 +337,38 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                               </div>
                               
                               @for (item of config().branches[selectedBranchIndex()].menu; track $index) {
-                                 <div class="flex gap-4 p-3 border rounded-lg bg-gray-50 group hover:border-blue-300 transition">
-                                    <div class="w-16 h-16 bg-gray-200 rounded relative flex-shrink-0 cursor-pointer overflow-hidden">
+                                 <div class="flex flex-col md:flex-row gap-4 p-3 border rounded-lg bg-gray-50 group hover:border-blue-300 transition items-start">
+                                    <div class="w-20 h-20 bg-gray-200 rounded relative flex-shrink-0 cursor-pointer overflow-hidden">
                                        <img [src]="item.image" class="w-full h-full object-cover">
                                        <input type="file" (change)="onFileSelected($event, 'menuItem', $index)" class="absolute inset-0 opacity-0" title="Ubah Foto">
+                                       @if(item.soldOut) {
+                                         <div class="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-[10px] font-bold">HABIS</div>
+                                       }
                                     </div>
-                                    <div class="flex-1 grid gap-2">
+                                    <div class="flex-1 grid gap-2 w-full">
                                        <div class="flex gap-2">
                                           <input type="text" [(ngModel)]="item.name" class="input font-bold" placeholder="Nama">
                                           <input type="text" [(ngModel)]="item.price" class="input w-24 text-right" placeholder="Harga">
                                        </div>
-                                       <div class="flex gap-2 items-center">
+                                       <div class="flex flex-wrap gap-2 items-center">
                                           <input type="text" [(ngModel)]="item.category" class="input text-xs w-24" placeholder="Kategori">
-                                          <label class="flex items-center gap-1 cursor-pointer select-none">
+                                          
+                                          <label class="flex items-center gap-1 cursor-pointer select-none bg-yellow-100 px-2 py-1 rounded">
                                              <input type="checkbox" [(ngModel)]="item.favorite">
-                                             <span class="text-xs font-bold text-yellow-600">Favorite</span>
+                                             <span class="text-xs font-bold text-yellow-800">Favorite</span>
                                           </label>
+
+                                          <label class="flex items-center gap-1 cursor-pointer select-none bg-red-100 px-2 py-1 rounded">
+                                             <input type="checkbox" [(ngModel)]="item.soldOut">
+                                             <span class="text-xs font-bold text-red-800">Habis (Sold Out)</span>
+                                          </label>
+                                          
+                                          <select [(ngModel)]="item.spicyLevel" class="input text-xs w-20 py-1">
+                                            <option [value]="0">Normal</option>
+                                            <option [value]="1">Pedas 1</option>
+                                            <option [value]="2">Pedas 2</option>
+                                            <option [value]="3">Pedas 3</option>
+                                          </select>
                                        </div>
                                        <textarea [(ngModel)]="item.desc" class="input text-xs h-10 resize-none" placeholder="Deskripsi"></textarea>
                                     </div>
@@ -308,28 +392,38 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                         </div>
 
                         <div class="section-box">
-                           <h3 class="section-title">Logika & Aturan</h3>
-                           <div class="grid grid-cols-2 gap-4">
+                           <h3 class="section-title">Logika & WhatsApp</h3>
+                           <div class="grid grid-cols-2 gap-4 mb-4">
                               <div>
                                  <label class="label">Min. Pax (Reguler)</label>
                                  <input type="number" [(ngModel)]="config().reservation.minPaxRegular" class="input font-bold text-lg">
-                                 <p class="text-xs text-gray-400 mt-1">Batas minimum orang hari biasa.</p>
                               </div>
                               <div>
                                  <label class="label">Min. Pax (Puasa)</label>
                                  <input type="number" [(ngModel)]="config().reservation.minPaxRamadan" class="input font-bold text-lg">
-                                 <p class="text-xs text-gray-400 mt-1">Batas minimum saat event puasa.</p>
                               </div>
+                           </div>
+                           <div>
+                              <label class="label">Template Pesan WhatsApp</label>
+                              <textarea [(ngModel)]="config().reservation.whatsappTemplate" class="input h-20 font-mono text-xs"></textarea>
+                              <p class="text-xs text-gray-400 mt-1">Gunakan tag: &#123;name&#125;, &#123;pax&#125;, &#123;date&#125;, &#123;time&#125;</p>
                            </div>
                         </div>
 
                         <div class="section-box">
-                           <h3 class="section-title">Style Section Reservasi</h3>
+                           <h3 class="section-title">Style & Ukuran</h3>
                            <div class="grid grid-cols-2 gap-4">
                               <div><label class="label">Background Color</label><input type="color" [(ngModel)]="config().reservation.style.backgroundColor" class="w-full h-10"></div>
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().reservation.style.textColor" class="w-full h-10"></div>
                               <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().reservation.style.accentColor" class="w-full h-10"></div>
-                              <div><label class="label">Font Family</label><select [(ngModel)]="config().reservation.style.fontFamily" class="input bg-white"><option value="Lato">Lato</option></select></div>
+                           </div>
+                           <div class="grid grid-cols-3 gap-4 mt-4">
+                              <div><label class="label">Ukuran Judul</label><input type="text" [(ngModel)]="config().reservation.style.titleFontSize" class="input" placeholder="2.25rem"></div>
+                              <div><label class="label">Tinggi Input</label><input type="text" [(ngModel)]="config().reservation.inputHeight" class="input" placeholder="42px"></div>
+                              <div><label class="label">Radius Input</label><input type="text" [(ngModel)]="config().reservation.inputBorderRadius" class="input" placeholder="8px"></div>
+                              <div><label class="label">Tinggi Tombol</label><input type="text" [(ngModel)]="config().reservation.buttonHeight" class="input" placeholder="48px"></div>
+                              <div><label class="label">Radius Card</label><input type="text" [(ngModel)]="config().reservation.cardBorderRadius" class="input" placeholder="16px"></div>
+                              <div><label class="label">Padding Section</label><input type="text" [(ngModel)]="config().reservation.style.sectionPaddingY" class="input" placeholder="40px"></div>
                            </div>
                         </div>
                      </div>
@@ -348,6 +442,12 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                               <div><label class="label">BG Color</label><input type="color" [(ngModel)]="config().locationPage.style.backgroundColor" class="w-full h-8"></div>
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().locationPage.style.textColor" class="w-full h-8"></div>
                               <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().locationPage.style.accentColor" class="w-full h-8"></div>
+                           </div>
+                           <div class="grid grid-cols-3 gap-4 mt-4">
+                              <div><label class="label">Ukuran Judul</label><input type="text" [(ngModel)]="config().locationPage.style.titleFontSize" class="input" placeholder="2.25rem"></div>
+                              <div><label class="label">Radius Card</label><input type="text" [(ngModel)]="config().locationPage.cardBorderRadius" class="input" placeholder="16px"></div>
+                              <div><label class="label">Tinggi Peta</label><input type="text" [(ngModel)]="config().locationPage.mapHeight" class="input" placeholder="200px"></div>
+                              <div><label class="label">Padding Section</label><input type="text" [(ngModel)]="config().locationPage.style.sectionPaddingY" class="input" placeholder="80px"></div>
                            </div>
                         </div>
 
@@ -378,6 +478,16 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                                  <div><label class="label">No. Telepon</label><input type="text" [(ngModel)]="config().branches[selectedBranchIndex()].phone" class="input"></div>
                                  <div><label class="label">WhatsApp</label><input type="text" [(ngModel)]="config().branches[selectedBranchIndex()].whatsappNumber" class="input font-mono"></div>
                               </div>
+                              
+                              <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                 <label class="label text-blue-800">Social Media Cabang (Opsional)</label>
+                                 <div class="space-y-2">
+                                   <div><input type="text" [(ngModel)]="config().branches[selectedBranchIndex()].instagramLink" class="input text-xs" placeholder="Link Instagram"></div>
+                                   <div><input type="text" [(ngModel)]="config().branches[selectedBranchIndex()].facebookLink" class="input text-xs" placeholder="Link Facebook"></div>
+                                   <div><input type="text" [(ngModel)]="config().branches[selectedBranchIndex()].tiktokLink" class="input text-xs" placeholder="Link TikTok"></div>
+                                 </div>
+                              </div>
+
                               <div><label class="label">Jam Operasional</label><input type="text" [(ngModel)]="config().branches[selectedBranchIndex()].hours" class="input"></div>
                               <div><label class="label">Google Maps URL</label><input type="text" [(ngModel)]="config().branches[selectedBranchIndex()].googleMapsUrl" class="input text-blue-600"></div>
                               <div>
@@ -399,46 +509,77 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                            <h3 class="section-title">Konten Footer</h3>
                            <div class="space-y-3">
                               <div><label class="label">Deskripsi Singkat</label><textarea [(ngModel)]="config().footer.description" class="input h-24"></textarea></div>
-                              <div><label class="label">Facebook Link</label><input type="text" [(ngModel)]="config().footer.facebookLink" class="input"></div>
-                              <div><label class="label">Instagram Link</label><input type="text" [(ngModel)]="config().footer.instagramLink" class="input"></div>
-                              <div><label class="label">TikTok Link</label><input type="text" [(ngModel)]="config().footer.tiktokLink" class="input"></div>
+                              <div><label class="label">Copyright Text</label><input type="text" [(ngModel)]="config().footer.copyrightText" class="input"></div>
                            </div>
                         </div>
 
                         <div class="section-box">
-                           <h3 class="section-title">Style Footer</h3>
+                           <h3 class="section-title">Style & Ukuran</h3>
                            <div class="grid grid-cols-2 gap-4">
                               <div><label class="label">Background Color</label><input type="color" [(ngModel)]="config().footer.style.backgroundColor" class="w-full h-10"></div>
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().footer.style.textColor" class="w-full h-10"></div>
                               <div><label class="label">Accent Color (Link)</label><input type="color" [(ngModel)]="config().footer.style.accentColor" class="w-full h-10"></div>
                            </div>
+                           <div class="grid grid-cols-3 gap-4 mt-4">
+                              <div><label class="label">Padding Section</label><input type="text" [(ngModel)]="config().footer.style.sectionPaddingY" class="input" placeholder="60px"></div>
+                              <div><label class="label">Ukuran Font Judul</label><input type="text" [(ngModel)]="config().footer.style.titleFontSize" class="input" placeholder="1.5rem"></div>
+                              <div><label class="label">Ukuran Font Body</label><input type="text" [(ngModel)]="config().footer.style.bodyFontSize" class="input" placeholder="0.875rem"></div>
+                           </div>
                         </div>
                      </div>
                   }
 
-                  <!-- TAB: MEDIA -->
+                  <!-- TAB: MEDIA (Instagram & Gallery) -->
                   @if (currentTab() === 'media') {
                      <div class="space-y-6 max-w-3xl">
-                        <div class="section-box">
-                           <h3 class="section-title">Profil Instagram (Tampilan Web)</h3>
-                           <div class="grid grid-cols-3 gap-4 mb-3">
-                              <div><label class="label">Posts</label><input type="text" [(ngModel)]="config().instagramProfile.postsCount" class="input"></div>
-                              <div><label class="label">Followers</label><input type="text" [(ngModel)]="config().instagramProfile.followersCount" class="input"></div>
-                              <div><label class="label">Following</label><input type="text" [(ngModel)]="config().instagramProfile.followingCount" class="input"></div>
+                        
+                        <!-- NEW: Toggle Visibility -->
+                        <div class="section-box flex items-center justify-between">
+                           <div>
+                              <h3 class="section-title mb-0">Tampilkan Section Instagram</h3>
+                              <p class="text-xs text-gray-500">Tampilkan profil Instagram palsu di halaman beranda</p>
                            </div>
-                           <div><label class="label">Username</label><input type="text" [(ngModel)]="config().instagramProfile.username" class="input"></div>
-                           <div class="mt-2"><label class="label">Bio</label><textarea [(ngModel)]="config().instagramProfile.bio" class="input"></textarea></div>
-                           <div class="mt-2"><label class="label">Profile Pic</label><input type="file" (change)="onFileSelected($event, 'logo')" class="input text-xs"></div>
+                           <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full cursor-pointer"
+                                [class.bg-green-500]="config().features.showGallery"
+                                [class.bg-gray-300]="!config().features.showGallery"
+                                (click)="config().features.showGallery = !config().features.showGallery">
+                                <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200"
+                                      [class.translate-x-6]="config().features.showGallery"></span>
+                           </div>
                         </div>
 
                         <div class="section-box">
-                           <h3 class="section-title">Galeri Foto</h3>
+                           <h3 class="section-title">Profil Instagram (Tampilan Web)</h3>
+                           <div class="flex items-start gap-4 mb-4">
+                              <div class="w-20 h-20 bg-gray-100 rounded-full overflow-hidden flex-shrink-0 relative group border border-gray-300">
+                                 <img [src]="config().instagramProfile.profilePic || 'https://ui-avatars.com/api/?name=IG'" class="w-full h-full object-cover">
+                                 <input type="file" (change)="onFileSelected($event, 'logo')" class="absolute inset-0 opacity-0 cursor-pointer" title="Ganti Foto Profil">
+                              </div>
+                              <div class="flex-1 space-y-2">
+                                 <div><label class="label">Username</label><input type="text" [(ngModel)]="config().instagramProfile.username" class="input font-bold"></div>
+                              </div>
+                           </div>
+                           
+                           <div class="grid grid-cols-3 gap-4 mb-3">
+                              <div><label class="label">Posts</label><input type="text" [(ngModel)]="config().instagramProfile.postsCount" class="input text-center"></div>
+                              <div><label class="label">Followers</label><input type="text" [(ngModel)]="config().instagramProfile.followersCount" class="input text-center"></div>
+                              <div><label class="label">Following</label><input type="text" [(ngModel)]="config().instagramProfile.followingCount" class="input text-center"></div>
+                           </div>
+                           
+                           <div class="mt-2"><label class="label">Bio</label><textarea [(ngModel)]="config().instagramProfile.bio" class="input h-24 whitespace-pre-wrap"></textarea></div>
+                        </div>
+
+                        <div class="section-box">
+                           <h3 class="section-title">Galeri Foto Feed</h3>
+                           <div class="mb-4 bg-blue-50 p-3 rounded text-sm text-blue-800">
+                              Upload foto-foto makanan atau suasana untuk ditampilkan di Grid Instagram.
+                           </div>
                            <input type="file" (change)="onFileSelected($event, 'gallery')" class="mb-4">
                            <div class="grid grid-cols-4 gap-2">
                               @for (img of config().gallery; track $index) {
                                  <div class="relative aspect-square group">
-                                    <img [src]="img" class="w-full h-full object-cover rounded">
-                                    <button (click)="removeGalleryImage($index)" class="absolute top-1 right-1 bg-red-600 text-white w-6 h-6 rounded-full opacity-0 group-hover:opacity-100">✕</button>
+                                    <img [src]="img" class="w-full h-full object-cover rounded shadow-sm border">
+                                    <button (click)="removeGalleryImage($index)" class="absolute top-1 right-1 bg-red-600 text-white w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-700">✕</button>
                                  </div>
                               }
                            </div>
@@ -446,7 +587,7 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
 
                         <div class="section-box">
                            <div class="flex justify-between items-center mb-4">
-                              <h3 class="section-title">Testimoni</h3>
+                              <h3 class="section-title">Testimoni Pelanggan</h3>
                               <button (click)="addTestimonial()" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">+ Baru</button>
                            </div>
                            <div class="space-y-4">
@@ -484,6 +625,13 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                                  <label class="label">Pesan Pembuka</label>
                                  <input type="text" [(ngModel)]="config().ai.initialMessage" class="input">
                               </div>
+                           </div>
+                           
+                           <h4 class="text-xs font-bold text-gray-500 uppercase mt-4 mb-2">Tampilan Chatbot</h4>
+                           <div class="grid grid-cols-2 gap-4">
+                              <div><label class="label">Warna Tombol/Header</label><input type="color" [(ngModel)]="config().ai.buttonColor" class="w-full h-10"></div>
+                              <div><label class="label">Ukuran Tombol</label><input type="text" [(ngModel)]="config().ai.buttonSize" class="input" placeholder="56px"></div>
+                              <div><label class="label">Lebar Jendela</label><input type="text" [(ngModel)]="config().ai.windowWidth" class="input" placeholder="340px"></div>
                            </div>
                         </div>
                      </div>
@@ -550,7 +698,7 @@ export class AdminComponent {
     { id: 'menu', label: 'Menu Makanan', icon: '🍱' },
     { id: 'reservation', label: 'Reservasi', icon: '📅' },
     { id: 'location', label: 'Lokasi', icon: '📍' },
-    { id: 'media', label: 'Galeri & Testimoni', icon: '📸' },
+    { id: 'media', label: 'Instagram Feed', icon: '📸' },
     { id: 'footer', label: 'Footer', icon: '🔗' },
     { id: 'ai', label: 'AI Assistant', icon: '🤖' },
     { id: 'database', label: 'Database', icon: '🔥' },
@@ -599,7 +747,11 @@ export class AdminComponent {
        const url = await this.configService.uploadFile(file);
        const c = this.config();
        
-       if (type === 'logo') c.global.logoImage = url;
+       if (type === 'logo') {
+           if (this.currentTab() === 'media') c.instagramProfile.profilePic = url;
+           else c.global.logoImage = url;
+       }
+       if (type === 'favicon') c.global.favicon = url;
        if (type === 'heroBg') c.hero.bgImage = url;
        if (type === 'aboutImage') c.about.image = url;
        if (type === 'introVideo') c.intro.videoUrl = url;
@@ -616,7 +768,7 @@ export class AdminComponent {
 
   // --- CRUD ---
   addMenuItem() {
-    this.config().branches[this.selectedBranchIndex()].menu.unshift({ name: 'Menu Baru', desc: '', price: 'Rp 0', category: 'Umum', image: 'https://picsum.photos/200', favorite: false });
+    this.config().branches[this.selectedBranchIndex()].menu.unshift({ name: 'Menu Baru', desc: '', price: 'Rp 0', category: 'Umum', image: 'https://picsum.photos/200', favorite: false, soldOut: false, spicyLevel: 0 });
   }
   removeMenuItem(i: number) { if(confirm('Hapus menu?')) this.config().branches[this.selectedBranchIndex()].menu.splice(i, 1); }
   removeGalleryImage(i: number) { if(confirm('Hapus foto?')) this.config().gallery.splice(i, 1); }

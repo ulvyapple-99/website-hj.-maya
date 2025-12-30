@@ -17,9 +17,12 @@ import { ConfigService, MenuItem } from '../services/config.service';
         
         <!-- Section Title -->
         <div class="text-center mb-12">
-          <h2 class="text-4xl md:text-5xl font-bold mb-4" [style.color]="config().menuPage.style.accentColor">{{ config().menuPage.title }}</h2>
+          <h2 class="font-bold mb-4" 
+              [style.color]="config().menuPage.style.accentColor"
+              [style.fontSize]="config().menuPage.style.titleFontSize"
+          >{{ config().menuPage.title }}</h2>
           <div class="h-1 w-24 mx-auto rounded mb-6" [style.backgroundColor]="config().menuPage.style.accentColor"></div>
-          <p class="max-w-2xl mx-auto opacity-70 text-lg font-light">{{ config().menuPage.subtitle }}</p>
+          <p class="max-w-2xl mx-auto opacity-70 font-light" [style.fontSize]="config().menuPage.style.subtitleFontSize">{{ config().menuPage.subtitle }}</p>
         </div>
 
         <!-- Branch Tabs -->
@@ -40,36 +43,46 @@ import { ConfigService, MenuItem } from '../services/config.service';
 
         <!-- Menu List Grid (Instagram Style) -->
         @if (currentBranchMenu().length > 0) {
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-6">
+          <div class="grid grid-cols-2 md:grid-cols-3" [style.gap]="config().menuPage.gridGap">
             @for (item of currentBranchMenu(); track $index) {
-              <div class="group relative overflow-hidden bg-gray-100 flex flex-col md:rounded-xl shadow-none md:shadow-md transition-all">
+              <div class="group relative overflow-hidden bg-gray-100 flex flex-col shadow-none md:shadow-md transition-all"
+                   [style.borderRadius]="config().menuPage.cardBorderRadius">
                 
                 <!-- Square Image (Like IG) -->
                 <div class="aspect-square relative overflow-hidden">
                    @if (isVideo(item.image)) {
                       <video [src]="item.image" class="w-full h-full object-cover" muted loop></video>
                    } @else {
-                      <img [src]="item.image" [alt]="item.name" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                      <img [src]="item.image" [alt]="item.name" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" [class.grayscale]="item.soldOut">
                    }
                    
+                   @if(item.soldOut) {
+                     <div class="absolute inset-0 bg-black/60 flex items-center justify-center z-20">
+                        <span class="text-white font-bold border-2 border-white px-4 py-2 uppercase tracking-widest">Sold Out</span>
+                     </div>
+                   }
+
                    <!-- Gradient Overlay on Hover -->
                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white p-4 text-center">
-                      <p class="font-bold text-lg translate-y-4 group-hover:translate-y-0 transition duration-300">{{ item.name }}</p>
-                      <p class="text-sm mt-2 opacity-90 translate-y-4 group-hover:translate-y-0 transition duration-300 delay-75">{{ item.price }}</p>
-                      @if (getQty(item) === 0) {
-                         <button (click)="addToCart(item)" class="mt-4 bg-white text-black px-4 py-2 rounded-full text-xs font-bold hover:bg-gray-200 transition translate-y-4 group-hover:translate-y-0 delay-100">
-                           + Pesan
-                         </button>
-                      } @else {
-                        <div class="mt-4 flex items-center gap-3 bg-white text-black rounded-full px-2 py-1 translate-y-4 group-hover:translate-y-0 delay-100">
-                           <button (click)="removeFromCart(item)" class="px-2 font-bold">-</button>
-                           <span class="font-bold">{{ getQty(item) }}</span>
-                           <button (click)="addToCart(item)" class="px-2 font-bold">+</button>
-                        </div>
+                      <p class="font-bold translate-y-4 group-hover:translate-y-0 transition duration-300" [style.fontSize]="config().menuPage.itemTitleSize">{{ item.name }}</p>
+                      <p class="mt-2 opacity-90 translate-y-4 group-hover:translate-y-0 transition duration-300 delay-75" [style.fontSize]="config().menuPage.itemPriceSize">{{ item.price }}</p>
+                      
+                      @if (config().features.enableOrdering && !item.soldOut) {
+                        @if (getQty(item) === 0) {
+                           <button (click)="addToCart(item)" class="mt-4 bg-white text-black px-4 py-2 rounded-full text-xs font-bold hover:bg-gray-200 transition translate-y-4 group-hover:translate-y-0 delay-100">
+                             + Pesan
+                           </button>
+                        } @else {
+                          <div class="mt-4 flex items-center gap-3 bg-white text-black rounded-full px-2 py-1 translate-y-4 group-hover:translate-y-0 delay-100">
+                             <button (click)="removeFromCart(item)" class="px-2 font-bold">-</button>
+                             <span class="font-bold">{{ getQty(item) }}</span>
+                             <button (click)="addToCart(item)" class="px-2 font-bold">+</button>
+                          </div>
+                        }
                       }
                    </div>
 
-                   <!-- Favorite Badge (Always Visible Small) -->
+                   <!-- Favorite Badge -->
                    @if (item.favorite) {
                       <div class="absolute top-2 right-2 bg-yellow-400 text-white p-1.5 rounded-full shadow-sm z-10">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -82,9 +95,19 @@ import { ConfigService, MenuItem } from '../services/config.service';
                 <!-- Info (Visible below on mobile, or customized) -->
                 <div class="p-3 md:p-4 bg-white flex flex-col flex-1 border-t md:border-none">
                   <div class="flex justify-between items-start mb-1">
-                     <h4 class="font-bold text-sm md:text-base leading-tight text-gray-800 line-clamp-1">{{ item.name }}</h4>
-                     <span class="text-xs font-bold text-gray-500">{{ item.price }}</span>
+                     <h4 class="font-bold leading-tight text-gray-800 line-clamp-1" [style.fontSize]="config().menuPage.itemTitleSize">{{ item.name }}</h4>
+                     <span class="font-bold text-gray-500" [style.fontSize]="config().menuPage.itemPriceSize">{{ item.price }}</span>
                   </div>
+                  
+                  <!-- Spicy Level -->
+                  @if (item.spicyLevel && item.spicyLevel > 0) {
+                     <div class="flex mb-1">
+                       @for (s of [].constructor(item.spicyLevel); track $index) {
+                         <span class="text-red-500 text-xs">🌶️</span>
+                       }
+                     </div>
+                  }
+
                   <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">{{ item.desc }}</p>
                 </div>
 
@@ -99,7 +122,7 @@ import { ConfigService, MenuItem } from '../services/config.service';
       </div>
 
       <!-- Floating Cart Button -->
-      @if (cartTotalItems() > 0) {
+      @if (config().features.enableOrdering && cartTotalItems() > 0) {
         <div class="fixed bottom-6 right-6 z-40 animate-bounce-in">
           <button (click)="toggleCartModal()" class="text-white p-4 rounded-full shadow-2xl transition flex items-center gap-3 pr-6 border-4 border-white hover:scale-105 active:scale-95"
             [style.backgroundColor]="config().menuPage.style.accentColor">

@@ -15,14 +15,14 @@ import { ConfigService } from '../services/config.service';
       [style.color]="config().global.navbarTextColor"
     >
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
+        <div class="flex justify-between items-center" [style.height]="config().global.navHeight">
           <!-- Logo -->
           <div routerLink="/" class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
              @if (config().global.logoImage) {
                @if (isVideo(config().global.logoImage)) {
-                  <video [src]="config().global.logoImage" class="h-10 w-auto object-contain" autoplay muted loop></video>
+                  <video [src]="config().global.logoImage" [style.height]="config().global.navLogoHeight" class="w-auto object-contain" autoplay muted loop></video>
                } @else {
-                  <img [src]="config().global.logoImage" class="h-10 w-auto object-contain" alt="Logo">
+                  <img [src]="config().global.logoImage" [style.height]="config().global.navLogoHeight" class="w-auto object-contain" alt="Logo">
                }
              } @else {
                <div 
@@ -37,12 +37,22 @@ import { ConfigService } from '../services/config.service';
           </div>
 
           <!-- Desktop Menu -->
-          <div class="hidden md:flex space-x-8">
-            <a routerLink="/" routerLinkActive="font-bold underline" [routerLinkActiveOptions]="{exact: true}" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Beranda</a>
-            <a routerLink="/about" routerLinkActive="font-bold underline" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Tentang</a>
-            <a routerLink="/menu" routerLinkActive="font-bold underline" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Menu</a>
-            <a routerLink="/reservation" routerLinkActive="font-bold underline" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Reservasi</a>
-            <a routerLink="/location" routerLinkActive="font-bold underline" class="hover:opacity-80 transition-colors font-medium cursor-pointer">Lokasi</a>
+          <div class="hidden md:flex" [style.gap]="config().global.navLinkGap">
+            <a routerLink="/" routerLinkActive="font-bold underline" [routerLinkActiveOptions]="{exact: true}" 
+               [style.fontSize]="config().global.navLinkFontSize"
+               class="hover:opacity-80 transition-colors font-medium cursor-pointer">Beranda</a>
+            <a routerLink="/about" routerLinkActive="font-bold underline" 
+               [style.fontSize]="config().global.navLinkFontSize"
+               class="hover:opacity-80 transition-colors font-medium cursor-pointer">Tentang</a>
+            <a routerLink="/menu" routerLinkActive="font-bold underline" 
+               [style.fontSize]="config().global.navLinkFontSize"
+               class="hover:opacity-80 transition-colors font-medium cursor-pointer">Menu</a>
+            <a routerLink="/reservation" routerLinkActive="font-bold underline" 
+               [style.fontSize]="config().global.navLinkFontSize"
+               class="hover:opacity-80 transition-colors font-medium cursor-pointer">Reservasi</a>
+            <a routerLink="/location" routerLinkActive="font-bold underline" 
+               [style.fontSize]="config().global.navLinkFontSize"
+               class="hover:opacity-80 transition-colors font-medium cursor-pointer">Lokasi</a>
           </div>
 
           <!-- Mobile Button -->

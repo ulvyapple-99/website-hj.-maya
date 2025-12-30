@@ -15,16 +15,20 @@ interface GuestOrder {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="py-10 min-h-screen relative transition-colors duration-500"
+    <section class="min-h-screen relative transition-colors duration-500"
       [style.backgroundColor]="config().reservation.style.backgroundColor"
       [style.color]="config().reservation.style.textColor"
       [style.fontFamily]="config().reservation.style.fontFamily"
+      [style.paddingTop]="config().reservation.style.sectionPaddingY"
+      [style.paddingBottom]="config().reservation.style.sectionPaddingY"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         
         <!-- Header -->
         <div class="text-center mb-8">
-          <h2 class="text-3xl md:text-4xl font-bold mb-2" [style.color]="config().reservation.style.accentColor">{{ config().reservation.title }}</h2>
+          <h2 class="font-bold mb-2" 
+              [style.color]="config().reservation.style.accentColor"
+              [style.fontSize]="config().reservation.style.titleFontSize">{{ config().reservation.title }}</h2>
           <div class="h-1 w-24 mx-auto rounded" [style.backgroundColor]="config().reservation.style.accentColor"></div>
           <p class="mt-4 opacity-80 max-w-3xl mx-auto">
             {{ config().reservation.subtitle }}
@@ -35,13 +39,17 @@ interface GuestOrder {
           
           <!-- COLUMN 1: Reservation Info -->
           <div class="lg:col-span-3 space-y-6 text-gray-800">
-            <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 h-fit sticky top-24">
+            <div class="bg-white p-6 shadow-lg border border-gray-200 h-fit sticky top-24"
+                 [style.borderRadius]="config().reservation.cardBorderRadius">
               <h3 class="text-lg font-bold border-b pb-2 mb-4" [style.color]="config().reservation.style.accentColor">Data Reservasi</h3>
               
               <div class="space-y-4">
                 <div>
                   <label class="block text-xs font-bold mb-1 uppercase">Pilih Cabang</label>
-                  <select [ngModel]="selectedBranchIndex()" (ngModelChange)="setBranch($event)" class="w-full border rounded px-3 py-2 text-sm font-bold bg-white">
+                  <select [ngModel]="selectedBranchIndex()" (ngModelChange)="setBranch($event)" 
+                          class="w-full border px-3 py-2 text-sm font-bold bg-white"
+                          [style.height]="config().reservation.inputHeight"
+                          [style.borderRadius]="config().reservation.inputBorderRadius">
                     @for (branch of config().branches; track $index) {
                       <option [value]="$index">{{ branch.name }}</option>
                     }
@@ -50,21 +58,30 @@ interface GuestOrder {
 
                 <div>
                   <label class="block text-xs font-bold mb-1 uppercase">Nama Pemesan</label>
-                  <input type="text" [(ngModel)]="formName" class="w-full border rounded px-3 py-2 text-sm bg-white" placeholder="Bpk. Budi">
+                  <input type="text" [(ngModel)]="formName" 
+                         class="w-full border px-3 py-2 text-sm bg-white" placeholder="Bpk. Budi"
+                         [style.height]="config().reservation.inputHeight"
+                         [style.borderRadius]="config().reservation.inputBorderRadius">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs font-bold mb-1 uppercase">Tanggal</label>
-                    <input type="date" [(ngModel)]="formDate" class="w-full border rounded px-3 py-2 text-sm bg-white">
+                    <input type="date" [(ngModel)]="formDate" 
+                           class="w-full border px-3 py-2 text-sm bg-white"
+                           [style.height]="config().reservation.inputHeight"
+                           [style.borderRadius]="config().reservation.inputBorderRadius">
                   </div>
                   <div>
                     <label class="block text-xs font-bold mb-1 uppercase">Jam</label>
-                    <input type="time" [(ngModel)]="formTime" class="w-full border rounded px-3 py-2 text-sm bg-white">
+                    <input type="time" [(ngModel)]="formTime" 
+                           class="w-full border px-3 py-2 text-sm bg-white"
+                           [style.height]="config().reservation.inputHeight"
+                           [style.borderRadius]="config().reservation.inputBorderRadius">
                   </div>
                 </div>
 
-                <div class="bg-gray-50 p-3 rounded-lg border">
+                <div class="bg-gray-50 p-3 border" [style.borderRadius]="config().reservation.inputBorderRadius">
                    <label class="block text-xs font-bold mb-2 uppercase" [style.color]="config().reservation.style.accentColor">Jenis Acara</label>
                    <div class="flex flex-col gap-2">
                      <label class="flex items-center gap-2 cursor-pointer">
@@ -80,15 +97,20 @@ interface GuestOrder {
 
                 <div>
                   <label class="block text-xs font-bold mb-1 uppercase">Jumlah Pax</label>
-                  <input type="number" [(ngModel)]="formPax" class="w-full border rounded px-3 py-2 text-sm bg-white">
+                  <input type="number" [(ngModel)]="formPax" 
+                         class="w-full border px-3 py-2 text-sm bg-white"
+                         [style.height]="config().reservation.inputHeight"
+                         [style.borderRadius]="config().reservation.inputBorderRadius">
                 </div>
                 
                 <!-- Submit Box -->
-                <div class="text-white p-4 rounded-lg mt-4" [style.backgroundColor]="config().reservation.style.accentColor">
+                <div class="text-white p-4 mt-4" [style.backgroundColor]="config().reservation.style.accentColor" [style.borderRadius]="config().reservation.inputBorderRadius">
                    <div class="flex justify-between text-sm mb-1 opacity-90">Total:</div>
                    <div class="text-2xl font-bold mb-4">{{ formatRupiah(grandTotal()) }}</div>
                    <button (click)="submitReservation()" [disabled]="!isValid()"
-                     class="w-full bg-white text-black font-bold py-3 rounded shadow transition hover:bg-gray-100 disabled:opacity-50">
+                     class="w-full bg-white text-black font-bold py-3 shadow transition hover:bg-gray-100 disabled:opacity-50"
+                     [style.height]="config().reservation.buttonHeight"
+                     [style.borderRadius]="config().reservation.inputBorderRadius">
                      Kirim WhatsApp
                    </button>
                 </div>
@@ -98,7 +120,7 @@ interface GuestOrder {
 
           <!-- COLUMN 2 & 3: Guest & Menu (Combined for brevity in styles, kept logical structure) -->
           <div class="lg:col-span-4 text-gray-800">
-             <div class="bg-white p-6 rounded-xl shadow-lg h-full flex flex-col">
+             <div class="bg-white p-6 shadow-lg h-full flex flex-col" [style.borderRadius]="config().reservation.cardBorderRadius">
                 <h3 class="text-lg font-bold mb-4 border-b pb-2 flex justify-between items-center" [style.color]="config().reservation.style.accentColor">
                    <span>Pesanan Tamu</span>
                    <button (click)="addGuest()" class="text-xs bg-green-600 text-white px-2 py-1 rounded font-bold">+ Tambah</button>
@@ -125,7 +147,7 @@ interface GuestOrder {
           </div>
 
           <div class="lg:col-span-5 text-gray-800">
-             <div class="bg-white p-6 rounded-xl shadow-lg h-full">
+             <div class="bg-white p-6 shadow-lg h-full" [style.borderRadius]="config().reservation.cardBorderRadius">
                 <h3 class="text-lg font-bold mb-4 border-b pb-2" [style.color]="config().reservation.style.accentColor">Pilih Menu</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[800px] overflow-y-auto">
                    @for (item of currentBranchMenu(); track $index) {
@@ -133,19 +155,24 @@ interface GuestOrder {
                          <div class="h-32 bg-gray-100 relative">
                             <img [src]="item.image" class="w-full h-full object-cover">
                             <span class="absolute bottom-0 left-0 bg-black/60 text-white text-xs px-2 py-1">{{ item.price }}</span>
+                            @if(item.soldOut) { <div class="absolute inset-0 bg-white/50 flex items-center justify-center font-bold">HABIS</div> }
                          </div>
                          <div class="p-3 flex-1 flex flex-col justify-between">
                             <h4 class="font-bold text-sm leading-tight mb-1">{{ item.name }}</h4>
                             <div class="mt-2 flex justify-between items-center">
-                               @if (getActiveGuestQty(item) === 0) {
-                                  <button (click)="addToActiveGuest(item)" class="text-xs text-white px-3 py-1 rounded font-bold"
-                                     [style.backgroundColor]="config().reservation.style.accentColor">+ Pesan</button>
+                               @if (!item.soldOut) {
+                                   @if (getActiveGuestQty(item) === 0) {
+                                      <button (click)="addToActiveGuest(item)" class="text-xs text-white px-3 py-1 rounded font-bold"
+                                         [style.backgroundColor]="config().reservation.style.accentColor">+ Pesan</button>
+                                   } @else {
+                                      <div class="flex items-center bg-gray-100 rounded">
+                                         <button (click)="removeFromActiveGuest(item)" class="px-2 font-bold">-</button>
+                                         <span class="px-2 font-bold">{{ getActiveGuestQty(item) }}</span>
+                                         <button (click)="addToActiveGuest(item)" class="px-2 font-bold">+</button>
+                                      </div>
+                                   }
                                } @else {
-                                  <div class="flex items-center bg-gray-100 rounded">
-                                     <button (click)="removeFromActiveGuest(item)" class="px-2 font-bold">-</button>
-                                     <span class="px-2 font-bold">{{ getActiveGuestQty(item) }}</span>
-                                     <button (click)="addToActiveGuest(item)" class="px-2 font-bold">+</button>
-                                  </div>
+                                   <span class="text-red-500 text-xs font-bold">Sold Out</span>
                                }
                             </div>
                          </div>
@@ -228,14 +255,22 @@ export class ReservationComponent {
 
   submitReservation() {
     const b = this.currentBranch();
-    let msg = `*RESERVASI ${b.name}*\nNama: ${this.formName()}\nTanggal: ${this.formDate()} ${this.formTime()}\nPax: ${this.formPax()}\n\n`;
+    
+    // CUSTOM TEMPLATE LOGIC
+    let msg = this.config().reservation.whatsappTemplate || 'Halo Admin, reservasi {name}';
+    msg = msg.replace('{name}', this.formName())
+             .replace('{date}', this.formDate())
+             .replace('{time}', this.formTime())
+             .replace('{pax}', this.formPax().toString());
+    
+    msg += `\n\n*Detail Order:*\n`;
     this.guests().forEach((g, i) => {
        if (g.cart.size > 0) {
           msg += `*${i+1}. ${g.name}*\n`;
           g.cart.forEach((q, m) => msg += `  ${q}x ${m.name}\n`);
        }
     });
-    msg += `\n*Total: ${this.formatRupiah(this.grandTotal())}*`;
+    msg += `\n*Total Estimasi: ${this.formatRupiah(this.grandTotal())}*`;
 
     const phone = this.configService.formatPhoneNumber(b.whatsappNumber);
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');

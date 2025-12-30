@@ -13,18 +13,20 @@ import { ConfigService } from '../services/config.service';
     <!-- Floating Toggle Button -->
     <button 
       (click)="toggleChat()"
-      class="fixed bottom-24 right-6 z-40 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 group border-2 border-white"
-      [style.backgroundColor]="brandColor"
+      class="fixed bottom-24 right-6 z-40 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 group border-2 border-white"
+      [style.backgroundColor]="config().ai.buttonColor || brandColor"
+      [style.width]="config().ai.buttonSize"
+      [style.height]="config().ai.buttonSize"
       title="Chat dengan AI"
     >
       @if (!isOpen()) {
         <!-- Chat Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-1/2 h-1/2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
         </svg>
       } @else {
         <!-- Close Icon (Chevron down) -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-1/2 h-1/2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       }
@@ -41,12 +43,13 @@ import { ConfigService } from '../services/config.service';
     <!-- Chat Window Widget -->
     @if (isOpen()) {
       <div 
-        class="fixed bottom-40 right-6 z-50 w-[340px] md:w-96 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up border border-gray-200 font-sans"
+        class="fixed bottom-40 right-6 z-50 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up border border-gray-200 font-sans"
         style="height: 500px; max-height: 70vh;"
+        [style.width]="config().ai.windowWidth"
       >
         <!-- Header -->
         <div class="p-4 flex items-center justify-between text-white shadow-md relative z-10"
-             [style.backgroundColor]="brandColor">
+             [style.backgroundColor]="config().ai.buttonColor || brandColor">
            <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md border border-white/30 shadow-inner">
                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,7 +95,7 @@ import { ConfigService } from '../services/config.service';
                 <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold shadow-sm border border-white"
                      [class.bg-gray-300]="msg.role === 'ai'"
                      [class.text-gray-600]="msg.role === 'ai'"
-                     [style.backgroundColor]="msg.role === 'user' ? brandColor : ''"
+                     [style.backgroundColor]="msg.role === 'user' ? (config().ai.buttonColor || brandColor) : ''"
                      [class.text-white]="msg.role === 'user'">
                    {{ msg.role === 'user' ? 'U' : 'AI' }}
                 </div>
@@ -104,7 +107,7 @@ import { ConfigService } from '../services/config.service';
                      [class.bg-white]="msg.role === 'ai'"
                      [class.text-gray-800]="msg.role === 'ai'"
                      [class.text-white]="msg.role === 'user'"
-                     [style.backgroundColor]="msg.role === 'user' ? brandColor : ''">
+                     [style.backgroundColor]="msg.role === 'user' ? (config().ai.buttonColor || brandColor) : ''">
                   {{ msg.text }}
                 </div>
              </div>
@@ -125,8 +128,8 @@ import { ConfigService } from '../services/config.service';
         <!-- Input Area -->
         <div class="p-3 bg-white border-t border-gray-200">
            <div class="flex items-center gap-2 bg-gray-100 px-4 py-2.5 rounded-3xl border border-transparent focus-within:bg-white focus-within:border-gray-300 focus-within:ring-2 focus-within:ring-opacity-20 transition-all shadow-inner"
-                [style.caretColor]="brandColor"
-                [style.--tw-ring-color]="brandColor">
+                [style.caretColor]="config().ai.buttonColor || brandColor"
+                [style.--tw-ring-color]="config().ai.buttonColor || brandColor">
               <input 
                 type="text" 
                 [(ngModel)]="userInput" 
@@ -139,7 +142,7 @@ import { ConfigService } from '../services/config.service';
                 (click)="sendMessage()" 
                 [disabled]="isLoading() || !userInput().trim()"
                 class="p-1.5 rounded-full transition disabled:opacity-30 hover:scale-110 active:scale-95"
-                [style.color]="userInput().trim() ? brandColor : '#9CA3AF'"
+                [style.color]="userInput().trim() ? (config().ai.buttonColor || brandColor) : '#9CA3AF'"
               >
                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />

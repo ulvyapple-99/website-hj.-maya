@@ -21,6 +21,8 @@ export interface MenuItem {
   category: string;
   image: string;
   favorite?: boolean;
+  soldOut?: boolean; // NEW: Fitur Stok Habis
+  spicyLevel?: number; // NEW: 0 = No, 1-3 = Pedas
 }
 
 export interface Branch {
@@ -32,6 +34,10 @@ export interface Branch {
   whatsappNumber: string;
   hours: string;
   mapImage: string;
+  // NEW: Branch specific social media
+  instagramLink?: string;
+  facebookLink?: string;
+  tiktokLink?: string;
   menu: MenuItem[];
 }
 
@@ -42,7 +48,36 @@ export interface Testimonial {
   role: string;
 }
 
-export interface PageStyle {
+// NEW: Granular Style Options (The "50 Features")
+export interface StyleOptions {
+  // Typography Sizes
+  titleFontSize?: string;     // e.g. '3rem'
+  subtitleFontSize?: string;  // e.g. '1.2rem'
+  bodyFontSize?: string;      // e.g. '1rem'
+  
+  // Dimensions & Spacing
+  sectionPaddingY?: string;   // e.g. '80px'
+  elementGap?: string;        // e.g. '20px'
+  containerMaxWidth?: string; // e.g. '1280px'
+  
+  // Visuals
+  borderRadius?: string;      // e.g. '12px'
+  boxShadow?: string;         // e.g. '0 4px 6px rgba(0,0,0,0.1)'
+  borderWidth?: string;       // e.g. '1px'
+  
+  // Component Specifics (Optional keys based on context)
+  buttonPaddingX?: string;
+  buttonPaddingY?: string;
+  buttonRadius?: string;
+  inputHeight?: string;
+  imageHeight?: string;
+  mapHeight?: string;
+  iconSize?: string;
+  navHeight?: string;
+  logoHeight?: string;
+}
+
+export interface PageStyle extends StyleOptions {
   backgroundColor: string;
   textColor: string;
   accentColor: string;
@@ -50,11 +85,28 @@ export interface PageStyle {
 }
 
 export interface AppConfig {
+  features: {
+    showHero: boolean;
+    showAbout: boolean;
+    showMenu: boolean;
+    showReservation: boolean;
+    showLocation: boolean;
+    showGallery: boolean;
+    showTestimonials: boolean;
+    enableOrdering: boolean; 
+  };
   global: {
     logoText: string;
     logoImage: string;
+    favicon: string; 
+    metaDescription: string;
     navbarColor: string;
     navbarTextColor: string;
+    // New Global Styles
+    navHeight: string;
+    navLogoHeight: string;
+    navLinkFontSize: string;
+    navLinkGap: string;
   };
   intro: {
     enabled: boolean;
@@ -66,45 +118,63 @@ export interface AppConfig {
     title: string;
     highlight: string;
     subtitle: string;
-    buttonText1: string; // NEW
-    buttonText2: string; // NEW
+    buttonText1: string;
+    buttonText2: string;
     bgImage: string;
-    style: PageStyle;
+    overlayOpacity: number; 
+    style: PageStyle; // Enhanced with StyleOptions
   };
   about: {
     title: string;
     description: string;
     image: string;
+    imagePosition: 'left' | 'right'; 
     stats: {
       val1: string; label1: string;
       val2: string; label2: string;
       val3: string; label3: string;
     };
-    style: PageStyle;
+    style: PageStyle; // Enhanced
   };
   menuPage: {
     title: string;
     subtitle: string;
-    style: PageStyle;
+    style: PageStyle; // Enhanced
+    // Specific Menu Styles
+    cardImageHeight: string;
+    cardBorderRadius: string;
+    itemTitleSize: string;
+    itemPriceSize: string;
+    gridGap: string;
   };
   reservation: {
     title: string;
     subtitle: string;
     minPaxRegular: number;
     minPaxRamadan: number;
-    style: PageStyle;
+    whatsappTemplate: string; 
+    style: PageStyle; // Enhanced
+    // Specific Reservation Styles
+    cardBorderRadius: string;
+    inputHeight: string;
+    inputBorderRadius: string;
+    buttonHeight: string;
   };
   locationPage: {
     title: string;
     subtitle: string;
-    style: PageStyle;
+    style: PageStyle; // Enhanced
+    // Specific Location Styles
+    cardBorderRadius: string;
+    mapHeight: string;
   };
   footer: {
-    description: string; // NEW
+    description: string;
+    copyrightText: string; 
     instagramLink: string;
     facebookLink: string;
     tiktokLink: string;
-    style: PageStyle;
+    style: PageStyle; // Enhanced
   };
   instagramProfile: {
     username: string;
@@ -120,6 +190,11 @@ export interface AppConfig {
   ai: {
     systemInstruction: string;
     initialMessage: string;
+    // New AI Styles
+    buttonColor: string;
+    buttonSize: string;
+    windowWidth: string;
+    headerColor: string;
   };
 }
 
@@ -152,11 +227,27 @@ export class ConfigService {
   };
 
   config = signal<AppConfig>({
+    features: {
+        showHero: true,
+        showAbout: true,
+        showMenu: true,
+        showReservation: true,
+        showLocation: true,
+        showGallery: true,
+        showTestimonials: true,
+        enableOrdering: true
+    },
     global: {
-      logoText: 'Hj. Maya Cimahi',
+      logoText: 'Hj. Maya Group',
       logoImage: '', 
+      favicon: '',
+      metaDescription: 'Sate Maranggi Paling Enak di Cimahi',
       navbarColor: '#FFFFFF',
-      navbarTextColor: '#3E2723'
+      navbarTextColor: '#3E2723',
+      navHeight: '80px',
+      navLogoHeight: '40px',
+      navLinkFontSize: '16px',
+      navLinkGap: '32px'
     },
     intro: {
       enabled: false,
@@ -171,17 +262,24 @@ export class ConfigService {
       buttonText1: 'Lihat Menu Kami',
       buttonText2: 'Reservasi Meja',
       bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920&auto=format&fit=crop',
+      overlayOpacity: 0.5,
       style: {
         backgroundColor: '#2D1810',
         textColor: '#FFFFFF',
         accentColor: '#FF6F00',
-        fontFamily: 'Playfair Display'
+        fontFamily: 'Playfair Display',
+        titleFontSize: '4.5rem',
+        subtitleFontSize: '1.25rem',
+        buttonPaddingX: '40px',
+        buttonPaddingY: '16px',
+        buttonRadius: '50px'
       }
     },
     about: {
       title: 'Resep Warisan Keluarga',
       description: 'Sate Maranggi Hj. Maya Cimahi menghadirkan cita rasa otentik yang telah melegenda.',
       image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=1000&auto=format&fit=crop',
+      imagePosition: 'left',
       stats: {
         val1: '100%', label1: 'Daging Segar',
         val2: '4.9', label2: 'Rating Rasa',
@@ -191,7 +289,11 @@ export class ConfigService {
         backgroundColor: '#FFF8E1',
         textColor: '#4E342E',
         accentColor: '#D84315',
-        fontFamily: 'Lato'
+        fontFamily: 'Lato',
+        titleFontSize: '3rem',
+        bodyFontSize: '1.125rem',
+        sectionPaddingY: '80px',
+        borderRadius: '16px'
       }
     },
     menuPage: {
@@ -201,20 +303,34 @@ export class ConfigService {
         backgroundColor: '#FFFFFF', 
         textColor: '#3E2723',
         accentColor: '#D84315',
-        fontFamily: 'Playfair Display'
-      }
+        fontFamily: 'Playfair Display',
+        titleFontSize: '3rem',
+        subtitleFontSize: '1.125rem'
+      },
+      cardImageHeight: '100%', // Aspect square handled by CSS usually, but can be forced
+      cardBorderRadius: '12px',
+      itemTitleSize: '1.125rem',
+      itemPriceSize: '0.875rem',
+      gridGap: '24px'
     },
     reservation: {
       title: 'Reservasi Tempat',
       subtitle: 'Booking meja untuk acara keluarga, arisan, atau buka bersama.',
       minPaxRegular: 5,
       minPaxRamadan: 5,
+      whatsappTemplate: 'Halo Admin {branch}, saya mau reservasi meja untuk {pax} orang pada tanggal {date} jam {time} a.n {name}.',
       style: {
         backgroundColor: '#EFEBE9',
         textColor: '#3E2723', 
         accentColor: '#D84315',
-        fontFamily: 'Lato'
-      }
+        fontFamily: 'Lato',
+        titleFontSize: '2.25rem',
+        sectionPaddingY: '40px'
+      },
+      cardBorderRadius: '16px',
+      inputHeight: '42px',
+      inputBorderRadius: '8px',
+      buttonHeight: '48px'
     },
     locationPage: {
       title: 'Kunjungi Kami',
@@ -223,49 +339,100 @@ export class ConfigService {
         backgroundColor: '#3E2723',
         textColor: '#FFF8E1',
         accentColor: '#FFD54F',
-        fontFamily: 'Playfair Display'
-      }
+        fontFamily: 'Playfair Display',
+        titleFontSize: '2.25rem',
+        sectionPaddingY: '80px'
+      },
+      cardBorderRadius: '16px',
+      mapHeight: '200px'
     },
     footer: {
       description: 'Menyajikan cita rasa Sate Maranggi asli Cimahi sejak 1980. Bumbu meresap, daging empuk, sambal nikmat.',
-      instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/',
+      copyrightText: 'All Rights Reserved.',
+      instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/', // Fallback global
       facebookLink: 'https://facebook.com',
       tiktokLink: 'https://tiktok.com',
       style: {
         backgroundColor: '#1A120B',
         textColor: '#D7CCC8',
         accentColor: '#FF6F00',
-        fontFamily: 'Lato'
+        fontFamily: 'Lato',
+        sectionPaddingY: '60px',
+        titleFontSize: '1.5rem',
+        bodyFontSize: '0.875rem'
       }
     },
     instagramProfile: {
       username: 'satemaranggihjmayacimahi',
-      postsCount: '1,245',
-      followersCount: '15.4K',
-      followingCount: '89',
-      bio: 'Sate Maranggi Asli Hj. Maya 🍢',
-      profilePic: 'https://ui-avatars.com/api/?name=Hj+Maya&background=D84315&color=fff&size=128'
+      postsCount: '633',
+      followersCount: '2,903',
+      followingCount: '21',
+      bio: 'Sate Maranggi Hj. Maya Cimahi 🍢\n📍Jl. Mahar Martanegara No.123, Utama, Cimahi\nBuka Setiap Hari 10.00 - 22.00 WIB\nInfo & Reservasi klik link dibawah 👇',
+      profilePic: 'https://ui-avatars.com/api/?name=HM&background=D84315&color=fff&size=128&rounded=true'
     },
     branches: [
       {
-        id: 'pusat',
-        name: 'Pusat Cimahi',
-        address: 'Jl. Mahar Martanegara No.123, Utama, Kec. Cimahi Sel., Kota Cimahi, Jawa Barat',
+        id: 'tn',
+        name: 'Tuang Ngeunah',
+        address: 'Jl. Kolonel Masturi No. 123, Cimahi Utara',
+        googleMapsUrl: 'https://maps.app.goo.gl/xxx',
+        phone: '0812-1111-2222',
+        whatsappNumber: '6281211112222',
+        hours: '10.00 - 22.00 WIB',
+        mapImage: 'https://picsum.photos/seed/tuang/600/400',
+        instagramLink: 'https://instagram.com/tuangngeunah',
+        facebookLink: 'https://facebook.com/tuangngeunah',
+        tiktokLink: 'https://tiktok.com/@tuangngeunah',
+        menu: [
+           { name: 'Sate Maranggi Premium', desc: 'Daging pilihan terbaik', price: 'Rp 50.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', favorite: true, soldOut: false, spicyLevel: 0 }
+        ]
+      },
+      {
+        id: 'cimahi',
+        name: 'Hj. Maya Cimahi',
+        address: 'Jl. Mahar Martanegara No.123, Utama, Cimahi',
         googleMapsUrl: 'https://maps.app.goo.gl/xxx',
         phone: '0812-2233-4455',
         whatsappNumber: '6281222334455',
         hours: '09.00 - 22.00 WIB',
-        mapImage: 'https://picsum.photos/seed/mapcimahi/600/400',
+        mapImage: 'https://picsum.photos/seed/cimahi/600/400',
+        instagramLink: 'https://instagram.com/satemaranggihjmayacimahi',
+        facebookLink: '',
+        tiktokLink: '',
         menu: [
-           { name: 'Sate Maranggi Campur', desc: 'Sate Sapi + Jando', price: 'Rp 45.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?w=800', favorite: true }
+           { name: 'Sate Maranggi Campur', desc: 'Sate Sapi + Jando', price: 'Rp 45.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?w=800', favorite: true, soldOut: false, spicyLevel: 0 }
+        ]
+      },
+      {
+        id: 'pasteur',
+        name: 'Hj. Maya Pasteur',
+        address: 'Jl. Dr. Djunjunan No. 45, Pasteur, Bandung',
+        googleMapsUrl: 'https://maps.app.goo.gl/xxx',
+        phone: '0812-9988-7766',
+        whatsappNumber: '6281299887766',
+        hours: '10.00 - 23.00 WIB',
+        mapImage: 'https://picsum.photos/seed/pasteur/600/400',
+        instagramLink: 'https://instagram.com/satemaranggihjmayapasteur',
+        facebookLink: '',
+        tiktokLink: '',
+        menu: [
+           { name: 'Sop Iga Bakar', desc: 'Iga bakar dengan kuah sop segar', price: 'Rp 65.000', category: 'Sop', image: 'https://images.unsplash.com/photo-1544025162-d76690b6d012?w=800', favorite: true, soldOut: false, spicyLevel: 1 }
         ]
       }
     ],
-    gallery: [],
+    gallery: [
+       'https://images.unsplash.com/photo-1544025162-d76690b6d012?w=500',
+       'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=500',
+       'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500'
+    ],
     testimonials: [],
     ai: {
       systemInstruction: 'Anda adalah asisten restoran.',
-      initialMessage: 'Halo, ada yang bisa dibantu?'
+      initialMessage: 'Halo, ada yang bisa dibantu?',
+      buttonColor: '#D84315',
+      buttonSize: '56px',
+      windowWidth: '340px',
+      headerColor: '#D84315'
     }
   });
 
@@ -276,6 +443,18 @@ export class ConfigService {
        const c = this.config();
        const root = document.documentElement;
        root.style.setProperty('--color-brand-brown', c.hero.style.backgroundColor);
+       // Set Favicon Dynamically
+       if (c.global.favicon) {
+         const link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+         if (!link) {
+            const newLink = document.createElement('link');
+            newLink.rel = 'icon';
+            newLink.href = c.global.favicon;
+            document.head.appendChild(newLink);
+         } else {
+            link.href = c.global.favicon;
+         }
+       }
     });
   }
 
@@ -339,48 +518,61 @@ export class ConfigService {
       if (docSnap.exists()) {
         const data = docSnap.data() as AppConfig;
         
-        // Merge with existing config structure to ensure no undefined errors
-        this.config.update(current => ({
+        // Deep Merge & Fallback for new properties
+        this.config.update(current => {
+          // Helper to merge style properties safely
+          const mergeStyle = (currentStyle: any, newStyle: any) => ({ ...currentStyle, ...newStyle });
+
+          return {
             ...current,
             ...data,
+            features: { ...current.features, ...(data.features || {}) },
             global: { ...current.global, ...(data.global || {}) },
+            intro: { ...current.intro, ...(data.intro || {}) },
             hero: { 
                 ...current.hero, 
                 ...(data.hero || {}),
-                buttonText1: data.hero?.buttonText1 || current.hero.buttonText1,
-                buttonText2: data.hero?.buttonText2 || current.hero.buttonText2
+                style: mergeStyle(current.hero.style, data.hero?.style)
             },
-            menuPage: { ...current.menuPage, ...(data.menuPage || {}) },
             about: { 
                 ...current.about, 
                 ...(data.about || {}),
-                stats: { ...current.about.stats, ...(data.about?.stats || {}) }
+                stats: { ...current.about.stats, ...(data.about?.stats || {}) },
+                style: mergeStyle(current.about.style, data.about?.style)
             },
-            reservation: { ...current.reservation, ...(data.reservation || {}) },
-            locationPage: { ...current.locationPage, ...(data.locationPage || {}) },
+            menuPage: { 
+                ...current.menuPage, 
+                ...(data.menuPage || {}),
+                style: mergeStyle(current.menuPage.style, data.menuPage?.style)
+            },
+            reservation: { 
+                ...current.reservation, 
+                ...(data.reservation || {}),
+                style: mergeStyle(current.reservation.style, data.reservation?.style)
+            },
+            locationPage: { 
+                ...current.locationPage, 
+                ...(data.locationPage || {}),
+                style: mergeStyle(current.locationPage.style, data.locationPage?.style)
+            },
             footer: { 
                 ...current.footer, 
                 ...(data.footer || {}),
-                description: data.footer?.description || current.footer.description
+                style: mergeStyle(current.footer.style, data.footer?.style)
             },
-            instagramProfile: data.instagramProfile || current.instagramProfile,
             branches: data.branches || current.branches,
+            instagramProfile: data.instagramProfile || current.instagramProfile,
             gallery: data.gallery || current.gallery,
             testimonials: data.testimonials || current.testimonials,
             ai: { ...current.ai, ...(data.ai || {}) }
-        }));
+          };
+        });
       } else {
-        // Document doesn't exist yet, we can try to create it with default
         console.log("Config doc missing, using default.");
       }
     }, (error) => {
-      // Handle Permission Error
-      if (error.code === 'permission-denied') {
-         this.firestoreError.set("PERMISSION_DENIED: Database terkunci. Harap deploy 'firestore.rules' di Firebase Console.");
-      } else {
-        console.error("Firestore Listen Error:", error);
-        this.firestoreError.set(error.message);
-      }
+       console.error("Firestore Listen Error:", error);
+       this.firestoreError.set(error.message);
     });
   }
 
@@ -448,7 +640,7 @@ export class ConfigService {
   getMenuContext(): string {
     return this.config().branches.map(b => 
       `CABANG: ${b.name}\n` + 
-      b.menu.map(m => `  - ${m.name} (${m.price})`).join('\n')
+      b.menu.map(m => `  - ${m.name} (${m.price}) ${m.soldOut ? '[HABIS]' : ''}`).join('\n')
     ).join('\n\n');
   }
 
