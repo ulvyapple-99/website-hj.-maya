@@ -14,7 +14,7 @@ export interface FirebaseConfig {
   appId: string;
 }
 
-// NEW: Reusable Text Style Interface
+// Reusable Text Style Interface
 export interface TextStyle {
   fontFamily: string;
   fontSize: string;
@@ -163,8 +163,8 @@ export interface AppConfig {
       val2: string; label2: string;
       val3: string; label3: string;
     };
-    statsStyle: TextStyle; // NEW
-    statsLabelStyle: TextStyle; // NEW
+    statsStyle: TextStyle; 
+    statsLabelStyle: TextStyle; 
     style: PageStyle;
   };
   menuPage: {
@@ -189,9 +189,9 @@ export interface AppConfig {
   };
   reservation: {
     title: string;
-    titleStyle: TextStyle; // NEW
+    titleStyle: TextStyle;
     subtitle: string;
-    subtitleStyle: TextStyle; // NEW
+    subtitleStyle: TextStyle;
     minPaxRegular: number;
     minPaxRamadan: number;
     whatsappTemplate: string; 
@@ -203,27 +203,28 @@ export interface AppConfig {
   };
   locationPage: {
     title: string;
-    titleStyle: TextStyle; // NEW
+    titleStyle: TextStyle;
     subtitle: string;
-    subtitleStyle: TextStyle; // NEW
-    labelStyle: TextStyle; // NEW for "TEMUKAN KAMI"
-    branchNameStyle: TextStyle; // NEW for Branch Names
+    subtitleStyle: TextStyle;
+    labelStyle: TextStyle;
+    branchNameStyle: TextStyle;
+    branchDetailStyle: TextStyle;
     style: PageStyle;
     cardBorderRadius: string;
     mapHeight: string;
   };
-  testimonialStyles: { // NEW SECTION
+  testimonialStyles: {
     reviewStyle: TextStyle;
     nameStyle: TextStyle;
     roleStyle: TextStyle;
   };
   footer: {
     description: string;
-    descriptionStyle: TextStyle; // NEW
+    descriptionStyle: TextStyle;
     copyrightText: string;
-    copyrightStyle: TextStyle; // NEW
-    brandStyle: TextStyle; // NEW
-    socialMediaHeaderStyle: TextStyle; // NEW for "Media Sosial Cabang"
+    copyrightStyle: TextStyle;
+    brandStyle: TextStyle;
+    socialMediaHeaderStyle: TextStyle;
     instagramLink: string;
     facebookLink: string;
     tiktokLink: string;
@@ -259,11 +260,13 @@ export class ConfigService {
   private db: Firestore | undefined;
   
   private DOC_ID = 'main_config';
+  private LOCAL_STORAGE_KEY = 'app_config_local';
 
   // Auth State
   currentUser = signal<User | null>(null);
-  isAdmin = computed(() => this.currentUser() !== null);
+  isAdmin = computed(() => this.currentUser() !== null || this.isDemoMode());
   isFirebaseReady = signal(false);
+  isDemoMode = signal(false);
   
   // Error State
   firestoreError = signal<string | null>(null);
@@ -292,16 +295,16 @@ export class ConfigService {
         enableCursor: true
     },
     global: {
-      logoText: 'Hj. Maya Group',
-      logoStyle: { fontFamily: 'Playfair Display', fontSize: '1.25rem', color: 'inherit' },
+      logoText: 'Sate Maranggi Hj. Maya',
+      logoStyle: { fontFamily: 'Oswald', fontSize: '1.5rem', color: '#D84315' },
       logoImage: '', 
       favicon: '',
-      metaDescription: 'Sate Maranggi Paling Enak di Cimahi',
+      metaDescription: 'Sate Maranggi Hj. Maya Cimahi - Kelezatan Daging Sapi Pilihan & Sambal Oncom Legendaris.',
       metaStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#000000' },
       navbarColor: '#FFFFFF',
       navbarTextColor: '#3E2723',
       navHeight: '80px',
-      navLogoHeight: '40px',
+      navLogoHeight: '45px',
       navLinkFontSize: '16px',
       navLinkGap: '32px',
       analyticsId: ''
@@ -313,25 +316,25 @@ export class ConfigService {
       fadeOut: 'fade'
     },
     hero: {
-      badgeText: 'Est. 1980',
-      badgeStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#D84315' },
+      badgeText: 'ASLI CIMAHI SEJAK 1985',
+      badgeStyle: { fontFamily: 'Oswald', fontSize: '0.875rem', color: '#FFD700' },
       title: 'Sate Maranggi',
-      titleStyle: { fontFamily: 'Playfair Display', fontSize: '4.5rem', color: '#FFFFFF' },
-      highlight: 'Asli Hj. Maya',
-      highlightStyle: { fontFamily: 'Playfair Display', fontSize: 'inherit', color: '#FFD54F' },
-      subtitle: 'Legenda Kuliner Cimahi. Nikmati sensasi Sate Jando yang lumer dan Sate Sapi empuk dengan sambal oncom khas yang bikin nagih.',
+      titleStyle: { fontFamily: 'Oswald', fontSize: '4.5rem', color: '#FFFFFF' },
+      highlight: 'Hj. Maya',
+      highlightStyle: { fontFamily: 'Great Vibes', fontSize: 'inherit', color: '#FF7043' },
+      subtitle: 'Rasakan kelembutan sate sapi maranggi dengan bumbu rempah rahasia dan sambal oncom yang menggugah selera.',
       subtitleStyle: { fontFamily: 'Lato', fontSize: '1.25rem', color: '#F3F4F6' },
-      buttonText1: 'Lihat Menu Kami',
+      buttonText1: 'Lihat Menu',
       button1Style: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFFFFF' },
-      buttonText2: 'Reservasi Meja',
+      buttonText2: 'Reservasi',
       button2Style: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFFFFF' },
       bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920&auto=format&fit=crop',
-      overlayOpacity: 0.5,
+      overlayOpacity: 0.6,
       style: {
         backgroundColor: '#2D1810',
         textColor: '#FFFFFF',
-        accentColor: '#FF6F00',
-        fontFamily: 'Playfair Display',
+        accentColor: '#D84315',
+        fontFamily: 'Oswald',
         titleFontSize: '4.5rem',
         subtitleFontSize: '1.25rem',
         buttonPaddingX: '40px',
@@ -340,122 +343,123 @@ export class ConfigService {
       }
     },
     about: {
-      title: 'Resep Warisan Keluarga',
-      titleStyle: { fontFamily: 'Lato', fontSize: '3rem', color: '#D84315' },
-      description: 'Sate Maranggi Hj. Maya Cimahi menghadirkan cita rasa otentik yang telah melegenda.',
-      descriptionStyle: { fontFamily: 'Lato', fontSize: '1.125rem', color: '#4E342E' },
-      image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=1000&auto=format&fit=crop',
-      imagePosition: 'left',
+      title: 'Legenda Kuliner Cimahi',
+      titleStyle: { fontFamily: 'Oswald', fontSize: '3rem', color: '#3E2723' },
+      description: 'Berawal dari resep keluarga yang dijaga keasliannya, Sate Maranggi Hj. Maya telah menjadi ikon kuliner di Cimahi.\n\nKami hanya menggunakan daging sapi pilihan yang dimarinasi dengan rempah-rempah alami, dibakar sempurna, dan disajikan dengan ketan bakar serta sambal oncom khas.',
+      descriptionStyle: { fontFamily: 'Lato', fontSize: '1.125rem', color: '#5D4037' },
+      image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=1000',
+      imagePosition: 'right',
       stats: {
-        val1: '100%', label1: 'Daging Segar',
-        val2: '4.9', label2: 'Rating Rasa',
-        val3: '1980', label3: 'Sejak'
+        val1: '100%', label1: 'Daging Sapi',
+        val2: '40th', label2: 'Pengalaman',
+        val3: '3', label3: 'Cabang'
       },
-      statsStyle: { fontFamily: 'Lato', fontSize: '1.5rem', color: '#D84315' },
-      statsLabelStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#4E342E' },
+      statsStyle: { fontFamily: 'Oswald', fontSize: '2rem', color: '#D84315' },
+      statsLabelStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#3E2723' },
       style: {
         backgroundColor: '#FFF8E1',
-        textColor: '#4E342E',
+        textColor: '#3E2723',
         accentColor: '#D84315',
         fontFamily: 'Lato',
         titleFontSize: '3rem',
         bodyFontSize: '1.125rem',
         sectionPaddingY: '80px',
-        borderRadius: '16px'
+        borderRadius: '24px'
       }
     },
     menuPage: {
-      title: 'Menu Andalan',
-      titleStyle: { fontFamily: 'Playfair Display', fontSize: '3rem', color: '#D84315' },
-      subtitle: 'Pilihan menu favorit pelanggan setia Hj. Maya',
-      subtitleStyle: { fontFamily: 'Playfair Display', fontSize: '1.125rem', color: '#3E2723' },
+      title: 'Menu Favorit',
+      titleStyle: { fontFamily: 'Oswald', fontSize: '3rem', color: '#3E2723' },
+      subtitle: 'Sate, Sop, dan Hidangan Sunda Pilihan',
+      subtitleStyle: { fontFamily: 'Lato', fontSize: '1.125rem', color: '#5D4037' },
       style: {
         backgroundColor: '#FFFFFF', 
         textColor: '#3E2723',
         accentColor: '#D84315',
-        fontFamily: 'Playfair Display',
+        fontFamily: 'Oswald',
         titleFontSize: '3rem',
         subtitleFontSize: '1.125rem'
       },
       cardImageHeight: '100%', 
-      cardBorderRadius: '12px',
+      cardBorderRadius: '16px',
       itemTitleSize: '1.125rem',
       itemPriceSize: '0.875rem',
       gridGap: '24px'
     },
     packagesPage: {
-      title: 'Paket Hemat',
-      titleStyle: { fontFamily: 'Playfair Display', fontSize: '2.5rem', color: '#D84315' },
-      subtitle: 'Pilihan paket makan bersama untuk keluarga dan rombongan.',
-      subtitleStyle: { fontFamily: 'Playfair Display', fontSize: '1rem', color: '#3E2723' },
+      title: 'Paket Botram',
+      titleStyle: { fontFamily: 'Oswald', fontSize: '2.5rem', color: '#3E2723' },
+      subtitle: 'Makan bareng lebih hemat dan nikmat',
+      subtitleStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#5D4037' },
       style: {
         backgroundColor: '#FFF3E0', 
         textColor: '#3E2723',
         accentColor: '#D84315',
-        fontFamily: 'Playfair Display',
+        fontFamily: 'Oswald',
         titleFontSize: '2.5rem',
         subtitleFontSize: '1rem'
       },
       cardBorderRadius: '16px'
     },
     reservation: {
-      title: 'Reservasi Tempat',
-      titleStyle: { fontFamily: 'Lato', fontSize: '2.25rem', color: '#D84315' }, // Default
-      subtitle: 'Booking meja untuk acara keluarga, arisan, atau buka bersama.',
-      subtitleStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#3E2723' }, // Default
+      title: 'Reservasi Meja',
+      titleStyle: { fontFamily: 'Oswald', fontSize: '2.25rem', color: '#3E2723' },
+      subtitle: 'Pastikan tempat untuk acara spesial Anda',
+      subtitleStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#5D4037' },
       minPaxRegular: 5,
       minPaxRamadan: 5,
-      whatsappTemplate: 'Halo Admin {branch}, saya mau reservasi meja untuk {pax} orang pada tanggal {date} jam {time} a.n {name}.',
+      whatsappTemplate: 'Halo Admin Sate Hj. Maya {branch}, saya mau reservasi untuk {pax} orang pada tanggal {date} jam {time} a.n {name}.',
       style: {
-        backgroundColor: '#EFEBE9',
+        backgroundColor: '#F5F5F5',
         textColor: '#3E2723', 
         accentColor: '#D84315',
         fontFamily: 'Lato',
         titleFontSize: '2.25rem',
-        sectionPaddingY: '40px'
+        sectionPaddingY: '60px'
       },
       cardBorderRadius: '16px',
-      inputHeight: '42px',
+      inputHeight: '48px',
       inputBorderRadius: '8px',
-      buttonHeight: '48px'
+      buttonHeight: '52px'
     },
     locationPage: {
-      title: 'Kunjungi Kami',
-      titleStyle: { fontFamily: 'Playfair Display', fontSize: '2.25rem', color: '#3E2723' }, // Default
-      subtitle: 'Nikmati suasana makan yang nyaman di lokasi kami.',
-      subtitleStyle: { fontFamily: 'Playfair Display', fontSize: '1rem', color: '#3E2723' }, // Default
-      labelStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#FFD54F' }, // Default
-      branchNameStyle: { fontFamily: 'Playfair Display', fontSize: '1.25rem', color: '#D84315' }, // Default
+      title: 'Outlet Kami',
+      titleStyle: { fontFamily: 'Oswald', fontSize: '2.5rem', color: '#FFFFFF' },
+      subtitle: 'Kunjungi cabang terdekat di kota Anda',
+      subtitleStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFCCBC' },
+      labelStyle: { fontFamily: 'Oswald', fontSize: '0.875rem', color: '#FF7043' },
+      branchNameStyle: { fontFamily: 'Oswald', fontSize: '1.5rem', color: '#D84315' },
+      branchDetailStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#5D4037' },
       style: {
-        backgroundColor: '#3E2723',
+        backgroundColor: '#1A120B',
         textColor: '#FFF8E1',
-        accentColor: '#FFD54F',
-        fontFamily: 'Playfair Display',
-        titleFontSize: '2.25rem',
+        accentColor: '#D84315',
+        fontFamily: 'Oswald',
+        titleFontSize: '2.5rem',
         sectionPaddingY: '80px'
       },
-      cardBorderRadius: '16px',
-      mapHeight: '200px'
+      cardBorderRadius: '20px',
+      mapHeight: '220px'
     },
     testimonialStyles: {
       reviewStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#4B5563' },
-      nameStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#111827' },
+      nameStyle: { fontFamily: 'Oswald', fontSize: '1rem', color: '#111827' },
       roleStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#D84315' }
     },
     footer: {
-      description: 'Menyajikan cita rasa Sate Maranggi asli Cimahi sejak 1980. Bumbu meresap, daging empuk, sambal nikmat.',
-      descriptionStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#9CA3AF' }, // Default
-      copyrightText: 'All Rights Reserved.',
-      copyrightStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#6B7280' }, // Default
-      brandStyle: { fontFamily: 'Playfair Display', fontSize: '1.5rem', color: '#E5E7EB' }, // Default
-      socialMediaHeaderStyle: { fontFamily: 'Lato', fontSize: '1.125rem', color: '#FF6F00' }, // Default
+      description: 'Sate Maranggi Hj. Maya.\nCita rasa otentik yang tak terlupakan.',
+      descriptionStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#BCAAA4' },
+      copyrightText: 'Created with Passion.',
+      copyrightStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#8D6E63' },
+      brandStyle: { fontFamily: 'Oswald', fontSize: '1.5rem', color: '#FFFFFF' },
+      socialMediaHeaderStyle: { fontFamily: 'Oswald', fontSize: '1.125rem', color: '#FF7043' },
       instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/', 
-      facebookLink: 'https://facebook.com',
-      tiktokLink: 'https://tiktok.com',
+      facebookLink: '',
+      tiktokLink: '',
       style: {
-        backgroundColor: '#1A120B',
+        backgroundColor: '#261C19',
         textColor: '#D7CCC8',
-        accentColor: '#FF6F00',
+        accentColor: '#FF7043',
         fontFamily: 'Lato',
         sectionPaddingY: '60px',
         titleFontSize: '1.5rem',
@@ -467,62 +471,30 @@ export class ConfigService {
       postsCount: '633',
       followersCount: '2,903',
       followingCount: '21',
-      bio: 'Sate Maranggi Hj. Maya Cimahi 🍢\n📍Jl. Mahar Martanegara No.123, Utama, Cimahi\nBuka Setiap Hari 10.00 - 22.00 WIB\nInfo & Reservasi klik link dibawah 👇',
+      bio: 'Sate Maranggi Hj. Maya Cimahi 🍢\n📍Jl. Mahar Martanegara No.123, Utama, Cimahi\nBuka Setiap Hari 10.00 - 22.00 WIB',
       profilePic: 'https://ui-avatars.com/api/?name=HM&background=D84315&color=fff&size=128&rounded=true'
     },
     branches: [
       {
-        id: 'tn',
-        name: 'Tuang Ngeunah',
-        address: 'Jl. Kolonel Masturi No. 123, Cimahi Utara',
-        googleMapsUrl: 'https://maps.app.goo.gl/xxx',
-        phone: '0812-1111-2222',
-        whatsappNumber: '6281211112222',
-        hours: '10.00 - 22.00 WIB',
-        mapImage: 'https://picsum.photos/seed/tuang/600/400',
-        instagramLink: 'https://instagram.com/tuangngeunah',
-        facebookLink: 'https://facebook.com/tuangngeunah',
-        tiktokLink: 'https://tiktok.com/@tuangngeunah',
-        menu: [
-           { name: 'Sate Maranggi Premium', desc: 'Daging pilihan terbaik', price: 'Rp 50.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', favorite: true, soldOut: false, spicyLevel: 0 }
-        ],
-        packages: [
-          { name: 'Paket Keluarga A', price: 'Rp 250.000', description: 'Cocok untuk 4 orang', image: 'https://picsum.photos/seed/paka/400/300', items: ['40 Tusuk Sate Campur', '4 Nasi Timbel', '1 Karedok', '4 Teh Manis'] }
-        ]
-      },
-      {
         id: 'cimahi',
-        name: 'Hj. Maya Cimahi',
-        address: 'Jl. Mahar Martanegara No.123, Utama, Cimahi',
+        name: 'Pusat Cimahi',
+        address: 'Jl. Mahar Martanegara No.123, Utama, Kec. Cimahi Sel., Kota Cimahi',
         googleMapsUrl: 'https://maps.app.goo.gl/xxx',
-        phone: '0812-2233-4455',
-        whatsappNumber: '6281222334455',
-        hours: '09.00 - 22.00 WIB',
+        phone: '0812-2345-6789',
+        whatsappNumber: '6281223456789',
+        hours: '10.00 - 22.00 WIB',
         mapImage: 'https://picsum.photos/seed/cimahi/600/400',
         instagramLink: 'https://instagram.com/satemaranggihjmayacimahi',
         facebookLink: '',
         tiktokLink: '',
         menu: [
-           { name: 'Sate Maranggi Campur', desc: 'Sate Sapi + Jando', price: 'Rp 45.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?w=800', favorite: true, soldOut: false, spicyLevel: 0 }
+           { name: 'Sate Maranggi Sapi (10 Tsk)', desc: 'Full daging sapi empuk dengan bumbu meresap', price: 'Rp 50.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', favorite: true, soldOut: false, spicyLevel: 0 },
+           { name: 'Sate Maranggi Jando (10 Tsk)', desc: 'Lemak susu sapi gurih lumer di mulut', price: 'Rp 45.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?w=800', favorite: true, soldOut: false, spicyLevel: 0 },
+           { name: 'Ketan Bakar', desc: 'Teman makan sate paling pas', price: 'Rp 10.000', category: 'Pelengkap', image: 'https://images.unsplash.com/photo-1626804475297-411f7e340d86?w=800', favorite: false, soldOut: false, spicyLevel: 0 }
         ],
-        packages: []
-      },
-      {
-        id: 'pasteur',
-        name: 'Hj. Maya Pasteur',
-        address: 'Jl. Dr. Djunjunan No. 45, Pasteur, Bandung',
-        googleMapsUrl: 'https://maps.app.goo.gl/xxx',
-        phone: '0812-9988-7766',
-        whatsappNumber: '6281299887766',
-        hours: '10.00 - 23.00 WIB',
-        mapImage: 'https://picsum.photos/seed/pasteur/600/400',
-        instagramLink: 'https://instagram.com/satemaranggihjmayapasteur',
-        facebookLink: '',
-        tiktokLink: '',
-        menu: [
-           { name: 'Sop Iga Bakar', desc: 'Iga bakar dengan kuah sop segar', price: 'Rp 65.000', category: 'Sop', image: 'https://images.unsplash.com/photo-1544025162-d76690b6d012?w=800', favorite: true, soldOut: false, spicyLevel: 1 }
-        ],
-        packages: []
+        packages: [
+          { name: 'Paket Berdua', price: 'Rp 120.000', description: 'Hemat untuk pasangan', image: 'https://picsum.photos/seed/dua/400/300', items: ['20 Tusuk Sate', '2 Nasi Timbel', '2 Teh Manis', '1 Karedok'] }
+        ]
       }
     ],
     gallery: [
@@ -530,26 +502,30 @@ export class ConfigService {
        'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=500',
        'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500'
     ],
-    testimonials: [],
+    testimonials: [
+        { name: 'Budi Santoso', role: 'Local Guide', rating: 5, text: 'Sate maranggi paling enak di Cimahi! Dagingnya empuk banget.' },
+        { name: 'Siti Aminah', role: 'Food Blogger', rating: 5, text: 'Sambal oncomnya juara. Wajib coba sate jandonya.' }
+    ],
     ai: {
-      systemInstruction: 'Anda adalah asisten restoran.',
-      initialMessage: 'Halo, ada yang bisa dibantu?',
+      systemInstruction: 'Anda adalah asisten virtual Sate Maranggi Hj. Maya. Jawab dengan ramah, gunakan bahasa Indonesia yang santai tapi sopan. Rekomendasikan Sate Jando dan Sate Sapi.',
+      initialMessage: 'Halo! Cari sate maranggi enak? Ada yang bisa saya bantu?',
       buttonColor: '#D84315',
-      buttonSize: '56px',
-      windowWidth: '340px',
+      buttonSize: '60px',
+      windowWidth: '360px',
       headerColor: '#D84315'
     }
   });
 
   constructor() {
+    this.loadLocalConfig();
     this.initFirebase();
 
     effect(() => {
        const c = this.config();
        const root = document.documentElement;
        root.style.setProperty('--color-brand-brown', c.hero.style.backgroundColor);
+       root.style.setProperty('--color-brand-orange', c.hero.style.accentColor);
        
-       // Handle Favicon
        if (c.global.favicon) {
          const link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
          if (!link) {
@@ -561,28 +537,36 @@ export class ConfigService {
             link.href = c.global.favicon;
          }
        }
-
-       // Handle PWA Manifest Dynamic Generation
        this.updateManifest(c);
-
-       // Handle Analytics Injection
        if (c.global.analyticsId) {
           this.injectAnalytics(c.global.analyticsId);
        }
     });
   }
+  
+  private loadLocalConfig() {
+    try {
+      const local = localStorage.getItem(this.LOCAL_STORAGE_KEY);
+      if (local) {
+        const parsed = JSON.parse(local);
+        this.config.update(c => ({
+            ...c,
+            ...parsed,
+            intro: { ...c.intro, ...(parsed.intro || {}) }
+        }));
+        console.log("✅ Config loaded from LocalStorage");
+      }
+    } catch(e) { console.error("Error loading local config", e); }
+  }
 
   // --- ANALYTICS ---
   private injectAnalytics(id: string) {
     if (document.getElementById('analytics-script')) return;
-    
-    // Google Analytics Stub
     const script = document.createElement('script');
     script.id = 'analytics-script';
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
     document.head.appendChild(script);
-
     const inline = document.createElement('script');
     inline.innerHTML = `
       window.dataLayer = window.dataLayer || [];
@@ -622,11 +606,9 @@ export class ConfigService {
         }
       ]
     };
-
     const stringManifest = JSON.stringify(manifest);
     const blob = new Blob([stringManifest], {type: 'application/json'});
     const manifestURL = URL.createObjectURL(blob);
-    
     let link: HTMLLinkElement | null = document.querySelector('#manifest-link');
     if (!link) {
       link = document.createElement('link');
@@ -677,37 +659,47 @@ export class ConfigService {
   }
 
   async loginAdmin(email: string, pass: string) {
-    if (!this.auth) throw new Error("Firebase belum terhubung.");
-    try {
-      await signInWithEmailAndPassword(this.auth, email, pass);
-    } catch (error: any) {
-      console.error("Login Failed:", error);
-      if (error.code === 'auth/api-key-not-valid') {
-        throw new Error("Konfigurasi API Key Firebase salah. Cek tab Database.");
+    if (this.auth) {
+      try {
+        await signInWithEmailAndPassword(this.auth, email, pass);
+        this.isDemoMode.set(false);
+        return;
+      } catch (error: any) {
+        console.warn("Firebase Login Failed, checking local fallback...", error.code);
       }
-      throw error;
     }
+    
+    if (email === 'admin@admin.com' && pass === 'admin') {
+      this.isDemoMode.set(true);
+      console.log("✅ Logged in to Local Admin Mode");
+      return;
+    }
+
+    throw new Error("Login gagal. Cek email/password atau gunakan mode lokal.");
   }
 
   async logoutAdmin() {
+    if (this.isDemoMode()) {
+      this.isDemoMode.set(false);
+      return;
+    }
     if (!this.auth) return;
     await signOut(this.auth);
   }
 
   subscribeToConfig() {
     if (!this.db) return; 
-
     const docRef = doc(this.db, 'settings', this.DOC_ID);
     
     onSnapshot(docRef, (docSnap) => {
-      this.firestoreError.set(null);
+      if (this.isDemoMode()) return;
 
+      this.firestoreError.set(null);
       if (docSnap.exists()) {
         const data = docSnap.data() as AppConfig;
         
-        // Deep Merge helper
-        const mergeStyle = (currentStyle: any, newStyle: any) => ({ ...currentStyle, ...newStyle });
-        const mergeText = (currentT: any, newT: any) => ({ ...currentT, ...newT });
+        const mergeStyle = (curr: any, fresh: any) => ({ ...curr, ...(fresh || {}) });
+        const mergeText = (curr: any, fresh: any) => ({ ...curr, ...(fresh || {}) });
 
         this.config.update(current => ({
             ...current,
@@ -719,7 +711,13 @@ export class ConfigService {
                 logoStyle: mergeText(current.global.logoStyle, data.global?.logoStyle),
                 metaStyle: mergeText(current.global.metaStyle, data.global?.metaStyle)
             },
-            intro: { ...current.intro, ...(data.intro || {}) },
+            // FIX: Ensure Intro structure is preserved and safe
+            intro: { 
+                ...current.intro, 
+                ...(data.intro || {}),
+                // Force default if missing to prevent "invalid nested entity"
+                fadeOut: (data.intro?.fadeOut) || current.intro.fadeOut || 'fade'
+            },
             hero: { 
                 ...current.hero, 
                 ...(data.hero || {}),
@@ -769,6 +767,7 @@ export class ConfigService {
                 subtitleStyle: mergeText(current.locationPage.subtitleStyle, data.locationPage?.subtitleStyle),
                 labelStyle: mergeText(current.locationPage.labelStyle, data.locationPage?.labelStyle),
                 branchNameStyle: mergeText(current.locationPage.branchNameStyle, data.locationPage?.branchNameStyle),
+                branchDetailStyle: mergeText(current.locationPage.branchDetailStyle, data.locationPage?.branchDetailStyle),
                 style: mergeStyle(current.locationPage.style, data.locationPage?.style)
             },
             testimonialStyles: {
@@ -801,8 +800,38 @@ export class ConfigService {
     });
   }
 
+  // RECURSIVE SANITIZER TO REMOVE UNDEFINED
+  private sanitizeObject(obj: any): any {
+    if (obj === null || obj === undefined) return null;
+    if (typeof obj !== 'object') return obj;
+    
+    if (Array.isArray(obj)) {
+      return obj.map(v => this.sanitizeObject(v));
+    }
+
+    const newObj: any = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const value = obj[key];
+        // If undefined, set to null or omit (Firestore prefers null over undefined)
+        newObj[key] = value === undefined ? null : this.sanitizeObject(value);
+      }
+    }
+    return newObj;
+  }
+
   async updateConfig(newConfig: AppConfig) {
     this.config.set(newConfig);
+    
+    // Local Save
+    try {
+      localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(newConfig));
+    } catch(e) { console.error("Local Save Error", e); }
+
+    if (this.isDemoMode()) {
+      console.log("Saved to LocalStorage (Demo Mode)");
+      return;
+    }
 
     if (!this.db) {
         alert("Error: Tidak terhubung ke database.");
@@ -810,8 +839,19 @@ export class ConfigService {
     }
 
     try {
-       await setDoc(doc(this.db, 'settings', this.DOC_ID), newConfig);
-       // NOTE: Alert replaced by Toast in components usually, but pure service log here
+       // DEEP SANITIZATION: Clean entire object before sending
+       let cleanConfig = this.sanitizeObject(JSON.parse(JSON.stringify(newConfig)));
+
+       // STRICT INTRO CHECK: Ensure structural integrity
+       if (!cleanConfig.intro) cleanConfig.intro = {};
+       cleanConfig.intro = {
+           enabled: cleanConfig.intro.enabled ?? false,
+           videoUrl: cleanConfig.intro.videoUrl || '',
+           duration: cleanConfig.intro.duration || 5,
+           fadeOut: cleanConfig.intro.fadeOut || 'fade'
+       };
+
+       await setDoc(doc(this.db, 'settings', this.DOC_ID), cleanConfig);
        console.log("Config saved successfully");
     } catch (error: any) {
       console.error("Error saving config:", error);
@@ -820,18 +860,22 @@ export class ConfigService {
   }
   
   async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
-    // FIX #1: Client-side compression to avoid 1MB Firestore Limit
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = (event: any) => {
+            if (file.type.startsWith('video/')) {
+                 resolve(event.target.result);
+                 return;
+            }
+
             const img = new Image();
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                const MAX_WIDTH = 800; // Reduced from 1000
+                const MAX_WIDTH = 800; 
                 const MAX_HEIGHT = 800;
                 
                 if (width > height) {
@@ -844,7 +888,6 @@ export class ConfigService {
                 const ctx = canvas.getContext('2d');
                 if (!ctx) { reject(new Error("Canvas error")); return; }
                 ctx.drawImage(img, 0, 0, width, height);
-                // Lower quality to 0.7
                 resolve(canvas.toDataURL('image/jpeg', 0.7));
             };
             img.onerror = () => reject(new Error("Invalid image"));
@@ -875,7 +918,6 @@ export class ConfigService {
 
   is3D(url: string): boolean {
     if (!url) return false;
-    // Fix #17: Better 3D detection
     const lower = url.toLowerCase();
     return lower.endsWith('.glb') || lower.endsWith('.gltf') || lower.startsWith('data:model') || lower.includes('gltf') || lower.includes('glb');
   }

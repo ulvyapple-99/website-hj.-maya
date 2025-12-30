@@ -49,7 +49,11 @@ import { ConfigService } from '../services/config.service';
                   {{ branch.name }}
               </h4>
               
-              <div class="space-y-4 text-sm opacity-90 mb-6 flex-grow">
+              <!-- Dynamic Branch Details Style -->
+              <div class="space-y-4 mb-6 flex-grow"
+                   [style.fontFamily]="config().locationPage.branchDetailStyle.fontFamily"
+                   [style.fontSize]="config().locationPage.branchDetailStyle.fontSize"
+                   [style.color]="config().locationPage.branchDetailStyle.color">
                 <div class="flex items-start gap-3">
                    <span class="font-bold text-lg">📍</span>
                    <span class="pt-1">{{ branch.address }}</span>

@@ -36,18 +36,18 @@ import { ConfigService } from './services/config.service';
         [class.pointer-events-none]="isClosing()"
       >
         @if (config().intro.videoUrl) {
+          <!-- FIX: Gunakan [src] langsung di tag video, jangan pakai <source> untuk binding dinamis base64 -->
           <video 
+            [src]="config().intro.videoUrl"
             autoplay 
             muted 
             playsinline 
             class="w-full h-full object-cover"
             (ended)="closeIntro()"
-          >
-             <source [src]="config().intro.videoUrl" type="video/mp4">
-          </video>
+          ></video>
         } @else {
            <!-- Fallback if enabled but no video -->
-           <div class="text-white animate-pulse">Loading...</div>
+           <div class="text-white animate-pulse">Loading Intro...</div>
         }
         
         <button 
