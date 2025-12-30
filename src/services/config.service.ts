@@ -14,6 +14,13 @@ export interface FirebaseConfig {
   appId: string;
 }
 
+// NEW: Reusable Text Style Interface
+export interface TextStyle {
+  fontFamily: string;
+  fontSize: string;
+  color: string;
+}
+
 export interface MenuItem {
   name: string;
   desc: string;
@@ -21,8 +28,17 @@ export interface MenuItem {
   category: string;
   image: string;
   favorite?: boolean;
-  soldOut?: boolean; // NEW: Fitur Stok Habis
-  spicyLevel?: number; // NEW: 0 = No, 1-3 = Pedas
+  soldOut?: boolean;
+  spicyLevel?: number;
+}
+
+export interface PackageItem {
+  name: string;
+  price: string;
+  description: string;
+  image: string;
+  items: string[]; // List of items included
+  minPax?: number;
 }
 
 export interface Branch {
@@ -34,38 +50,38 @@ export interface Branch {
   whatsappNumber: string;
   hours: string;
   mapImage: string;
-  // NEW: Branch specific social media
   instagramLink?: string;
   facebookLink?: string;
   tiktokLink?: string;
   menu: MenuItem[];
+  packages?: PackageItem[]; // New field
 }
 
 export interface Testimonial {
   name: string;
   text: string;
-  rating: number; // 1-5
+  rating: number;
   role: string;
 }
 
-// NEW: Granular Style Options (The "50 Features")
+// Granular Style Options
 export interface StyleOptions {
   // Typography Sizes
-  titleFontSize?: string;     // e.g. '3rem'
-  subtitleFontSize?: string;  // e.g. '1.2rem'
-  bodyFontSize?: string;      // e.g. '1rem'
+  titleFontSize?: string;
+  subtitleFontSize?: string;
+  bodyFontSize?: string;
   
   // Dimensions & Spacing
-  sectionPaddingY?: string;   // e.g. '80px'
-  elementGap?: string;        // e.g. '20px'
-  containerMaxWidth?: string; // e.g. '1280px'
+  sectionPaddingY?: string;
+  elementGap?: string;
+  containerMaxWidth?: string;
   
   // Visuals
-  borderRadius?: string;      // e.g. '12px'
-  boxShadow?: string;         // e.g. '0 4px 6px rgba(0,0,0,0.1)'
-  borderWidth?: string;       // e.g. '1px'
+  borderRadius?: string;
+  boxShadow?: string;
+  borderWidth?: string;
   
-  // Component Specifics (Optional keys based on context)
+  // Component Specifics
   buttonPaddingX?: string;
   buttonPaddingY?: string;
   buttonRadius?: string;
@@ -89,24 +105,28 @@ export interface AppConfig {
     showHero: boolean;
     showAbout: boolean;
     showMenu: boolean;
+    showPackages: boolean; 
     showReservation: boolean;
     showLocation: boolean;
     showGallery: boolean;
     showTestimonials: boolean;
     enableOrdering: boolean; 
+    enableCursor: boolean;
   };
   global: {
     logoText: string;
+    logoStyle: TextStyle; 
     logoImage: string;
     favicon: string; 
     metaDescription: string;
+    metaStyle: TextStyle; 
     navbarColor: string;
     navbarTextColor: string;
-    // New Global Styles
     navHeight: string;
     navLogoHeight: string;
     navLinkFontSize: string;
     navLinkGap: string;
+    analyticsId: string;
   };
   intro: {
     enabled: boolean;
@@ -115,14 +135,21 @@ export interface AppConfig {
     fadeOut: 'none' | 'fade' | 'slide-up' | 'slide-down' | 'zoom-out';
   };
   hero: {
+    badgeText: string;
+    badgeStyle: TextStyle;
     title: string;
+    titleStyle: TextStyle; // NEW
     highlight: string;
+    highlightStyle: TextStyle; // NEW
     subtitle: string;
+    subtitleStyle: TextStyle; // NEW
     buttonText1: string;
+    button1Style: TextStyle; // NEW
     buttonText2: string;
+    button2Style: TextStyle; // NEW
     bgImage: string;
     overlayOpacity: number; 
-    style: PageStyle; // Enhanced with StyleOptions
+    style: PageStyle;
   };
   about: {
     title: string;
@@ -134,18 +161,23 @@ export interface AppConfig {
       val2: string; label2: string;
       val3: string; label3: string;
     };
-    style: PageStyle; // Enhanced
+    style: PageStyle;
   };
   menuPage: {
     title: string;
     subtitle: string;
-    style: PageStyle; // Enhanced
-    // Specific Menu Styles
+    style: PageStyle;
     cardImageHeight: string;
     cardBorderRadius: string;
     itemTitleSize: string;
     itemPriceSize: string;
     gridGap: string;
+  };
+  packagesPage: { 
+    title: string;
+    subtitle: string;
+    style: PageStyle;
+    cardBorderRadius: string;
   };
   reservation: {
     title: string;
@@ -153,8 +185,7 @@ export interface AppConfig {
     minPaxRegular: number;
     minPaxRamadan: number;
     whatsappTemplate: string; 
-    style: PageStyle; // Enhanced
-    // Specific Reservation Styles
+    style: PageStyle;
     cardBorderRadius: string;
     inputHeight: string;
     inputBorderRadius: string;
@@ -163,8 +194,7 @@ export interface AppConfig {
   locationPage: {
     title: string;
     subtitle: string;
-    style: PageStyle; // Enhanced
-    // Specific Location Styles
+    style: PageStyle;
     cardBorderRadius: string;
     mapHeight: string;
   };
@@ -174,7 +204,7 @@ export interface AppConfig {
     instagramLink: string;
     facebookLink: string;
     tiktokLink: string;
-    style: PageStyle; // Enhanced
+    style: PageStyle;
   };
   instagramProfile: {
     username: string;
@@ -190,7 +220,6 @@ export interface AppConfig {
   ai: {
     systemInstruction: string;
     initialMessage: string;
-    // New AI Styles
     buttonColor: string;
     buttonSize: string;
     windowWidth: string;
@@ -216,7 +245,7 @@ export class ConfigService {
   // Error State
   firestoreError = signal<string | null>(null);
 
-  // Kredensial Default
+  // Default Config
   private defaultFirebaseConfig: FirebaseConfig = {
     apiKey: "AIzaSyDKnk7ypRSI5UFB-eI3WW-ZwakRfMSbz0U", 
     authDomain: "sate-maranggi-app.firebaseapp.com",
@@ -231,23 +260,28 @@ export class ConfigService {
         showHero: true,
         showAbout: true,
         showMenu: true,
+        showPackages: true,
         showReservation: true,
         showLocation: true,
         showGallery: true,
         showTestimonials: true,
-        enableOrdering: true
+        enableOrdering: true,
+        enableCursor: true
     },
     global: {
       logoText: 'Hj. Maya Group',
+      logoStyle: { fontFamily: 'Playfair Display', fontSize: '1.25rem', color: 'inherit' },
       logoImage: '', 
       favicon: '',
       metaDescription: 'Sate Maranggi Paling Enak di Cimahi',
+      metaStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#000000' },
       navbarColor: '#FFFFFF',
       navbarTextColor: '#3E2723',
       navHeight: '80px',
       navLogoHeight: '40px',
       navLinkFontSize: '16px',
-      navLinkGap: '32px'
+      navLinkGap: '32px',
+      analyticsId: ''
     },
     intro: {
       enabled: false,
@@ -256,11 +290,18 @@ export class ConfigService {
       fadeOut: 'fade'
     },
     hero: {
+      badgeText: 'Est. 1980',
+      badgeStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#D84315' },
       title: 'Sate Maranggi',
+      titleStyle: { fontFamily: 'Playfair Display', fontSize: '4.5rem', color: '#FFFFFF' },
       highlight: 'Asli Hj. Maya',
+      highlightStyle: { fontFamily: 'Playfair Display', fontSize: 'inherit', color: '#FFD54F' },
       subtitle: 'Legenda Kuliner Cimahi. Nikmati sensasi Sate Jando yang lumer dan Sate Sapi empuk dengan sambal oncom khas yang bikin nagih.',
+      subtitleStyle: { fontFamily: 'Lato', fontSize: '1.25rem', color: '#F3F4F6' },
       buttonText1: 'Lihat Menu Kami',
+      button1Style: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFFFFF' },
       buttonText2: 'Reservasi Meja',
+      button2Style: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFFFFF' },
       bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920&auto=format&fit=crop',
       overlayOpacity: 0.5,
       style: {
@@ -307,11 +348,24 @@ export class ConfigService {
         titleFontSize: '3rem',
         subtitleFontSize: '1.125rem'
       },
-      cardImageHeight: '100%', // Aspect square handled by CSS usually, but can be forced
+      cardImageHeight: '100%', 
       cardBorderRadius: '12px',
       itemTitleSize: '1.125rem',
       itemPriceSize: '0.875rem',
       gridGap: '24px'
+    },
+    packagesPage: {
+      title: 'Paket Hemat',
+      subtitle: 'Pilihan paket makan bersama untuk keluarga dan rombongan.',
+      style: {
+        backgroundColor: '#FFF3E0', 
+        textColor: '#3E2723',
+        accentColor: '#D84315',
+        fontFamily: 'Playfair Display',
+        titleFontSize: '2.5rem',
+        subtitleFontSize: '1rem'
+      },
+      cardBorderRadius: '16px'
     },
     reservation: {
       title: 'Reservasi Tempat',
@@ -349,7 +403,7 @@ export class ConfigService {
     footer: {
       description: 'Menyajikan cita rasa Sate Maranggi asli Cimahi sejak 1980. Bumbu meresap, daging empuk, sambal nikmat.',
       copyrightText: 'All Rights Reserved.',
-      instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/', // Fallback global
+      instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/', 
       facebookLink: 'https://facebook.com',
       tiktokLink: 'https://tiktok.com',
       style: {
@@ -385,6 +439,9 @@ export class ConfigService {
         tiktokLink: 'https://tiktok.com/@tuangngeunah',
         menu: [
            { name: 'Sate Maranggi Premium', desc: 'Daging pilihan terbaik', price: 'Rp 50.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', favorite: true, soldOut: false, spicyLevel: 0 }
+        ],
+        packages: [
+          { name: 'Paket Keluarga A', price: 'Rp 250.000', description: 'Cocok untuk 4 orang', image: 'https://picsum.photos/seed/paka/400/300', items: ['40 Tusuk Sate Campur', '4 Nasi Timbel', '1 Karedok', '4 Teh Manis'] }
         ]
       },
       {
@@ -401,7 +458,8 @@ export class ConfigService {
         tiktokLink: '',
         menu: [
            { name: 'Sate Maranggi Campur', desc: 'Sate Sapi + Jando', price: 'Rp 45.000', category: 'Sate', image: 'https://images.unsplash.com/photo-1603083544234-814b73b22228?w=800', favorite: true, soldOut: false, spicyLevel: 0 }
-        ]
+        ],
+        packages: []
       },
       {
         id: 'pasteur',
@@ -417,7 +475,8 @@ export class ConfigService {
         tiktokLink: '',
         menu: [
            { name: 'Sop Iga Bakar', desc: 'Iga bakar dengan kuah sop segar', price: 'Rp 65.000', category: 'Sop', image: 'https://images.unsplash.com/photo-1544025162-d76690b6d012?w=800', favorite: true, soldOut: false, spicyLevel: 1 }
-        ]
+        ],
+        packages: []
       }
     ],
     gallery: [
@@ -443,7 +502,8 @@ export class ConfigService {
        const c = this.config();
        const root = document.documentElement;
        root.style.setProperty('--color-brand-brown', c.hero.style.backgroundColor);
-       // Set Favicon Dynamically
+       
+       // Handle Favicon
        if (c.global.favicon) {
          const link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
          if (!link) {
@@ -455,7 +515,80 @@ export class ConfigService {
             link.href = c.global.favicon;
          }
        }
+
+       // Handle PWA Manifest Dynamic Generation
+       this.updateManifest(c);
+
+       // Handle Analytics Injection
+       if (c.global.analyticsId) {
+          this.injectAnalytics(c.global.analyticsId);
+       }
     });
+  }
+
+  // --- ANALYTICS ---
+  private injectAnalytics(id: string) {
+    if (document.getElementById('analytics-script')) return;
+    
+    // Google Analytics Stub
+    const script = document.createElement('script');
+    script.id = 'analytics-script';
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
+    document.head.appendChild(script);
+
+    const inline = document.createElement('script');
+    inline.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${id}');
+    `;
+    document.head.appendChild(inline);
+  }
+
+  logEvent(eventName: string, params: any = {}) {
+    if ((window as any).gtag) {
+      (window as any).gtag('event', eventName, params);
+    }
+    console.log('[Analytics]', eventName, params);
+  }
+
+  // --- PWA ---
+  private updateManifest(c: AppConfig) {
+    const manifest = {
+      name: c.global.logoText,
+      short_name: c.global.logoText,
+      start_url: "./",
+      display: "standalone",
+      background_color: c.global.navbarColor,
+      theme_color: c.global.navbarColor,
+      icons: [
+        {
+          src: c.global.favicon || "https://ui-avatars.com/api/?name=App&size=192",
+          sizes: "192x192",
+          type: "image/png"
+        },
+        {
+          src: c.global.favicon || "https://ui-avatars.com/api/?name=App&size=512",
+          sizes: "512x512",
+          type: "image/png"
+        }
+      ]
+    };
+
+    const stringManifest = JSON.stringify(manifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    
+    let link: HTMLLinkElement | null = document.querySelector('#manifest-link');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'manifest-link';
+      link.rel = 'manifest';
+      document.head.appendChild(link);
+    }
+    link.href = manifestURL;
   }
 
   getStoredFirebaseConfig(): FirebaseConfig | null {
@@ -513,25 +646,35 @@ export class ConfigService {
     const docRef = doc(this.db, 'settings', this.DOC_ID);
     
     onSnapshot(docRef, (docSnap) => {
-      this.firestoreError.set(null); // Clear error on success
+      this.firestoreError.set(null);
 
       if (docSnap.exists()) {
         const data = docSnap.data() as AppConfig;
         
-        // Deep Merge & Fallback for new properties
-        this.config.update(current => {
-          // Helper to merge style properties safely
-          const mergeStyle = (currentStyle: any, newStyle: any) => ({ ...currentStyle, ...newStyle });
+        // Deep Merge helper
+        const mergeStyle = (currentStyle: any, newStyle: any) => ({ ...currentStyle, ...newStyle });
+        const mergeText = (currentT: any, newT: any) => ({ ...currentT, ...newT });
 
-          return {
+        this.config.update(current => ({
             ...current,
             ...data,
             features: { ...current.features, ...(data.features || {}) },
-            global: { ...current.global, ...(data.global || {}) },
+            global: { 
+                ...current.global, 
+                ...(data.global || {}),
+                logoStyle: mergeText(current.global.logoStyle, data.global?.logoStyle),
+                metaStyle: mergeText(current.global.metaStyle, data.global?.metaStyle)
+            },
             intro: { ...current.intro, ...(data.intro || {}) },
             hero: { 
                 ...current.hero, 
                 ...(data.hero || {}),
+                badgeStyle: mergeText(current.hero.badgeStyle, data.hero?.badgeStyle),
+                titleStyle: mergeText(current.hero.titleStyle, data.hero?.titleStyle),
+                highlightStyle: mergeText(current.hero.highlightStyle, data.hero?.highlightStyle),
+                subtitleStyle: mergeText(current.hero.subtitleStyle, data.hero?.subtitleStyle),
+                button1Style: mergeText(current.hero.button1Style, data.hero?.button1Style),
+                button2Style: mergeText(current.hero.button2Style, data.hero?.button2Style),
                 style: mergeStyle(current.hero.style, data.hero?.style)
             },
             about: { 
@@ -544,6 +687,11 @@ export class ConfigService {
                 ...current.menuPage, 
                 ...(data.menuPage || {}),
                 style: mergeStyle(current.menuPage.style, data.menuPage?.style)
+            },
+            packagesPage: {
+                ...current.packagesPage,
+                ...(data.packagesPage || {}),
+                style: mergeStyle(current.packagesPage?.style || {}, data.packagesPage?.style || {})
             },
             reservation: { 
                 ...current.reservation, 
@@ -565,8 +713,7 @@ export class ConfigService {
             gallery: data.gallery || current.gallery,
             testimonials: data.testimonials || current.testimonials,
             ai: { ...current.ai, ...(data.ai || {}) }
-          };
-        });
+        }));
       } else {
         console.log("Config doc missing, using default.");
       }
@@ -586,18 +733,13 @@ export class ConfigService {
 
     try {
        await setDoc(doc(this.db, 'settings', this.DOC_ID), newConfig);
-       alert("Data berhasil disimpan ke Server Firebase!"); 
+       // NOTE: Alert replaced by Toast in components usually, but pure service log here
+       console.log("Config saved successfully");
     } catch (error: any) {
       console.error("Error saving config:", error);
-      if (error.code === 'permission-denied') {
-          alert("GAGAL MENYIMPAN: Akses Ditolak! Pastikan Rules sudah benar dan Anda sudah Login.");
-      } else {
-          alert("Gagal menyimpan ke server: " + error.message);
-      }
+      throw error;
     }
   }
-  
-  // --- LOCAL FILE HANDLING ---
   
   async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
     return new Promise((resolve, reject) => {

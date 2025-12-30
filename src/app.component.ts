@@ -6,6 +6,7 @@ import { NavbarComponent } from './components/navbar.component';
 import { FooterComponent } from './components/footer.component';
 import { AdminComponent } from './components/admin.component';
 import { CursorComponent } from './components/cursor.component';
+import { ToastComponent } from './components/toast.component';
 import { ConfigService } from './services/config.service';
 
 @Component({
@@ -17,10 +18,12 @@ import { ConfigService } from './services/config.service';
     NavbarComponent,
     FooterComponent,
     AdminComponent,
-    CursorComponent
+    CursorComponent,
+    ToastComponent
   ],
   template: `
     <app-cursor></app-cursor>
+    <app-toast></app-toast>
     
     <!-- Intro Video Overlay -->
     @if (showIntro()) {

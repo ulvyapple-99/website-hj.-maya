@@ -33,7 +33,13 @@ import { ConfigService } from '../services/config.service';
                  {{ config().global.logoText.charAt(0) }}
                </div>
              }
-             <span class="font-bold text-xl tracking-wide">{{ config().global.logoText }}</span>
+             <span class="font-bold tracking-wide"
+                   [style.fontFamily]="config().global.logoStyle.fontFamily"
+                   [style.fontSize]="config().global.logoStyle.fontSize"
+                   [style.color]="config().global.logoStyle.color === 'inherit' ? 'inherit' : config().global.logoStyle.color"
+             >
+               {{ config().global.logoText }}
+             </span>
           </div>
 
           <!-- Desktop Menu -->
@@ -47,6 +53,11 @@ import { ConfigService } from '../services/config.service';
             <a routerLink="/menu" routerLinkActive="font-bold underline" 
                [style.fontSize]="config().global.navLinkFontSize"
                class="hover:opacity-80 transition-colors font-medium cursor-pointer">Menu</a>
+            @if (config().features.showPackages) {
+               <a routerLink="/packages" routerLinkActive="font-bold underline" 
+                  [style.fontSize]="config().global.navLinkFontSize"
+                  class="hover:opacity-80 transition-colors font-medium cursor-pointer">Paket</a>
+            }
             <a routerLink="/reservation" routerLinkActive="font-bold underline" 
                [style.fontSize]="config().global.navLinkFontSize"
                class="hover:opacity-80 transition-colors font-medium cursor-pointer">Reservasi</a>
@@ -77,6 +88,9 @@ import { ConfigService } from '../services/config.service';
             <a routerLink="/" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Beranda</a>
             <a routerLink="/about" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Tentang</a>
             <a routerLink="/menu" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Menu</a>
+            @if (config().features.showPackages) {
+              <a routerLink="/packages" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Paket</a>
+            }
             <a routerLink="/reservation" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Reservasi</a>
             <a routerLink="/location" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Lokasi</a>
           </div>

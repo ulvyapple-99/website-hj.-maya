@@ -2,7 +2,8 @@
 import { Component, inject, signal, effect, CUSTOM_ELEMENTS_SCHEMA, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '../services/config.service';
+import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig, PackageItem } from '../services/config.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-admin',
@@ -115,6 +116,10 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                            <span>Menu</span>
                            <input type="checkbox" [(ngModel)]="config().features.showMenu">
                         </label>
+                         <label class="flex items-center justify-between text-sm">
+                           <span>Paket</span>
+                           <input type="checkbox" [(ngModel)]="config().features.showPackages">
+                        </label>
                         <label class="flex items-center justify-between text-sm">
                            <span>Reservation</span>
                            <input type="checkbox" [(ngModel)]="config().features.showReservation">
@@ -136,10 +141,34 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                         <div class="section-box">
                            <h3 class="section-title">Identitas Website & SEO</h3>
                            <div class="grid grid-cols-2 gap-4">
-                              <div><label class="label">Nama Website / Logo Text</label><input type="text" [(ngModel)]="config().global.logoText" class="input"></div>
+                              <div>
+                                 <label class="label">Nama Website / Logo Text</label>
+                                 <input type="text" [(ngModel)]="config().global.logoText" class="input">
+                                 <!-- Text Style Controls -->
+                                 <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
+                                    <select [(ngModel)]="config().global.logoStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
+                                       <option value="Playfair Display">Playfair</option>
+                                       <option value="Lato">Lato</option>
+                                       <option value="Montserrat">Montserrat</option>
+                                       <option value="Oswald">Oswald</option>
+                                       <option value="Lora">Lora</option>
+                                    </select>
+                                    <input type="text" [(ngModel)]="config().global.logoStyle.fontSize" class="input text-xs w-20 py-1" placeholder="Size">
+                                    <input type="color" [(ngModel)]="config().global.logoStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                 </div>
+                              </div>
                               <div>
                                  <label class="label">Meta Description (SEO)</label>
                                  <textarea [(ngModel)]="config().global.metaDescription" class="input h-10" placeholder="Deskripsi untuk Google..."></textarea>
+                                 <!-- Text Style Controls (Visual only for Admin, Meta tags don't style) -->
+                                 <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
+                                    <select [(ngModel)]="config().global.metaStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
+                                       <option value="Lato">Lato</option>
+                                       <option value="Open Sans">Open Sans</option>
+                                    </select>
+                                    <input type="text" [(ngModel)]="config().global.metaStyle.fontSize" class="input text-xs w-20 py-1" placeholder="Size">
+                                    <input type="color" [(ngModel)]="config().global.metaStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                 </div>
                               </div>
                               <div>
                                  <label class="label">Logo Image</label>
@@ -152,6 +181,14 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                                  <label class="label">Favicon (Icon Browser)</label>
                                  <input type="file" (change)="onFileSelected($event, 'favicon')" class="input text-xs">
                                  <img *ngIf="config().global.favicon" [src]="config().global.favicon" class="h-6 w-6 mt-1">
+                              </div>
+                              <div>
+                                 <label class="label">Google Analytics ID</label>
+                                 <input type="text" [(ngModel)]="config().global.analyticsId" class="input" placeholder="G-XXXXXXXXXX">
+                              </div>
+                              <div class="flex items-center gap-2 mt-4">
+                                <input type="checkbox" [(ngModel)]="config().features.enableCursor">
+                                <label class="label mb-0 cursor-pointer">Aktifkan Custom Cursor (Aksesibilitas)</label>
                               </div>
                            </div>
                         </div>
@@ -201,12 +238,90 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                         <div class="section-box">
                            <h3 class="section-title">Konten Utama</h3>
                            <div class="space-y-4">
-                              <div><label class="label">Judul Besar (Headline)</label><input type="text" [(ngModel)]="config().hero.title" class="input text-lg font-bold"></div>
-                              <div><label class="label">Teks Highlight (Warna Beda)</label><input type="text" [(ngModel)]="config().hero.highlight" class="input text-orange-600 font-bold"></div>
-                              <div><label class="label">Sub Judul</label><textarea [(ngModel)]="config().hero.subtitle" class="input h-20"></textarea></div>
+                              <div>
+                                 <label class="label">Teks Badge (Atas)</label>
+                                 <input type="text" [(ngModel)]="config().hero.badgeText" class="input">
+                                 <!-- Badge Style -->
+                                 <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
+                                    <select [(ngModel)]="config().hero.badgeStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
+                                       <option value="Lato">Lato</option>
+                                       <option value="Montserrat">Montserrat</option>
+                                       <option value="Open Sans">Open Sans</option>
+                                    </select>
+                                    <input type="text" [(ngModel)]="config().hero.badgeStyle.fontSize" class="input text-xs w-20 py-1" placeholder="Size">
+                                    <input type="color" [(ngModel)]="config().hero.badgeStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                 </div>
+                              </div>
+                              <div>
+                                 <label class="label">Judul Besar (Headline)</label>
+                                 <input type="text" [(ngModel)]="config().hero.title" class="input text-lg font-bold">
+                                 <!-- Title Style -->
+                                 <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
+                                    <select [(ngModel)]="config().hero.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
+                                       <option value="Playfair Display">Playfair</option>
+                                       <option value="Oswald">Oswald</option>
+                                       <option value="Montserrat">Montserrat</option>
+                                       <option value="Lora">Lora</option>
+                                    </select>
+                                    <input type="text" [(ngModel)]="config().hero.titleStyle.fontSize" class="input text-xs w-20 py-1" placeholder="Size">
+                                    <input type="color" [(ngModel)]="config().hero.titleStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                 </div>
+                              </div>
+                              <div>
+                                 <label class="label">Teks Highlight (Warna Beda)</label>
+                                 <input type="text" [(ngModel)]="config().hero.highlight" class="input text-orange-600 font-bold">
+                                 <!-- Highlight Style -->
+                                 <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
+                                    <select [(ngModel)]="config().hero.highlightStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
+                                       <option value="Playfair Display">Playfair</option>
+                                       <option value="Oswald">Oswald</option>
+                                       <option value="Montserrat">Montserrat</option>
+                                    </select>
+                                    <input type="text" [(ngModel)]="config().hero.highlightStyle.fontSize" class="input text-xs w-20 py-1" placeholder="Size">
+                                    <input type="color" [(ngModel)]="config().hero.highlightStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                 </div>
+                              </div>
+                              <div>
+                                 <label class="label">Sub Judul</label>
+                                 <textarea [(ngModel)]="config().hero.subtitle" class="input h-20"></textarea>
+                                 <!-- Subtitle Style -->
+                                 <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
+                                    <select [(ngModel)]="config().hero.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
+                                       <option value="Lato">Lato</option>
+                                       <option value="Montserrat">Montserrat</option>
+                                       <option value="Open Sans">Open Sans</option>
+                                    </select>
+                                    <input type="text" [(ngModel)]="config().hero.subtitleStyle.fontSize" class="input text-xs w-20 py-1" placeholder="Size">
+                                    <input type="color" [(ngModel)]="config().hero.subtitleStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                 </div>
+                              </div>
                               <div class="grid grid-cols-2 gap-4">
-                                 <div><label class="label">Teks Tombol 1</label><input type="text" [(ngModel)]="config().hero.buttonText1" class="input"></div>
-                                 <div><label class="label">Teks Tombol 2</label><input type="text" [(ngModel)]="config().hero.buttonText2" class="input"></div>
+                                 <div>
+                                    <label class="label">Teks Tombol 1</label>
+                                    <input type="text" [(ngModel)]="config().hero.buttonText1" class="input">
+                                    <!-- Button 1 Style -->
+                                    <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
+                                      <select [(ngModel)]="config().hero.button1Style.fontFamily" class="input text-xs w-20 bg-white py-1">
+                                         <option value="Lato">Lato</option>
+                                         <option value="Open Sans">Sans</option>
+                                      </select>
+                                      <input type="text" [(ngModel)]="config().hero.button1Style.fontSize" class="input text-xs w-16 py-1" placeholder="Size">
+                                      <input type="color" [(ngModel)]="config().hero.button1Style.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                    </div>
+                                 </div>
+                                 <div>
+                                    <label class="label">Teks Tombol 2</label>
+                                    <input type="text" [(ngModel)]="config().hero.buttonText2" class="input">
+                                    <!-- Button 2 Style -->
+                                    <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
+                                      <select [(ngModel)]="config().hero.button2Style.fontFamily" class="input text-xs w-20 bg-white py-1">
+                                         <option value="Lato">Lato</option>
+                                         <option value="Open Sans">Sans</option>
+                                      </select>
+                                      <input type="text" [(ngModel)]="config().hero.button2Style.fontSize" class="input text-xs w-16 py-1" placeholder="Size">
+                                      <input type="color" [(ngModel)]="config().hero.button2Style.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                    </div>
+                                 </div>
                               </div>
                            </div>
                         </div>
@@ -373,6 +488,85 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
                                        <textarea [(ngModel)]="item.desc" class="input text-xs h-10 resize-none" placeholder="Deskripsi"></textarea>
                                     </div>
                                     <button (click)="removeMenuItem($index)" class="self-start text-gray-300 hover:text-red-500 p-1">✕</button>
+                                 </div>
+                              }
+                           </div>
+                        </div>
+                     </div>
+                  }
+
+                  <!-- TAB: PACKAGES -->
+                  @if (currentTab() === 'packages') {
+                     <div class="space-y-6 h-full flex flex-col">
+                        <!-- Style Config -->
+                        <div class="section-box">
+                           <h3 class="section-title">Konfigurasi Halaman Paket</h3>
+                           <div class="grid grid-cols-2 gap-4 mb-4">
+                              <div><label class="label">Judul Halaman</label><input type="text" [(ngModel)]="config().packagesPage.title" class="input"></div>
+                              <div><label class="label">Sub Judul</label><input type="text" [(ngModel)]="config().packagesPage.subtitle" class="input"></div>
+                           </div>
+                           <div class="grid grid-cols-4 gap-2">
+                              <div><label class="label">BG Color</label><input type="color" [(ngModel)]="config().packagesPage.style.backgroundColor" class="w-full h-8"></div>
+                              <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().packagesPage.style.textColor" class="w-full h-8"></div>
+                              <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().packagesPage.style.accentColor" class="w-full h-8"></div>
+                           </div>
+                        </div>
+
+                        <!-- Content Management -->
+                        <div class="flex-1 flex flex-col bg-white rounded-xl shadow border overflow-hidden">
+                           <!-- Branch Tabs -->
+                           <div class="flex border-b bg-gray-50 overflow-x-auto">
+                              @for (branch of config().branches; track $index) {
+                                 <button (click)="selectedBranchIndex.set($index)" 
+                                    class="px-6 py-3 text-sm font-bold border-r hover:bg-white transition"
+                                    [class.bg-white]="selectedBranchIndex() === $index"
+                                    [class.text-blue-600]="selectedBranchIndex() === $index">
+                                    {{ branch.name }}
+                                 </button>
+                              }
+                           </div>
+                           
+                           <!-- Package List -->
+                           <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                              <div class="flex justify-between items-center mb-2">
+                                 <h4 class="font-bold text-gray-500 text-xs uppercase">Daftar Paket {{ config().branches[selectedBranchIndex()].name }}</h4>
+                                 <button (click)="addPackage()" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded font-bold hover:bg-green-700">+ Tambah Paket</button>
+                              </div>
+                              
+                              @if (!config().branches[selectedBranchIndex()].packages?.length) {
+                                 <p class="text-center text-gray-400 py-10 text-sm">Belum ada paket di cabang ini.</p>
+                              }
+
+                              @for (pkg of config().branches[selectedBranchIndex()].packages; track $index) {
+                                 <div class="border rounded-lg p-4 bg-gray-50 relative group">
+                                    <button (click)="removePackage($index)" class="absolute top-2 right-2 text-gray-300 hover:text-red-500 p-1">✕</button>
+                                    
+                                    <div class="grid md:grid-cols-[120px_1fr] gap-4">
+                                       <!-- Image -->
+                                       <div class="w-full h-32 bg-gray-200 rounded overflow-hidden relative cursor-pointer">
+                                          <img [src]="pkg.image || 'https://picsum.photos/200'" class="w-full h-full object-cover">
+                                          <input type="file" (change)="onFileSelected($event, 'packageItem', $index)" class="absolute inset-0 opacity-0" title="Ubah Foto">
+                                       </div>
+
+                                       <!-- Details -->
+                                       <div class="space-y-2">
+                                          <div class="flex gap-2">
+                                             <input type="text" [(ngModel)]="pkg.name" class="input font-bold" placeholder="Nama Paket">
+                                             <input type="text" [(ngModel)]="pkg.price" class="input w-32 text-right" placeholder="Harga">
+                                          </div>
+                                          <input type="text" [(ngModel)]="pkg.description" class="input text-xs" placeholder="Deskripsi Singkat">
+                                          
+                                          <!-- Items List Logic -->
+                                          <div>
+                                             <label class="label">Isi Paket (Pisahkan dengan Enter atau Koma)</label>
+                                             <textarea 
+                                                [ngModel]="pkg.items.join(', ')" 
+                                                (ngModelChange)="updatePackageItems(pkg, $event)"
+                                                class="input text-xs h-16" 
+                                                placeholder="Contoh: Nasi, Ayam, Tahu, Tempe"></textarea>
+                                          </div>
+                                       </div>
+                                    </div>
                                  </div>
                               }
                            </div>
@@ -677,6 +871,7 @@ import { ConfigService, MenuItem, Branch, Testimonial, FirebaseConfig } from '..
 })
 export class AdminComponent {
   configService = inject(ConfigService);
+  toastService = inject(ToastService);
   config = this.configService.config;
   isAuthenticated = this.configService.isAdmin;
   firestoreError = this.configService.firestoreError;
@@ -696,6 +891,7 @@ export class AdminComponent {
     { id: 'hero', label: 'Hero / Utama', icon: '🏠' },
     { id: 'about', label: 'About Us', icon: '📖' },
     { id: 'menu', label: 'Menu Makanan', icon: '🍱' },
+    { id: 'packages', label: 'Paket Hemat', icon: '🎁' },
     { id: 'reservation', label: 'Reservasi', icon: '📅' },
     { id: 'location', label: 'Lokasi', icon: '📍' },
     { id: 'media', label: 'Instagram Feed', icon: '📸' },
@@ -724,19 +920,39 @@ export class AdminComponent {
     try {
       await this.configService.loginAdmin(this.emailInput(), this.passwordInput());
       this.currentTab.set('global');
+      this.toastService.show('Selamat datang kembali, Admin!', 'success');
     } catch (err: any) {
       this.loginError.set("Gagal Login: " + err.message);
+      this.toastService.show('Gagal login, periksa kredensial.', 'error');
     } finally {
       this.isLoggingIn.set(false);
     }
   }
 
-  async logout() { await this.configService.logoutAdmin(); }
+  async logout() { 
+    await this.configService.logoutAdmin(); 
+    this.toastService.show('Berhasil logout.', 'info');
+  }
 
-  async saveChanges() { await this.configService.updateConfig({...this.config()}); }
+  async saveChanges() { 
+    try {
+      await this.configService.updateConfig({...this.config()});
+      this.toastService.show('Pengaturan berhasil disimpan!', 'success');
+    } catch(e) {
+      this.toastService.show('Gagal menyimpan pengaturan.', 'error');
+    }
+  }
 
-  saveFirebaseSetup() { this.configService.saveStoredFirebaseConfig(this.tempConfig); }
-  resetFirebaseSetup() { if(confirm('Reset ke default?')) this.configService.resetStoredFirebaseConfig(); }
+  saveFirebaseSetup() { 
+    this.configService.saveStoredFirebaseConfig(this.tempConfig);
+    this.toastService.show('Konfigurasi DB tersimpan. Memuat ulang...', 'success');
+  }
+  resetFirebaseSetup() { 
+    if(confirm('Reset ke default?')) {
+      this.configService.resetStoredFirebaseConfig();
+      this.toastService.show('Konfigurasi reset.', 'info');
+    }
+  }
 
   // Generic File Uploader
   async onFileSelected(event: any, type: string, index?: number) {
@@ -758,19 +974,59 @@ export class AdminComponent {
        
        if (type === 'branchMap') c.branches[this.selectedBranchIndex()].mapImage = url;
        if (type === 'menuItem' && typeof index === 'number') c.branches[this.selectedBranchIndex()].menu[index].image = url;
+       // Package Image logic
+       if (type === 'packageItem' && typeof index === 'number') {
+           const pkgs = c.branches[this.selectedBranchIndex()].packages;
+           if(pkgs && pkgs[index]) pkgs[index].image = url;
+       }
        
        if (type === 'gallery') { if(!c.gallery) c.gallery = []; c.gallery.push(url); }
        
        this.config.set({...c});
-     } catch (err: any) { alert("Error upload: " + err.message); } 
+       this.toastService.show('Upload berhasil!', 'success');
+     } catch (err: any) { 
+        this.toastService.show("Error upload: " + err.message, 'error');
+     } 
      finally { this.isUploading.set(false); }
   }
 
   // --- CRUD ---
   addMenuItem() {
     this.config().branches[this.selectedBranchIndex()].menu.unshift({ name: 'Menu Baru', desc: '', price: 'Rp 0', category: 'Umum', image: 'https://picsum.photos/200', favorite: false, soldOut: false, spicyLevel: 0 });
+    this.toastService.show('Item menu ditambahkan.', 'info');
   }
-  removeMenuItem(i: number) { if(confirm('Hapus menu?')) this.config().branches[this.selectedBranchIndex()].menu.splice(i, 1); }
+  removeMenuItem(i: number) { 
+    if(confirm('Hapus menu?')) {
+      this.config().branches[this.selectedBranchIndex()].menu.splice(i, 1);
+      this.toastService.show('Item menu dihapus.', 'info');
+    }
+  }
+
+  // Packages CRUD
+  addPackage() {
+    if (!this.config().branches[this.selectedBranchIndex()].packages) {
+        this.config().branches[this.selectedBranchIndex()].packages = [];
+    }
+    this.config().branches[this.selectedBranchIndex()].packages?.unshift({
+        name: 'Paket Baru',
+        price: 'Rp 0',
+        description: 'Deskripsi paket...',
+        image: 'https://picsum.photos/300/200',
+        items: ['Nasi', 'Lauk']
+    });
+    this.toastService.show('Paket ditambahkan.', 'info');
+  }
+  removePackage(i: number) {
+    if(confirm('Hapus paket ini?')) {
+        this.config().branches[this.selectedBranchIndex()].packages?.splice(i, 1);
+        this.toastService.show('Paket dihapus.', 'info');
+    }
+  }
+  updatePackageItems(pkg: PackageItem, value: string) {
+    // Split string by enter or comma and filter empty strings
+    pkg.items = value.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+  }
+
   removeGalleryImage(i: number) { if(confirm('Hapus foto?')) this.config().gallery.splice(i, 1); }
   
   addTestimonial() { 
@@ -780,8 +1036,9 @@ export class AdminComponent {
   removeTestimonial(i: number) { if(confirm('Hapus testimoni?')) this.config().testimonials.splice(i, 1); }
   
   addBranch() {
-    this.config().branches.push({ id: 'b-'+Date.now(), name: 'Baru', address: '', googleMapsUrl: '', phone: '', whatsappNumber: '', hours: '', mapImage: '', menu: [] });
+    this.config().branches.push({ id: 'b-'+Date.now(), name: 'Baru', address: '', googleMapsUrl: '', phone: '', whatsappNumber: '', hours: '', mapImage: '', menu: [], packages: [] });
     this.selectedBranchIndex.set(this.config().branches.length - 1);
+    this.toastService.show('Cabang baru dibuat.', 'success');
   }
   removeBranch() { if(confirm('Hapus cabang?')) { this.config().branches.splice(this.selectedBranchIndex(), 1); this.selectedBranchIndex.set(0); } }
 }

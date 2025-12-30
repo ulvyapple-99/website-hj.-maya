@@ -12,6 +12,10 @@ export class GeminiService {
   
   // GANTI DENGAN API KEY GOOGLE AI STUDIO ANDA JIKA 'process.env' ERROR DI DEPLOYMENT
   private HARDCODED_API_KEY = ''; 
+  
+  // Rate Limiting
+  private lastCallTime = 0;
+  private MIN_INTERVAL_MS = 3000; // 3 seconds delay
 
   constructor() {
     this.initAI();
@@ -35,6 +39,13 @@ export class GeminiService {
   }
 
   async getRecommendation(query: string): Promise<string> {
+    // Rate Limit Check
+    const now = Date.now();
+    if (now - this.lastCallTime < this.MIN_INTERVAL_MS) {
+       return "Mohon tunggu sebentar sebelum mengirim pesan lagi ya...";
+    }
+    this.lastCallTime = now;
+
     if (!this.ai) {
       this.initAI(); // Try to init again
       if (!this.ai) {

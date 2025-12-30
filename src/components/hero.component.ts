@@ -43,33 +43,49 @@ import { CommonModule } from '@angular/common';
       <div class="relative z-20 max-w-5xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
         <!-- Badge -->
         <div class="mb-6 animate-fade-in-down opacity-0" style="animation-delay: 0.1s; animation-fill-mode: forwards;">
-           <span class="px-5 py-2 rounded-full text-xs font-bold tracking-[0.25em] uppercase border border-white/40 backdrop-blur-md shadow-lg"
-                 [style.color]="config().hero.style.accentColor"
-                 [style.borderColor]="config().hero.style.accentColor">
-              Est. 1980
+           <span class="px-5 py-2 rounded-full font-bold tracking-[0.25em] uppercase border border-white/40 backdrop-blur-md shadow-lg"
+                 [style.color]="config().hero.badgeStyle.color"
+                 [style.borderColor]="config().hero.badgeStyle.color"
+                 [style.fontFamily]="config().hero.badgeStyle.fontFamily"
+                 [style.fontSize]="config().hero.badgeStyle.fontSize">
+              {{ config().hero.badgeText }}
            </span>
         </div>
 
+        <!-- Title -->
         <h1 class="font-bold tracking-tight mb-6 animate-fade-in-up leading-tight drop-shadow-2xl"
-            [style.fontSize]="config().hero.style.titleFontSize">
+            [style.fontFamily]="config().hero.titleStyle.fontFamily"
+            [style.fontSize]="config().hero.titleStyle.fontSize"
+            [style.color]="config().hero.titleStyle.color">
           {{ config().hero.title }} <br/>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-200"
-                [style.backgroundImage]="'linear-gradient(to right, ' + config().hero.style.accentColor + ', #FFD54F)'">
+          <!-- Highlight -->
+          <span class="text-transparent bg-clip-text"
+                [style.fontFamily]="config().hero.highlightStyle.fontFamily"
+                [style.fontSize]="config().hero.highlightStyle.fontSize"
+                [style.color]="config().hero.highlightStyle.color"
+                [style.backgroundImage]="config().hero.highlightStyle.color === 'inherit' ? 'linear-gradient(to right, ' + config().hero.style.accentColor + ', #FFD54F)' : 'none'">
             {{ config().hero.highlight }}
           </span>
         </h1>
         
         <div class="w-24 h-1.5 bg-white/60 mb-8 rounded-full animate-width-grow shadow-lg"></div>
 
-        <p class="max-w-2xl mb-10 font-light animate-fade-in-up opacity-0 text-gray-100 leading-relaxed drop-shadow-md" 
-           [style.fontSize]="config().hero.style.subtitleFontSize"
+        <!-- Subtitle -->
+        <p class="max-w-2xl mb-10 font-light animate-fade-in-up opacity-0 leading-relaxed drop-shadow-md" 
+           [style.fontFamily]="config().hero.subtitleStyle.fontFamily"
+           [style.fontSize]="config().hero.subtitleStyle.fontSize"
+           [style.color]="config().hero.subtitleStyle.color"
            style="animation-delay: 0.3s; animation-fill-mode: forwards;">
           {{ config().hero.subtitle }}
         </p>
         
         <div class="flex flex-col sm:flex-row gap-5 animate-fade-in-up opacity-0" style="animation-delay: 0.5s; animation-fill-mode: forwards;">
+          <!-- Button 1 -->
           <a routerLink="/menu" 
-             class="font-bold shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all transform hover:scale-105 hover:-translate-y-1 cursor-pointer no-underline border-none text-white relative overflow-hidden group"
+             class="font-bold shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all transform hover:scale-105 hover:-translate-y-1 cursor-pointer no-underline border-none relative overflow-hidden group"
+             [style.fontFamily]="config().hero.button1Style.fontFamily"
+             [style.fontSize]="config().hero.button1Style.fontSize"
+             [style.color]="config().hero.button1Style.color"
              [style.backgroundColor]="config().hero.style.accentColor"
              [style.paddingTop]="config().hero.style.buttonPaddingY"
              [style.paddingBottom]="config().hero.style.buttonPaddingY"
@@ -80,9 +96,13 @@ import { CommonModule } from '@angular/common';
             <span class="relative z-10">{{ config().hero.buttonText1 }}</span>
             <div class="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
           </a>
+          
+          <!-- Button 2 -->
           <a routerLink="/reservation" 
              class="font-bold transition-all transform hover:scale-105 cursor-pointer no-underline border-2 border-white/30 backdrop-blur-sm hover:bg-white/10 hover:border-white"
-             [style.color]="'#fff'"
+             [style.fontFamily]="config().hero.button2Style.fontFamily"
+             [style.fontSize]="config().hero.button2Style.fontSize"
+             [style.color]="config().hero.button2Style.color"
              [style.paddingTop]="config().hero.style.buttonPaddingY"
              [style.paddingBottom]="config().hero.style.buttonPaddingY"
              [style.paddingLeft]="config().hero.style.buttonPaddingX"

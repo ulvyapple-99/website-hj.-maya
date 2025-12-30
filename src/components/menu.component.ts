@@ -1,7 +1,8 @@
 
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfigService, MenuItem } from '../services/config.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-menu',
@@ -213,11 +214,30 @@ import { ConfigService, MenuItem } from '../services/config.service';
 })
 export class MenuComponent {
   configService = inject(ConfigService);
+  toastService = inject(ToastService);
   config = this.configService.config;
   
   selectedBranchIndex = signal(0);
   cart = signal<Map<string, number>>(new Map());
   showCartModal = signal(false);
+
+  constructor() {
+    // 1. Load Cart from LocalStorage
+    try {
+      const saved = localStorage.getItem('cart_data');
+      if (saved) {
+        this.cart.set(new Map(JSON.parse(saved)));
+      }
+    } catch(e) { console.error('Failed to load cart', e); }
+
+    // 2. Persist Cart on Change
+    effect(() => {
+      try {
+        const serialized = JSON.stringify(Array.from(this.cart().entries()));
+        localStorage.setItem('cart_data', serialized);
+      } catch (e) { console.error('Failed to save cart', e); }
+    });
+  }
 
   currentBranch = computed(() => this.config().branches[this.selectedBranchIndex()]);
   currentBranchMenu = computed(() => this.currentBranch().menu);
@@ -263,6 +283,11 @@ export class MenuComponent {
   setBranch(index: number) {
     if (this.selectedBranchIndex() !== index) {
       this.selectedBranchIndex.set(index);
+      // Optional: Clear cart when switching branch or keep it? 
+      // User might want to clear mixed branch orders.
+      if (this.cart().size > 0 && !confirm("Ganti cabang akan mengosongkan keranjang saat ini. Lanjutkan?")) {
+        return;
+      }
       this.cart.set(new Map());
     }
   }
@@ -273,6 +298,8 @@ export class MenuComponent {
       newMap.set(item.name, (newMap.get(item.name) || 0) + 1);
       return newMap;
     });
+    this.toastService.show(`Ditambahkan: ${item.name}`, 'success');
+    this.configService.logEvent('add_to_cart', { item: item.name, price: item.price });
   }
 
   removeFromCart(item: MenuItem) {
@@ -300,6 +327,8 @@ export class MenuComponent {
     message += `\n*Total Estimasi: ${this.formatRupiah(this.totalPrice())}*`;
     message += `\n\nMohon info ketersediaannya. Hatur nuhun.`;
     
+    this.configService.logEvent('checkout', { total: this.totalPrice() });
+
     const phone = this.configService.formatPhoneNumber(branch.whatsappNumber);
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   }
