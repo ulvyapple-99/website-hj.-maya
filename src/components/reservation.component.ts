@@ -71,7 +71,8 @@ interface GuestOrder {
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs font-bold mb-1 uppercase">Tanggal</label>
-                    <input type="date" [(ngModel)]="formDate" 
+                    <!-- FIX: Added min attribute -->
+                    <input type="date" [(ngModel)]="formDate" [min]="today"
                            class="w-full border px-3 py-2 text-sm bg-white"
                            [style.height]="config().reservation.inputHeight"
                            [style.borderRadius]="config().reservation.inputBorderRadius">
@@ -101,7 +102,7 @@ interface GuestOrder {
 
                 <div>
                   <label class="block text-xs font-bold mb-1 uppercase">Jumlah Pax</label>
-                  <input type="number" [(ngModel)]="formPax" 
+                  <input type="number" [(ngModel)]="formPax" min="1"
                          class="w-full border px-3 py-2 text-sm bg-white"
                          [style.height]="config().reservation.inputHeight"
                          [style.borderRadius]="config().reservation.inputBorderRadius">
@@ -202,6 +203,9 @@ export class ReservationComponent {
   formPax = signal(0);
   formNotes = signal('');
   isRamadan = signal(false);
+  
+  // DATE Validation
+  today = new Date().toISOString().split('T')[0];
 
   guests = signal<GuestOrder[]>([{ id: 1, name: 'Pemesan', cart: new Map() }]);
   activeGuestId = signal<number>(1);

@@ -1,5 +1,5 @@
 
-import { Component, signal, inject, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, signal, inject, ViewChild, ElementRef, AfterViewChecked, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GeminiService } from '../services/gemini.service';
@@ -32,7 +32,7 @@ import { ConfigService } from '../services/config.service';
       }
       
       <!-- Notification Ring -->
-      @if (!isOpen() && chatHistory().length === 0) {
+      @if (!isOpen() && chatHistory().length > 0) {
         <span class="absolute -top-1 -right-1 flex h-4 w-4">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
           <span class="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white"></span>
@@ -180,11 +180,20 @@ export class AssistantComponent implements AfterViewChecked {
   isLoading = signal(false);
   
   // Brand color fallback
-  brandColor = '#D84315'; // Default Orange
+  brandColor = '#D84315'; 
 
   constructor() {
-     // Try to sync with config if possible (simple effect)
-     // Not critical as we have a good fallback
+     // Persist Chat History
+     try {
+       const saved = localStorage.getItem('ai_chat_history');
+       if(saved) this.chatHistory.set(JSON.parse(saved));
+     } catch(e) {}
+
+     effect(() => {
+        try {
+          localStorage.setItem('ai_chat_history', JSON.stringify(this.chatHistory()));
+        } catch(e) {}
+     });
   }
 
   ngAfterViewChecked() {

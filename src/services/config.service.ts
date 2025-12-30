@@ -668,7 +668,15 @@ export class ConfigService {
 
   async loginAdmin(email: string, pass: string) {
     if (!this.auth) throw new Error("Firebase belum terhubung.");
-    await signInWithEmailAndPassword(this.auth, email, pass);
+    try {
+      await signInWithEmailAndPassword(this.auth, email, pass);
+    } catch (error: any) {
+      console.error("Login Failed:", error);
+      if (error.code === 'auth/api-key-not-valid') {
+        throw new Error("Konfigurasi API Key Firebase salah. Cek tab Database.");
+      }
+      throw error;
+    }
   }
 
   async logoutAdmin() {
@@ -797,6 +805,7 @@ export class ConfigService {
   }
   
   async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
+    // FIX #1: Client-side compression to avoid 1MB Firestore Limit
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -807,8 +816,9 @@ export class ConfigService {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                const MAX_WIDTH = 1000;
-                const MAX_HEIGHT = 1000;
+                const MAX_WIDTH = 800; // Reduced from 1000
+                const MAX_HEIGHT = 800;
+                
                 if (width > height) {
                     if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                 } else {
@@ -819,7 +829,8 @@ export class ConfigService {
                 const ctx = canvas.getContext('2d');
                 if (!ctx) { reject(new Error("Canvas error")); return; }
                 ctx.drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/jpeg', 0.8));
+                // Lower quality to 0.7
+                resolve(canvas.toDataURL('image/jpeg', 0.7));
             };
             img.onerror = () => reject(new Error("Invalid image"));
         };
@@ -849,6 +860,8 @@ export class ConfigService {
 
   is3D(url: string): boolean {
     if (!url) return false;
-    return url.endsWith('.glb') || url.endsWith('.gltf') || url.startsWith('data:model') || url.includes('gltf');
+    // Fix #17: Better 3D detection
+    const lower = url.toLowerCase();
+    return lower.endsWith('.glb') || lower.endsWith('.gltf') || lower.startsWith('data:model') || lower.includes('gltf') || lower.includes('glb');
   }
 }

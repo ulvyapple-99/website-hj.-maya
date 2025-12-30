@@ -90,12 +90,10 @@ import { ToastService } from '../services/toast.service';
                         title="Tampilkan Password"
                       >
                         @if (showPassword()) {
-                          <!-- Eye Slash Icon (Hide) -->
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
                           </svg>
                         } @else {
-                          <!-- Eye Icon (Show) -->
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -115,7 +113,7 @@ import { ToastService } from '../services/toast.service';
                </div>
             } @else {
                <!-- Sidebar Navigation -->
-               <div class="w-64 bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0">
+               <div class="w-64 bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0 flex flex-col">
                   <nav class="p-4 space-y-1">
                      <button *ngFor="let tab of tabs" (click)="currentTab.set(tab.id)"
                        class="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
@@ -127,6 +125,12 @@ import { ToastService } from '../services/toast.service';
                         {{ tab.label }}
                      </button>
                   </nav>
+
+                  <!-- Filter Font (New Feature) -->
+                  <div class="px-4 py-2 border-t">
+                    <label class="label text-[10px]">Filter Font List</label>
+                    <input type="text" [(ngModel)]="fontSearch" placeholder="Cari font..." class="input text-xs py-1">
+                  </div>
 
                   <!-- Quick Visibility Toggles -->
                   <div class="p-4 border-t mt-auto">
@@ -175,7 +179,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Text Style Controls -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().global.logoStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -186,10 +190,10 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Meta Description (SEO)</label>
                                  <textarea [(ngModel)]="config().global.metaDescription" class="input h-10" placeholder="Deskripsi untuk Google..."></textarea>
-                                 <!-- Text Style Controls (Visual only for Admin, Meta tags don't style) -->
+                                 <!-- Text Style Controls -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().global.metaStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -271,7 +275,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Badge Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().hero.badgeStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -285,7 +289,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().hero.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -299,7 +303,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Highlight Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().hero.highlightStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -313,7 +317,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().hero.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -328,7 +332,7 @@ import { ToastService } from '../services/toast.service';
                                     <!-- Button 1 Style -->
                                     <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                       <select [(ngModel)]="config().hero.button1Style.fontFamily" class="input text-xs w-20 bg-white py-1">
-                                         @for (f of fontList; track f) {
+                                         @for (f of filteredFonts(); track f) {
                                             <option [value]="f">{{ f }}</option>
                                          }
                                       </select>
@@ -342,7 +346,7 @@ import { ToastService } from '../services/toast.service';
                                     <!-- Button 2 Style -->
                                     <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                       <select [(ngModel)]="config().hero.button2Style.fontFamily" class="input text-xs w-20 bg-white py-1">
-                                         @for (f of fontList; track f) {
+                                         @for (f of filteredFonts(); track f) {
                                             <option [value]="f">{{ f }}</option>
                                          }
                                       </select>
@@ -375,14 +379,13 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Font Family</label>
                                  <select [(ngModel)]="config().hero.style.fontFamily" class="input bg-white">
-                                    @for (f of fontList; track f) {
+                                    @for (f of filteredFonts(); track f) {
                                        <option [value]="f">{{ f }}</option>
                                     }
                                  </select>
                               </div>
                            </div>
                            
-                           <!-- NEW: Granular Hero Settings -->
                            <h4 class="text-xs font-bold text-gray-500 uppercase mt-4 mb-2">Detail Ukuran</h4>
                            <div class="grid grid-cols-3 gap-4">
                              <div><label class="label">Ukuran Judul</label><input type="text" [(ngModel)]="config().hero.style.titleFontSize" class="input" placeholder="4.5rem"></div>
@@ -407,7 +410,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().about.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -421,7 +424,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Description Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().about.descriptionStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -447,7 +450,7 @@ import { ToastService } from '../services/toast.service';
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().about.style.textColor" class="w-full h-10"></div>
                               <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().about.style.accentColor" class="w-full h-10"></div>
                               <div><label class="label">Font Family</label><select [(ngModel)]="config().about.style.fontFamily" class="input bg-white">
-                                 @for (f of fontList; track f) {
+                                 @for (f of filteredFonts(); track f) {
                                     <option [value]="f">{{ f }}</option>
                                  }
                               </select></div>
@@ -474,7 +477,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().menuPage.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -488,7 +491,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().menuPage.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -502,7 +505,7 @@ import { ToastService } from '../services/toast.service';
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().menuPage.style.textColor" class="w-full h-8"></div>
                               <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().menuPage.style.accentColor" class="w-full h-8"></div>
                               <div><label class="label">Font</label><select [(ngModel)]="config().menuPage.style.fontFamily" class="input h-8 text-xs">
-                                 @for (f of fontList; track f) {
+                                 @for (f of filteredFonts(); track f) {
                                     <option [value]="f">{{ f }}</option>
                                  }
                               </select></div>
@@ -595,7 +598,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().packagesPage.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -609,7 +612,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().packagesPage.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -652,7 +655,6 @@ import { ToastService } from '../services/toast.service';
 
                               @for (pkg of config().branches[selectedBranchIndex()].packages; track $index) {
                                  <div class="border rounded-lg p-4 bg-gray-50 relative group">
-                                    <!-- FIXED: Added Z-Index and Background for better clickability -->
                                     <button (click)="removePackage($index)" class="absolute top-2 right-2 z-20 bg-white/80 hover:bg-red-100 text-gray-500 hover:text-red-600 p-1.5 rounded-full shadow-sm transition-all" title="Hapus Paket">
                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
@@ -702,7 +704,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().reservation.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -716,7 +718,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().reservation.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -776,7 +778,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().locationPage.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -790,7 +792,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().locationPage.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of fontList; track f) {
+                                       @for (f of filteredFonts(); track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -929,7 +931,7 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Font Review</label>
                                  <select [(ngModel)]="config().testimonialStyles.reviewStyle.fontFamily" class="input text-[10px] w-full py-1 h-6 mb-1">
-                                    @for (f of fontList; track f) {
+                                    @for (f of filteredFonts(); track f) {
                                        <option [value]="f">{{ f }}</option>
                                     }
                                  </select>
@@ -941,7 +943,7 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Font Nama</label>
                                  <select [(ngModel)]="config().testimonialStyles.nameStyle.fontFamily" class="input text-[10px] w-full py-1 h-6 mb-1">
-                                    @for (f of fontList; track f) {
+                                    @for (f of filteredFonts(); track f) {
                                        <option [value]="f">{{ f }}</option>
                                     }
                                  </select>
@@ -953,7 +955,7 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Font Role</label>
                                  <select [(ngModel)]="config().testimonialStyles.roleStyle.fontFamily" class="input text-[10px] w-full py-1 h-6 mb-1">
-                                    @for (f of fontList; track f) {
+                                    @for (f of filteredFonts(); track f) {
                                        <option [value]="f">{{ f }}</option>
                                     }
                                  </select>
@@ -996,7 +998,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Brand Style -->
                                 <div class="flex gap-2 mt-1 bg-gray-100 p-2 rounded">
                                    <select [(ngModel)]="config().footer.brandStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                      @for (f of fontList; track f) {
+                                      @for (f of filteredFonts(); track f) {
                                          <option [value]="f">{{ f }}</option>
                                       }
                                    </select>
@@ -1011,7 +1013,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Description Style -->
                                 <div class="flex gap-2 mt-1 bg-gray-100 p-2 rounded">
                                    <select [(ngModel)]="config().footer.descriptionStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                      @for (f of fontList; track f) {
+                                      @for (f of filteredFonts(); track f) {
                                          <option [value]="f">{{ f }}</option>
                                       }
                                    </select>
@@ -1026,7 +1028,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Copyright Style -->
                                 <div class="flex gap-2 mt-1 bg-gray-100 p-2 rounded">
                                    <select [(ngModel)]="config().footer.copyrightStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                      @for (f of fontList; track f) {
+                                      @for (f of filteredFonts(); track f) {
                                          <option [value]="f">{{ f }}</option>
                                       }
                                    </select>
@@ -1134,6 +1136,9 @@ export class AdminComponent {
   currentTab = signal('global');
   selectedBranchIndex = signal(0);
   
+  // FONT FILTERING (FIX Blind Spot #7 & #13)
+  fontSearch = signal('');
+  
   tabs = [
     { id: 'global', label: 'Global & Intro', icon: '🌍' },
     { id: 'hero', label: 'Hero / Utama', icon: '🏠' },
@@ -1148,7 +1153,6 @@ export class AdminComponent {
     { id: 'database', label: 'Database', icon: '🔥' },
   ];
   
-  // A comprehensive list of Google Fonts + System Fonts
   fontList = [
     'Playfair Display', 'Lato', 'Montserrat', 'Oswald', 'Lora', 'Raleway',
     'Open Sans', 'Roboto', 'Merriweather', 'Nunito', 'Poppins', 'Rubik',
@@ -1160,6 +1164,12 @@ export class AdminComponent {
     'Cabin', 'Bitter', 'Varela Round', 'Comfortaa', 'Maven Pro',
     'Arial', 'Helvetica', 'Times New Roman', 'Courier New', 'Verdana', 'Georgia'
   ].sort();
+
+  // Computed Font List
+  filteredFonts = computed(() => {
+    const term = this.fontSearch().toLowerCase();
+    return this.fontList.filter(f => f.toLowerCase().includes(term));
+  });
   
   tempConfig: FirebaseConfig = { apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: '' };
 
@@ -1174,7 +1184,6 @@ export class AdminComponent {
     else document.body.classList.remove('admin-mode');
   }
 
-  // Method to toggle password visibility
   togglePassword() {
     this.showPassword.update(v => !v);
   }
@@ -1220,10 +1229,17 @@ export class AdminComponent {
     }
   }
 
-  // Generic File Uploader
+  // Generic File Uploader with VALIDATION (Fix Blind Spot #2)
   async onFileSelected(event: any, type: string, index?: number) {
      const file = event.target.files[0];
      if(!file) return;
+
+     // Validation Size < 5MB
+     if (file.size > 5 * 1024 * 1024) {
+       this.toastService.show('File terlalu besar! Maksimal 5MB.', 'error');
+       return;
+     }
+
      this.isUploading.set(true); 
      try {
        const url = await this.configService.uploadFile(file);
@@ -1284,7 +1300,6 @@ export class AdminComponent {
   }
   removePackage(i: number) {
     if(confirm('Hapus paket ini?')) {
-        // Ensuring we mutate via update to trigger change detection in UI immediately
         const c = this.config();
         c.branches[this.selectedBranchIndex()].packages?.splice(i, 1);
         this.config.set({...c});

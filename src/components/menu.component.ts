@@ -58,9 +58,9 @@ import { ToastService } from '../services/toast.service';
                 <!-- Square Image (Like IG) -->
                 <div class="aspect-square relative overflow-hidden">
                    @if (isVideo(item.image)) {
-                      <video [src]="item.image" class="w-full h-full object-cover" muted loop></video>
+                      <video [src]="item.image" class="w-full h-full object-cover" muted loop loading="lazy"></video>
                    } @else {
-                      <img [src]="item.image" [alt]="item.name" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" [class.grayscale]="item.soldOut">
+                      <img [src]="item.image" [alt]="item.name" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" [class.grayscale]="item.soldOut" loading="lazy">
                    }
                    
                    @if(item.soldOut) {
@@ -242,13 +242,20 @@ export class MenuComponent {
   currentBranch = computed(() => this.config().branches[this.selectedBranchIndex()]);
   currentBranchMenu = computed(() => this.currentBranch().menu);
   
+  // Helper to generate unique key for cart items based on Branch + Name
+  private getItemKey(item: MenuItem): string {
+    return `${this.currentBranch().id}_${item.name}`;
+  }
+
   cartItemsList = computed(() => {
     const list: {menu: MenuItem, qty: number}[] = [];
     const currentMenu = this.currentBranchMenu();
+    const branchPrefix = this.currentBranch().id + '_';
     
-    this.cart().forEach((qty, name) => { 
-        if (qty > 0) {
-            const item = currentMenu.find(m => m.name === name);
+    this.cart().forEach((qty, key) => { 
+        if (qty > 0 && key.startsWith(branchPrefix)) {
+            const originalName = key.replace(branchPrefix, '');
+            const item = currentMenu.find(m => m.name === originalName);
             if (item) {
                 list.push({menu: item, qty});
             }
@@ -259,7 +266,10 @@ export class MenuComponent {
 
   cartTotalItems = computed(() => {
     let count = 0;
-    for (const qty of this.cart().values()) count += qty;
+    const branchPrefix = this.currentBranch().id + '_';
+    this.cart().forEach((qty, key) => {
+        if(key.startsWith(branchPrefix)) count += qty;
+    });
     return count;
   });
 
@@ -271,10 +281,15 @@ export class MenuComponent {
   totalPrice = computed(() => {
     let total = 0;
     const currentMenu = this.currentBranchMenu();
-    this.cart().forEach((qty, name) => { 
-        const item = currentMenu.find(m => m.name === name);
-        if (item) {
-            total += this.parsePrice(item.price) * qty;
+    const branchPrefix = this.currentBranch().id + '_';
+
+    this.cart().forEach((qty, key) => { 
+        if (key.startsWith(branchPrefix)) {
+          const originalName = key.replace(branchPrefix, '');
+          const item = currentMenu.find(m => m.name === originalName);
+          if (item) {
+              total += this.parsePrice(item.price) * qty;
+          }
         }
     });
     return total;
@@ -283,19 +298,14 @@ export class MenuComponent {
   setBranch(index: number) {
     if (this.selectedBranchIndex() !== index) {
       this.selectedBranchIndex.set(index);
-      // Optional: Clear cart when switching branch or keep it? 
-      // User might want to clear mixed branch orders.
-      if (this.cart().size > 0 && !confirm("Ganti cabang akan mengosongkan keranjang saat ini. Lanjutkan?")) {
-        return;
-      }
-      this.cart.set(new Map());
     }
   }
 
   addToCart(item: MenuItem) {
+    const key = this.getItemKey(item);
     this.cart.update(currentMap => {
       const newMap = new Map<string, number>(currentMap);
-      newMap.set(item.name, (newMap.get(item.name) || 0) + 1);
+      newMap.set(key, (newMap.get(key) || 0) + 1);
       return newMap;
     });
     this.toastService.show(`Ditambahkan: ${item.name}`, 'success');
@@ -303,17 +313,19 @@ export class MenuComponent {
   }
 
   removeFromCart(item: MenuItem) {
+    const key = this.getItemKey(item);
     this.cart.update(currentMap => {
       const newMap = new Map<string, number>(currentMap);
-      const currentQty = newMap.get(item.name) || 0;
-      if (currentQty > 1) newMap.set(item.name, currentQty - 1);
-      else newMap.delete(item.name);
+      const currentQty = newMap.get(key) || 0;
+      if (currentQty > 1) newMap.set(key, currentQty - 1);
+      else newMap.delete(key);
       return newMap;
     });
   }
 
   getQty(item: MenuItem): number {
-    return this.cart().get(item.name) || 0;
+    const key = this.getItemKey(item);
+    return this.cart().get(key) || 0;
   }
 
   toggleCartModal() {
@@ -322,7 +334,7 @@ export class MenuComponent {
 
   checkout() {
     const branch = this.currentBranch();
-    let message = `*Halo Sate Maranggi Hj. Maya,*\nSaya mau pesan untuk diambil/diantar:\n\n`;
+    let message = `*Halo Sate Maranggi Hj. Maya (${branch.name}),*\nSaya mau pesan untuk diambil/diantar:\n\n`;
     this.cartItemsList().forEach(i => message += `• ${i.qty}x ${i.menu.name}\n`);
     message += `\n*Total Estimasi: ${this.formatRupiah(this.totalPrice())}*`;
     message += `\n\nMohon info ketersediaannya. Hatur nuhun.`;
