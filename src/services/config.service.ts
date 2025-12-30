@@ -223,6 +223,7 @@ export interface AppConfig {
     copyrightText: string;
     copyrightStyle: TextStyle; // NEW
     brandStyle: TextStyle; // NEW
+    socialMediaHeaderStyle: TextStyle; // NEW for "Media Sosial Cabang"
     instagramLink: string;
     facebookLink: string;
     tiktokLink: string;
@@ -447,6 +448,7 @@ export class ConfigService {
       copyrightText: 'All Rights Reserved.',
       copyrightStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#6B7280' }, // Default
       brandStyle: { fontFamily: 'Playfair Display', fontSize: '1.5rem', color: '#E5E7EB' }, // Default
+      socialMediaHeaderStyle: { fontFamily: 'Lato', fontSize: '1.125rem', color: '#FF6F00' }, // Default
       instagramLink: 'https://www.instagram.com/satemaranggihjmayacimahi/', 
       facebookLink: 'https://facebook.com',
       tiktokLink: 'https://tiktok.com',
@@ -781,6 +783,7 @@ export class ConfigService {
                 descriptionStyle: mergeText(current.footer.descriptionStyle, data.footer?.descriptionStyle),
                 copyrightStyle: mergeText(current.footer.copyrightStyle, data.footer?.copyrightStyle),
                 brandStyle: mergeText(current.footer.brandStyle, data.footer?.brandStyle),
+                socialMediaHeaderStyle: mergeText(current.footer.socialMediaHeaderStyle, data.footer?.socialMediaHeaderStyle),
                 style: mergeStyle(current.footer.style, data.footer?.style)
             },
             branches: data.branches || current.branches,

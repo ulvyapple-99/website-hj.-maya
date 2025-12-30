@@ -34,7 +34,12 @@ import { CommonModule } from '@angular/common';
 
         <!-- Branch Specific Links -->
         <div class="flex-1 w-full md:w-auto">
-           <h4 class="font-bold text-lg mb-4 text-center md:text-left" [style.color]="config().footer.style.accentColor">Media Sosial Cabang</h4>
+           <!-- Dynamic Style for "Media Sosial Cabang" Header -->
+           <h4 class="font-bold mb-4 text-center md:text-left" 
+               [style.color]="config().footer.socialMediaHeaderStyle.color"
+               [style.fontFamily]="config().footer.socialMediaHeaderStyle.fontFamily"
+               [style.fontSize]="config().footer.socialMediaHeaderStyle.fontSize">Media Sosial Cabang</h4>
+           
            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               @for (branch of config().branches; track $index) {
                 <div class="flex flex-col items-center md:items-start">
