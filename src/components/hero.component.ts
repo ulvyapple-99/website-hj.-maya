@@ -40,7 +40,14 @@ import { CommonModule } from '@angular/common';
         <div class="absolute inset-0 bg-black z-10" [style.opacity]="config().hero.overlayOpacity"></div>
       </div>
 
-      <div class="relative z-20 max-w-5xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+      <div class="relative z-20 max-w-5xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col w-full"
+           [class.items-center]="!config().hero.textAlign || config().hero.textAlign === 'center'"
+           [class.items-start]="config().hero.textAlign === 'left'"
+           [class.items-end]="config().hero.textAlign === 'right'"
+           [class.text-center]="!config().hero.textAlign || config().hero.textAlign === 'center'"
+           [class.text-left]="config().hero.textAlign === 'left'"
+           [class.text-right]="config().hero.textAlign === 'right'">
+           
         <!-- Badge -->
         <div class="mb-6 animate-fade-in-down opacity-0" style="animation-delay: 0.1s; animation-fill-mode: forwards;">
            <span class="px-5 py-2 rounded-full font-bold tracking-[0.25em] uppercase border border-white/40 backdrop-blur-md shadow-lg"
@@ -68,7 +75,8 @@ import { CommonModule } from '@angular/common';
           </span>
         </h1>
         
-        <div class="w-24 h-1.5 bg-white/60 mb-8 rounded-full animate-width-grow shadow-lg"></div>
+        <div class="w-24 h-1.5 bg-white/60 mb-8 rounded-full animate-width-grow shadow-lg"
+             [style.alignSelf]="config().hero.textAlign === 'left' ? 'flex-start' : (config().hero.textAlign === 'right' ? 'flex-end' : 'center')"></div>
 
         <!-- Subtitle -->
         <p class="max-w-2xl mb-10 font-light animate-fade-in-up opacity-0 leading-relaxed drop-shadow-md" 
@@ -79,10 +87,15 @@ import { CommonModule } from '@angular/common';
           {{ config().hero.subtitle }}
         </p>
         
-        <div class="flex flex-col sm:flex-row gap-5 animate-fade-in-up opacity-0" style="animation-delay: 0.5s; animation-fill-mode: forwards;">
+        <div class="flex flex-col sm:flex-row gap-5 animate-fade-in-up opacity-0" 
+             style="animation-delay: 0.5s; animation-fill-mode: forwards;"
+             [class.justify-center]="!config().hero.textAlign || config().hero.textAlign === 'center'"
+             [class.justify-start]="config().hero.textAlign === 'left'"
+             [class.justify-end]="config().hero.textAlign === 'right'">
+          
           <!-- Button 1 -->
-          <a routerLink="/menu" 
-             class="font-bold shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all transform hover:scale-105 hover:-translate-y-1 cursor-pointer no-underline border-none relative overflow-hidden group"
+          <a [routerLink]="config().hero.button1Link || '/menu'" 
+             class="font-bold shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all transform hover:scale-105 hover:-translate-y-1 cursor-pointer no-underline border-none relative overflow-hidden group text-center"
              [style.fontFamily]="config().hero.button1Style.fontFamily"
              [style.fontSize]="config().hero.button1Style.fontSize"
              [style.color]="config().hero.button1Style.color"
@@ -98,8 +111,8 @@ import { CommonModule } from '@angular/common';
           </a>
           
           <!-- Button 2 -->
-          <a routerLink="/reservation" 
-             class="font-bold transition-all transform hover:scale-105 cursor-pointer no-underline border-2 border-white/30 backdrop-blur-sm hover:bg-white/10 hover:border-white"
+          <a [routerLink]="config().hero.button2Link || '/reservation'" 
+             class="font-bold transition-all transform hover:scale-105 cursor-pointer no-underline border-2 border-white/30 backdrop-blur-sm hover:bg-white/10 hover:border-white text-center"
              [style.fontFamily]="config().hero.button2Style.fontFamily"
              [style.fontSize]="config().hero.button2Style.fontSize"
              [style.color]="config().hero.button2Style.color"

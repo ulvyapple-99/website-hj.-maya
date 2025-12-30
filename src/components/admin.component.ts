@@ -119,279 +119,278 @@ import { ToastService } from '../services/toast.service';
                 <div class="max-w-6xl mx-auto space-y-8 pb-24">
 
                    <!-- ==========================
-                        TAB: GLOBAL & INTRO (COMPLETE)
+                        TAB: GLOBAL & INTRO
                         ========================== -->
                    @if (currentTab() === 'global') {
-                      
-                      <!-- INTRO SECTION -->
                       <section class="space-y-4">
                         <div class="flex items-center gap-2 mb-2">
                            <span class="text-2xl">🎬</span>
                            <h2 class="text-lg font-bold text-gray-800">Intro Loading Screen</h2>
                         </div>
-                        
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                           <!-- Toggle -->
                            <div class="flex items-center justify-between mb-6 pb-6 border-b border-gray-100">
-                              <div>
-                                 <h3 class="font-bold text-gray-900">Aktifkan Intro Video</h3>
-                                 <p class="text-sm text-gray-500">Tampilkan video saat website pertama kali dibuka.</p>
-                              </div>
+                              <div><h3 class="font-bold text-gray-900">Aktifkan Intro Video</h3><p class="text-sm text-gray-500">Tampilkan video saat website pertama kali dibuka.</p></div>
                               <label class="relative inline-flex items-center cursor-pointer">
                                  <input type="checkbox" [(ngModel)]="config().intro.enabled" class="sr-only peer">
-                                 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                                 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-orange-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                               </label>
                            </div>
-
                            @if (config().intro.enabled) {
                               <div class="grid md:grid-cols-12 gap-6">
-                                 <!-- Video Uploader -->
                                  <div class="md:col-span-5">
-                                    <label class="form-label">Upload Video Intro (.mp4)</label>
+                                    <label class="form-label">Upload Video (.mp4)</label>
                                     <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition relative group min-h-[160px] flex flex-col justify-center items-center cursor-pointer">
                                        <input type="file" (change)="onFileSelected($event, 'introVideo')" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
                                        <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mb-2">
                                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                                        </div>
-                                       <span class="text-sm font-bold text-gray-600 group-hover:text-orange-600">Klik untuk upload</span>
-                                       <span class="text-xs text-gray-400 mt-1">Max 2MB disarankan</span>
+                                       <span class="text-sm font-bold text-gray-600">Klik upload video</span>
                                     </div>
-                                    @if (config().intro.videoUrl) {
-                                       <div class="mt-2 text-xs text-green-600 font-bold flex items-center gap-1">
-                                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                                          Video Terupload
-                                       </div>
-                                    }
+                                    @if (config().intro.videoUrl) { <div class="mt-2 text-xs text-green-600 font-bold">✓ Video Terupload</div> }
                                  </div>
-                                 
-                                 <!-- Settings -->
                                  <div class="md:col-span-7 space-y-4">
                                     <div class="grid grid-cols-2 gap-4">
-                                       <div>
-                                          <label class="form-label">Durasi (Detik)</label>
-                                          <input type="number" [(ngModel)]="config().intro.duration" class="form-input">
-                                       </div>
-                                       <div>
-                                          <label class="form-label">Efek Animasi</label>
+                                       <div><label class="form-label">Durasi (Detik)</label><input type="number" [(ngModel)]="config().intro.duration" class="form-input"></div>
+                                       <div><label class="form-label">Efek Animasi</label>
                                           <select [(ngModel)]="config().intro.fadeOut" class="form-select">
-                                             <option value="fade">Fade Out (Pudar)</option>
-                                             <option value="slide-up">Slide Up (Naik)</option>
-                                             <option value="slide-down">Slide Down (Turun)</option>
-                                             <option value="zoom-out">Zoom Out (Mengecil)</option>
-                                             <option value="none">Tanpa Efek</option>
+                                             <option value="fade">Fade Out</option><option value="slide-up">Slide Up</option><option value="slide-down">Slide Down</option><option value="zoom-out">Zoom Out</option>
                                           </select>
                                        </div>
-                                    </div>
-                                    
-                                    <!-- Preview Box -->
-                                    <div class="bg-gray-100 p-3 rounded-lg text-xs text-gray-500">
-                                       <span class="font-bold">Info:</span> Jika video tidak muncul, pastikan format .mp4 dan ukuran file tidak terlalu besar untuk Firestore. Gunakan kompresor video online jika perlu.
                                     </div>
                                  </div>
                               </div>
                            }
                         </div>
                       </section>
-
-                      <!-- IDENTITY SECTION -->
                       <section class="space-y-4">
-                        <div class="flex items-center gap-2 mb-2">
-                           <span class="text-2xl">🆔</span>
-                           <h2 class="text-lg font-bold text-gray-800">Identitas Website & SEO</h2>
-                        </div>
-
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                           <div class="grid md:grid-cols-2 gap-8">
-                              <!-- Left: Branding -->
-                              <div class="space-y-5">
-                                 <div>
-                                    <label class="form-label">Nama Website / Brand</label>
-                                    <input type="text" [(ngModel)]="config().global.logoText" class="form-input font-bold text-lg">
-                                 </div>
-                                 
-                                 <div class="grid grid-cols-2 gap-4">
-                                    <!-- Upload Logo -->
-                                    <div>
-                                       <label class="form-label">Logo Image</label>
-                                       <div class="relative h-24 border border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden group">
-                                          @if(config().global.logoImage) {
-                                            <img [src]="config().global.logoImage" class="h-full w-auto object-contain p-2">
-                                          } @else {
-                                            <span class="text-xs text-gray-400">No Image</span>
-                                          }
-                                          <label class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold cursor-pointer transition">
-                                             Upload
-                                             <input type="file" (change)="onFileSelected($event, 'logoImage')" class="hidden">
-                                          </label>
-                                       </div>
-                                       @if(config().global.logoImage) { <button (click)="config().global.logoImage=''" class="text-[10px] text-red-500 underline mt-1">Hapus Gambar</button> }
-                                    </div>
-
-                                    <!-- Upload Favicon -->
-                                    <div>
-                                       <label class="form-label">Favicon (Tab Icon)</label>
-                                       <div class="relative h-24 border border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden group">
-                                          @if(config().global.favicon) {
-                                            <img [src]="config().global.favicon" class="w-10 h-10 object-contain">
-                                          } @else {
-                                            <span class="text-xs text-gray-400">No Icon</span>
-                                          }
-                                          <label class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold cursor-pointer transition">
-                                             Upload
-                                             <input type="file" (change)="onFileSelected($event, 'favicon')" class="hidden">
-                                          </label>
-                                       </div>
-                                    </div>
-                                 </div>
-                              </div>
-
-                              <!-- Right: SEO -->
-                              <div class="space-y-5">
-                                 <div>
-                                    <label class="form-label">Meta Description (SEO)</label>
-                                    <textarea [(ngModel)]="config().global.metaDescription" class="form-input h-24 text-sm" placeholder="Deskripsi singkat website untuk Google..."></textarea>
-                                 </div>
-                                 <div>
-                                    <label class="form-label">Google Analytics ID</label>
-                                    <input type="text" [(ngModel)]="config().global.analyticsId" class="form-input font-mono text-sm" placeholder="G-XXXXXXXXXX">
-                                 </div>
+                        <div class="flex items-center gap-2 mb-2"><span class="text-2xl">🆔</span><h2 class="text-lg font-bold text-gray-800">Identitas & Style</h2></div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+                           <div class="grid md:grid-cols-2 gap-6">
+                              <div><label class="form-label">Nama Brand</label><input type="text" [(ngModel)]="config().global.logoText" class="form-input font-bold text-lg"></div>
+                              <div class="grid grid-cols-2 gap-4">
+                                 <div><label class="form-label">Warna Navbar</label><div class="flex gap-2"><input type="color" [(ngModel)]="config().global.navbarColor" class="h-10 w-12 rounded cursor-pointer border"><input type="text" [(ngModel)]="config().global.navbarColor" class="form-input"></div></div>
+                                 <div><label class="form-label">Warna Teks</label><div class="flex gap-2"><input type="color" [(ngModel)]="config().global.navbarTextColor" class="h-10 w-12 rounded cursor-pointer border"><input type="text" [(ngModel)]="config().global.navbarTextColor" class="form-input"></div></div>
                               </div>
                            </div>
-                        </div>
-                      </section>
-
-                      <!-- STYLE SECTION -->
-                      <section class="space-y-4">
-                        <div class="flex items-center gap-2 mb-2">
-                           <span class="text-2xl">🎨</span>
-                           <h2 class="text-lg font-bold text-gray-800">Tampilan & Navigasi</h2>
-                        </div>
-
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-8">
-                           
-                           <!-- Typography -->
-                           <div>
-                              <h3 class="text-sm font-bold text-gray-900 border-b pb-2 mb-4 uppercase tracking-wide">Logo & Font Style</h3>
-                              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                 <div>
-                                    <label class="form-label">Font Family Logo</label>
-                                    <select [(ngModel)]="config().global.logoStyle.fontFamily" class="form-select font-bold">
-                                       <option value="Oswald">Oswald (Bold/Modern)</option>
-                                       <option value="Playfair Display">Playfair Display (Elegan)</option>
-                                       <option value="Dancing Script">Dancing Script (Latin)</option>
-                                       <option value="Great Vibes">Great Vibes (Classic)</option>
-                                       <option value="Lato">Lato (Clean)</option>
-                                       <option value="Montserrat">Montserrat (Geometric)</option>
-                                    </select>
-                                 </div>
-                                 <div>
-                                    <label class="form-label">Ukuran Font Logo</label>
-                                    <input type="text" [(ngModel)]="config().global.logoStyle.fontSize" class="form-input">
-                                 </div>
-                                 <div>
-                                    <label class="form-label">Warna Logo</label>
-                                    <div class="flex gap-2">
-                                       <input type="color" [(ngModel)]="config().global.logoStyle.color" class="h-10 w-12 rounded cursor-pointer border border-gray-300">
-                                       <input type="text" [(ngModel)]="config().global.logoStyle.color" class="form-input uppercase">
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-
-                           <!-- Navbar Settings -->
-                           <div>
-                              <h3 class="text-sm font-bold text-gray-900 border-b pb-2 mb-4 uppercase tracking-wide">Pengaturan Navbar (Menu Atas)</h3>
-                              <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                 <div>
-                                    <label class="form-label">Warna Background</label>
-                                    <div class="flex gap-2">
-                                       <input type="color" [(ngModel)]="config().global.navbarColor" class="h-10 w-12 rounded cursor-pointer border border-gray-300">
-                                       <input type="text" [(ngModel)]="config().global.navbarColor" class="form-input uppercase">
-                                    </div>
-                                 </div>
-                                 <div>
-                                    <label class="form-label">Warna Teks Menu</label>
-                                    <div class="flex gap-2">
-                                       <input type="color" [(ngModel)]="config().global.navbarTextColor" class="h-10 w-12 rounded cursor-pointer border border-gray-300">
-                                       <input type="text" [(ngModel)]="config().global.navbarTextColor" class="form-input uppercase">
-                                    </div>
-                                 </div>
-                                 <div>
-                                    <label class="form-label">Tinggi Navbar</label>
-                                    <input type="text" [(ngModel)]="config().global.navHeight" class="form-input" placeholder="80px">
-                                 </div>
-                                 <div>
-                                    <label class="form-label">Tinggi Logo (di Navbar)</label>
-                                    <input type="text" [(ngModel)]="config().global.navLogoHeight" class="form-input" placeholder="45px">
-                                 </div>
-                                 <div>
-                                    <label class="form-label">Ukuran Font Menu</label>
-                                    <input type="text" [(ngModel)]="config().global.navLinkFontSize" class="form-input" placeholder="16px">
-                                 </div>
-                                 <div>
-                                    <label class="form-label">Jarak Antar Menu</label>
-                                    <input type="text" [(ngModel)]="config().global.navLinkGap" class="form-input" placeholder="32px">
-                                 </div>
-                              </div>
+                           <div class="grid md:grid-cols-3 gap-6 pt-4 border-t">
+                              <div><label class="form-label">Font Logo</label><select [(ngModel)]="config().global.logoStyle.fontFamily" class="form-select"><option value="Oswald">Oswald</option><option value="Playfair Display">Playfair</option><option value="Great Vibes">Great Vibes</option><option value="Lato">Lato</option></select></div>
+                              <div><label class="form-label">Size Logo</label><input type="text" [(ngModel)]="config().global.logoStyle.fontSize" class="form-input"></div>
+                              <div><label class="form-label">Warna Logo</label><div class="flex gap-2"><input type="color" [(ngModel)]="config().global.logoStyle.color" class="h-10 w-12 rounded cursor-pointer border"><input type="text" [(ngModel)]="config().global.logoStyle.color" class="form-input"></div></div>
                            </div>
                         </div>
                       </section>
                    }
 
                    <!-- ==========================
-                        OTHER TABS (Simpler but Tidy)
+                        TAB: HERO (COMPLETELY REVAMPED & ROBUST)
                         ========================== -->
-                   
                    @if (currentTab() === 'hero') {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                         <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                            <h3 class="font-bold text-lg">Hero Banner</h3>
-                            <div class="flex items-center gap-2 text-sm text-gray-500">
-                               <input type="checkbox" [(ngModel)]="config().features.showHero" class="rounded text-orange-600 focus:ring-orange-500"> Aktifkan
+                      
+                      <!-- Header Switch -->
+                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex justify-between items-center mb-6">
+                         <div class="flex items-center gap-3">
+                            <span class="text-2xl">🏠</span>
+                            <div>
+                               <h3 class="font-bold text-gray-900">Hero Section</h3>
+                               <p class="text-xs text-gray-500">Banner utama di halaman depan</p>
                             </div>
                          </div>
-                         <div class="p-6 grid md:grid-cols-2 gap-8">
-                            <!-- Background -->
-                            <div class="space-y-4">
-                               <label class="form-label">Background Media</label>
-                               <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden relative group border">
-                                  @if (isVideo(config().hero.bgImage)) {
-                                     <video [src]="config().hero.bgImage" class="w-full h-full object-cover" muted autoplay loop></video>
-                                  } @else {
-                                     <img [src]="config().hero.bgImage" class="w-full h-full object-cover">
-                                  }
-                                  <label class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold cursor-pointer transition">
-                                     Ganti Media
-                                     <input type="file" (change)="onFileSelected($event, 'heroBg')" class="hidden">
-                                  </label>
-                               </div>
-                               <div>
-                                  <label class="form-label">Overlay Opacity (Gelap Terang)</label>
-                                  <input type="range" min="0" max="1" step="0.1" [(ngModel)]="config().hero.overlayOpacity" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
-                               </div>
-                            </div>
-                            
-                            <!-- Texts -->
-                            <div class="space-y-4">
-                               <div><label class="form-label">Badge Text (Atas)</label><input type="text" [(ngModel)]="config().hero.badgeText" class="form-input"></div>
-                               <div><label class="form-label">Headline Utama</label><input type="text" [(ngModel)]="config().hero.title" class="form-input font-bold text-lg"></div>
-                               <div><label class="form-label">Highlight Text (Warna Beda)</label><input type="text" [(ngModel)]="config().hero.highlight" class="form-input text-orange-600 font-bold"></div>
-                               <div><label class="form-label">Sub Judul</label><textarea [(ngModel)]="config().hero.subtitle" class="form-input h-20"></textarea></div>
-                               
-                               <div class="grid grid-cols-2 gap-4 pt-4 border-t">
-                                  <div><label class="form-label">Tombol 1 Text</label><input type="text" [(ngModel)]="config().hero.buttonText1" class="form-input"></div>
-                                  <div><label class="form-label">Tombol 2 Text</label><input type="text" [(ngModel)]="config().hero.buttonText2" class="form-input"></div>
-                               </div>
-                            </div>
-                         </div>
+                         <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" [(ngModel)]="config().features.showHero" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-orange-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                            <span class="ml-3 text-sm font-bold text-gray-700">Tampilkan</span>
+                         </label>
                       </div>
+
+                      @if (config().features.showHero) {
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                           
+                           <!-- COL 1: LAYOUT & MEDIA (Span 4) -->
+                           <div class="lg:col-span-4 space-y-6">
+                              <!-- Layout Control -->
+                              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                 <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 font-bold text-sm text-gray-700">1. Layout & Alignment</div>
+                                 <div class="p-5">
+                                    <label class="form-label">Text Alignment</label>
+                                    <div class="flex bg-gray-100 rounded-lg p-1">
+                                       <button (click)="config().hero.textAlign = 'left'" [class.bg-white]="config().hero.textAlign === 'left'" [class.shadow]="config().hero.textAlign === 'left'" class="flex-1 py-2 rounded text-sm font-bold transition">Left</button>
+                                       <button (click)="config().hero.textAlign = 'center'" [class.bg-white]="!config().hero.textAlign || config().hero.textAlign === 'center'" [class.shadow]="!config().hero.textAlign || config().hero.textAlign === 'center'" class="flex-1 py-2 rounded text-sm font-bold transition">Center</button>
+                                       <button (click)="config().hero.textAlign = 'right'" [class.bg-white]="config().hero.textAlign === 'right'" [class.shadow]="config().hero.textAlign === 'right'" class="flex-1 py-2 rounded text-sm font-bold transition">Right</button>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                 <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 font-bold text-sm text-gray-700">2. Media & Background</div>
+                                 <div class="p-5 space-y-5">
+                                    <!-- Media Preview & Upload -->
+                                    <div class="space-y-2">
+                                       <label class="form-label">Background Image / Video</label>
+                                       <div class="aspect-[9/16] md:aspect-video bg-gray-900 rounded-lg overflow-hidden relative group border border-gray-300 shadow-inner">
+                                          @if (isVideo(config().hero.bgImage)) {
+                                             <video [src]="config().hero.bgImage" class="w-full h-full object-cover opacity-80" muted autoplay loop></video>
+                                          } @else {
+                                             <img [src]="config().hero.bgImage" class="w-full h-full object-cover opacity-80">
+                                          }
+                                          <label class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white cursor-pointer transition duration-300">
+                                             <span class="font-bold text-xs uppercase tracking-widest">Ganti Media</span>
+                                             <input type="file" (change)="onFileSelected($event, 'heroBg')" class="hidden">
+                                          </label>
+                                       </div>
+                                    </div>
+
+                                    <!-- Overlay Control -->
+                                    <div>
+                                       <div class="flex justify-between items-center mb-1">
+                                          <label class="form-label mb-0">Overlay Opacity</label>
+                                          <span class="text-xs font-mono bg-gray-100 px-1 rounded">{{ config().hero.overlayOpacity }}</span>
+                                       </div>
+                                       <input type="range" min="0" max="1" step="0.1" [(ngModel)]="config().hero.overlayOpacity" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
+                                    </div>
+
+                                    <!-- Base Background Color -->
+                                    <div>
+                                       <label class="form-label">Base Background Color</label>
+                                       <div class="flex gap-2">
+                                          <input type="color" [(ngModel)]="config().hero.style.backgroundColor" class="h-10 w-12 rounded cursor-pointer border shadow-sm">
+                                          <input type="text" [(ngModel)]="config().hero.style.backgroundColor" class="form-input font-mono uppercase">
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <!-- COL 2: TYPOGRAPHY & CONTENT (Span 8) -->
+                           <div class="lg:col-span-8 space-y-6">
+                              
+                              <!-- BADGE SETTINGS -->
+                              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                 <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 font-bold text-sm text-gray-700">3. Badge (Label Atas)</div>
+                                 <div class="p-5 grid md:grid-cols-2 gap-6">
+                                    <div class="col-span-2 md:col-span-1">
+                                       <label class="form-label">Teks Badge</label>
+                                       <input type="text" [(ngModel)]="config().hero.badgeText" class="form-input">
+                                    </div>
+                                    <div class="col-span-2 md:col-span-1 grid grid-cols-2 gap-3">
+                                       <div>
+                                          <label class="form-label">Warna</label>
+                                          <div class="flex gap-2"><input type="color" [(ngModel)]="config().hero.badgeStyle.color" class="h-9 w-9 rounded border cursor-pointer"><input type="text" [(ngModel)]="config().hero.badgeStyle.color" class="form-input px-2 py-1 text-xs"></div>
+                                       </div>
+                                       <div>
+                                          <label class="form-label">Ukuran</label>
+                                          <input type="text" [(ngModel)]="config().hero.badgeStyle.fontSize" class="form-input px-2 py-1.5" placeholder="0.875rem">
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              <!-- MAIN TITLE SETTINGS -->
+                              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
+                                 <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 font-bold text-sm text-gray-700">4. Judul Utama (Headline)</div>
+                                 <div class="p-5 space-y-6">
+                                    <!-- Main Title Text -->
+                                    <div class="grid md:grid-cols-12 gap-4">
+                                       <div class="md:col-span-8">
+                                          <label class="form-label">Teks Judul Utama</label>
+                                          <input type="text" [(ngModel)]="config().hero.title" class="form-input font-bold text-lg">
+                                       </div>
+                                       <div class="md:col-span-4">
+                                          <label class="form-label">Warna Judul</label>
+                                          <div class="flex gap-2"><input type="color" [(ngModel)]="config().hero.titleStyle.color" class="h-10 w-full rounded border cursor-pointer"><input type="text" [(ngModel)]="config().hero.titleStyle.color" class="form-input w-20"></div>
+                                       </div>
+                                    </div>
+
+                                    <!-- Typography Grid -->
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                       <div>
+                                          <label class="form-label">Font Family</label>
+                                          <select [(ngModel)]="config().hero.titleStyle.fontFamily" class="form-select text-xs">
+                                             <option value="Oswald">Oswald</option><option value="Playfair Display">Playfair</option><option value="Great Vibes">Great Vibes</option><option value="Lato">Lato</option>
+                                          </select>
+                                       </div>
+                                       <div>
+                                          <label class="form-label">Font Size</label>
+                                          <input type="text" [(ngModel)]="config().hero.titleStyle.fontSize" class="form-input text-xs" placeholder="4.5rem">
+                                       </div>
+                                       <!-- Highlight Text -->
+                                       <div class="col-span-2">
+                                          <label class="form-label text-orange-600">Highlight Text (Aksen)</label>
+                                          <div class="flex gap-2">
+                                             <input type="text" [(ngModel)]="config().hero.highlight" class="form-input text-xs font-bold text-orange-600">
+                                             <input type="color" [(ngModel)]="config().hero.highlightStyle.color" class="h-9 w-9 flex-shrink-0 rounded border cursor-pointer">
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              <!-- SUBTITLE SETTINGS -->
+                              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                 <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 font-bold text-sm text-gray-700">5. Sub-Judul (Deskripsi)</div>
+                                 <div class="p-5 grid md:grid-cols-12 gap-6">
+                                    <div class="md:col-span-8">
+                                       <label class="form-label">Teks Deskripsi</label>
+                                       <textarea [(ngModel)]="config().hero.subtitle" class="form-input h-24 text-sm leading-relaxed"></textarea>
+                                    </div>
+                                    <div class="md:col-span-4 space-y-3">
+                                       <div>
+                                          <label class="form-label">Warna Teks</label>
+                                          <div class="flex gap-2"><input type="color" [(ngModel)]="config().hero.subtitleStyle.color" class="h-9 w-10 rounded border cursor-pointer"><input type="text" [(ngModel)]="config().hero.subtitleStyle.color" class="form-input px-2 py-1 text-xs"></div>
+                                       </div>
+                                       <div>
+                                          <label class="form-label">Ukuran Font</label>
+                                          <input type="text" [(ngModel)]="config().hero.subtitleStyle.fontSize" class="form-input px-2 py-1 text-xs">
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              <!-- ACTION BUTTONS -->
+                              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                 <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 font-bold text-sm text-gray-700">6. Tombol Aksi (Buttons)</div>
+                                 <div class="p-5 space-y-6">
+                                    <!-- Global Button Style -->
+                                    <div class="grid grid-cols-3 gap-4 mb-4 pb-4 border-b border-dashed border-gray-200">
+                                       <div><label class="form-label">Accent Color (Bg Tombol 1)</label><div class="flex gap-2"><input type="color" [(ngModel)]="config().hero.style.accentColor" class="h-9 w-full rounded border cursor-pointer"><input type="text" [(ngModel)]="config().hero.style.accentColor" class="form-input text-xs"></div></div>
+                                       <div><label class="form-label">Border Radius</label><input type="text" [(ngModel)]="config().hero.style.buttonRadius" class="form-input text-xs" placeholder="50px"></div>
+                                       <div><label class="form-label">Padding (Vertical)</label><input type="text" [(ngModel)]="config().hero.style.buttonPaddingY" class="form-input text-xs" placeholder="16px"></div>
+                                    </div>
+
+                                    <div class="grid md:grid-cols-2 gap-8">
+                                       <!-- Button 1 -->
+                                       <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                          <h4 class="font-bold text-xs uppercase mb-3 text-gray-500">Tombol Utama (Solid)</h4>
+                                          <div class="space-y-3">
+                                             <div><label class="form-label">Teks Tombol</label><input type="text" [(ngModel)]="config().hero.buttonText1" class="form-input font-bold"></div>
+                                             <div><label class="form-label">Link Tujuan (Internal)</label><input type="text" [(ngModel)]="config().hero.button1Link" class="form-input text-xs" placeholder="/menu"></div>
+                                             <div><label class="form-label">Warna Teks</label><div class="flex gap-2"><input type="color" [(ngModel)]="config().hero.button1Style.color" class="h-8 w-10 rounded border cursor-pointer"><input type="text" [(ngModel)]="config().hero.button1Style.color" class="form-input text-xs"></div></div>
+                                          </div>
+                                       </div>
+
+                                       <!-- Button 2 -->
+                                       <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                          <h4 class="font-bold text-xs uppercase mb-3 text-gray-500">Tombol Kedua (Outline)</h4>
+                                          <div class="space-y-3">
+                                             <div><label class="form-label">Teks Tombol</label><input type="text" [(ngModel)]="config().hero.buttonText2" class="form-input font-bold"></div>
+                                             <div><label class="form-label">Link Tujuan (Internal)</label><input type="text" [(ngModel)]="config().hero.button2Link" class="form-input text-xs" placeholder="/reservation"></div>
+                                             <div><label class="form-label">Warna Teks & Border</label><div class="flex gap-2"><input type="color" [(ngModel)]="config().hero.button2Style.color" class="h-8 w-10 rounded border cursor-pointer"><input type="text" [(ngModel)]="config().hero.button2Style.color" class="form-input text-xs"></div></div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+
+                           </div> <!-- End Col 8 -->
+                        </div>
+                      }
                    }
 
+                   <!-- ==========================
+                        TAB: MENU
+                        ========================== -->
                    @if (currentTab() === 'menu') {
-                      <!-- Menu CMS -->
                       <div class="space-y-6">
                          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                            <!-- Branch Tabs Header -->
                             <div class="flex overflow-x-auto border-b border-gray-200">
                                @for (branch of config().branches; track $index) {
                                   <button (click)="selectedBranchIndex.set($index)" 
@@ -412,7 +411,6 @@ import { ToastService } from '../services/toast.service';
                             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                                @for (item of config().branches[selectedBranchIndex()].menu; track $index) {
                                   <div class="flex gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition group">
-                                     <!-- Image -->
                                      <div class="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
                                         <img [src]="item.image" class="w-full h-full object-cover">
                                         <label class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold cursor-pointer transition">
@@ -420,27 +418,21 @@ import { ToastService } from '../services/toast.service';
                                            <input type="file" (change)="onFileSelected($event, 'menuItem', $index)" class="hidden">
                                         </label>
                                      </div>
-                                     
-                                     <!-- Inputs -->
                                      <div class="flex-1 space-y-2">
                                         <div class="flex gap-2">
                                            <input type="text" [(ngModel)]="item.name" class="form-input font-bold" placeholder="Nama Menu">
                                            <input type="text" [(ngModel)]="item.price" class="form-input w-24 text-right" placeholder="Harga">
                                         </div>
                                         <textarea [(ngModel)]="item.desc" class="form-input text-xs min-h-[40px]" placeholder="Deskripsi..."></textarea>
-                                        
                                         <div class="flex items-center gap-2 flex-wrap">
                                            <input type="text" [(ngModel)]="item.category" class="form-input text-xs w-24 py-1" placeholder="Kategori">
-                                           
                                            <label class="flex items-center gap-1 text-xs cursor-pointer select-none bg-yellow-50 px-2 py-1 rounded border border-yellow-200 text-yellow-700">
                                               <input type="checkbox" [(ngModel)]="item.favorite"> ⭐ Fav
                                            </label>
                                            <label class="flex items-center gap-1 text-xs cursor-pointer select-none bg-red-50 px-2 py-1 rounded border border-red-200 text-red-700">
                                               <input type="checkbox" [(ngModel)]="item.soldOut"> 🚫 Habis
                                            </label>
-                                           <button (click)="removeMenuItem($index)" class="ml-auto text-red-400 hover:text-red-600">
-                                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                                           </button>
+                                           <button (click)="removeMenuItem($index)" class="ml-auto text-red-400 hover:text-red-600">✕</button>
                                         </div>
                                      </div>
                                   </div>
@@ -450,7 +442,9 @@ import { ToastService } from '../services/toast.service';
                       </div>
                    }
 
-                   <!-- Other Tabs placeholders with similar structure -->
+                   <!-- ==========================
+                        TAB: ABOUT
+                        ========================== -->
                    @if (currentTab() === 'about') {
                       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
                          <h3 class="font-bold text-lg border-b pb-4">Halaman Tentang Kami</h3>
@@ -473,8 +467,56 @@ import { ToastService } from '../services/toast.service';
                       </div>
                    }
 
+                   <!-- ==========================
+                        TAB: PACKAGES
+                        ========================== -->
+                   @if (currentTab() === 'packages') {
+                      <div class="space-y-6">
+                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="p-4 bg-gray-50 flex justify-between items-center border-b border-gray-200">
+                               <h3 class="font-bold text-gray-700">Paket Hemat</h3>
+                               <button (click)="addPackage()" class="bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-orange-700 transition">+ Tambah Paket</button>
+                            </div>
+                            <div class="p-6">
+                              @if (!config().branches[selectedBranchIndex()].packages?.length) {
+                                 <div class="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">Belum ada paket untuk cabang ini.</div>
+                              }
+                              <div class="grid md:grid-cols-2 gap-6">
+                                 @for (pkg of config().branches[selectedBranchIndex()].packages; track $index) {
+                                    <div class="border rounded-xl p-4 relative bg-white hover:shadow-md transition group">
+                                       <button (click)="removePackage($index)" class="absolute top-2 right-2 text-red-400 hover:text-red-600 bg-white rounded-full p-1 shadow-sm">✕</button>
+                                       <div class="flex gap-4">
+                                          <div class="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
+                                             <img [src]="pkg.image || 'https://picsum.photos/200'" class="w-full h-full object-cover">
+                                             <label class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold cursor-pointer transition">
+                                                Ubah
+                                                <input type="file" (change)="onFileSelected($event, 'packageItem', $index)" class="hidden">
+                                             </label>
+                                          </div>
+                                          <div class="flex-1 space-y-2">
+                                             <div class="flex gap-2">
+                                                <input type="text" [(ngModel)]="pkg.name" class="form-input font-bold" placeholder="Nama Paket">
+                                                <input type="text" [(ngModel)]="pkg.price" class="form-input w-24 text-right" placeholder="Harga">
+                                             </div>
+                                             <input type="text" [(ngModel)]="pkg.description" class="form-input text-xs" placeholder="Deskripsi Singkat">
+                                             <div>
+                                                <label class="text-[10px] uppercase font-bold text-gray-400">Isi Paket (Pisahkan koma)</label>
+                                                <textarea [ngModel]="pkg.items.join(', ')" (ngModelChange)="updatePackageItems(pkg, $event)" class="form-input text-xs h-16"></textarea>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 }
+                              </div>
+                            </div>
+                         </div>
+                      </div>
+                   }
+
+                   <!-- ==========================
+                        TAB: LOCATION
+                        ========================== -->
                    @if (currentTab() === 'location') {
-                       <!-- Location CMS -->
                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                <h3 class="font-bold text-lg">Kelola Cabang</h3>
@@ -510,12 +552,9 @@ import { ToastService } from '../services/toast.service';
                        </div>
                    }
 
-                   @if (currentTab() === 'ai' || currentTab() === 'database' || currentTab() === 'footer' || currentTab() === 'media' || currentTab() === 'packages') {
-                      <!-- Placeholder for other tabs (implementation similar to previous, just cleaner containers) -->
+                   @if (currentTab() === 'ai' || currentTab() === 'database' || currentTab() === 'footer' || currentTab() === 'media') {
                       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-500">
                          <p class="mb-4">Pengaturan {{ getActiveTabLabel() }} tersedia.</p> 
-                         <!-- Note: For brevity in this specific response, I focused heavily on the requested GLOBAL overhaul. 
-                              The logic for these tabs exists in the TS file and would follow the same grid pattern. -->
                          <p class="text-xs">Silakan gunakan struktur grid yang sama seperti tab Global untuk merapikan bagian ini.</p>
                       </div>
                    }
@@ -645,6 +684,11 @@ export class AdminComponent {
         if (type === 'menuItem' && typeof index === 'number') {
            newC.branches[this.selectedBranchIndex()].menu[index].image = base64;
         }
+        if (type === 'packageItem' && typeof index === 'number') {
+           if (newC.branches[this.selectedBranchIndex()].packages?.[index]) {
+             newC.branches[this.selectedBranchIndex()].packages![index].image = base64;
+           }
+        }
         if (type === 'branchMap') {
            newC.branches[this.selectedBranchIndex()].mapImage = base64;
         }
@@ -683,6 +727,36 @@ export class AdminComponent {
       newC.branches[this.selectedBranchIndex()].menu.splice(index, 1);
       return newC;
     });
+  }
+
+  addPackage() {
+    this.config.update(c => {
+      const newC = { ...c };
+      const currentBranch = newC.branches[this.selectedBranchIndex()];
+      if (!currentBranch.packages) currentBranch.packages = [];
+      
+      currentBranch.packages.unshift({
+        name: 'Paket Baru',
+        price: 'Rp 0',
+        description: 'Deskripsi...',
+        image: 'https://picsum.photos/400/300',
+        items: ['Item 1', 'Item 2']
+      });
+      return newC;
+    });
+  }
+
+  removePackage(index: number) {
+    if(!confirm('Hapus paket ini?')) return;
+    this.config.update(c => {
+      const newC = { ...c };
+      newC.branches[this.selectedBranchIndex()].packages?.splice(index, 1);
+      return newC;
+    });
+  }
+
+  updatePackageItems(pkg: PackageItem, text: string) {
+    pkg.items = text.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
   }
 
   addBranch() {

@@ -144,11 +144,14 @@ export interface AppConfig {
     subtitle: string;
     subtitleStyle: TextStyle; 
     buttonText1: string;
+    button1Link: string;
     button1Style: TextStyle; 
     buttonText2: string;
+    button2Link: string;
     button2Style: TextStyle; 
     bgImage: string;
     overlayOpacity: number; 
+    textAlign: 'left' | 'center' | 'right'; 
     style: PageStyle;
   };
   about: {
@@ -325,11 +328,14 @@ export class ConfigService {
       subtitle: 'Rasakan kelembutan sate sapi maranggi dengan bumbu rempah rahasia dan sambal oncom yang menggugah selera.',
       subtitleStyle: { fontFamily: 'Lato', fontSize: '1.25rem', color: '#F3F4F6' },
       buttonText1: 'Lihat Menu',
+      button1Link: '/menu',
       button1Style: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFFFFF' },
       buttonText2: 'Reservasi',
+      button2Link: '/reservation',
       button2Style: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFFFFF' },
       bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920&auto=format&fit=crop',
       overlayOpacity: 0.6,
+      textAlign: 'center',
       style: {
         backgroundColor: '#2D1810',
         textColor: '#FFFFFF',
@@ -642,6 +648,7 @@ export class ConfigService {
       this.app = initializeApp(configToUse);
       this.auth = getAuth(this.app);
       this.db = getFirestore(this.app);
+      // Removed Storage init as requested
       
       this.isFirebaseReady.set(true);
       console.log(`✅ Firebase initialized with project: ${configToUse.projectId}`);
@@ -711,11 +718,9 @@ export class ConfigService {
                 logoStyle: mergeText(current.global.logoStyle, data.global?.logoStyle),
                 metaStyle: mergeText(current.global.metaStyle, data.global?.metaStyle)
             },
-            // FIX: Ensure Intro structure is preserved and safe
             intro: { 
                 ...current.intro, 
                 ...(data.intro || {}),
-                // Force default if missing to prevent "invalid nested entity"
                 fadeOut: (data.intro?.fadeOut) || current.intro.fadeOut || 'fade'
             },
             hero: { 
@@ -813,7 +818,6 @@ export class ConfigService {
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const value = obj[key];
-        // If undefined, set to null or omit (Firestore prefers null over undefined)
         newObj[key] = value === undefined ? null : this.sanitizeObject(value);
       }
     }
@@ -823,13 +827,11 @@ export class ConfigService {
   async updateConfig(newConfig: AppConfig) {
     this.config.set(newConfig);
     
-    // Local Save
     try {
       localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(newConfig));
     } catch(e) { console.error("Local Save Error", e); }
 
     if (this.isDemoMode()) {
-      console.log("Saved to LocalStorage (Demo Mode)");
       return;
     }
 
@@ -839,60 +841,89 @@ export class ConfigService {
     }
 
     try {
-       // DEEP SANITIZATION: Clean entire object before sending
        let cleanConfig = this.sanitizeObject(JSON.parse(JSON.stringify(newConfig)));
-
-       // STRICT INTRO CHECK: Ensure structural integrity
+       // Ensure critical sections are objects
        if (!cleanConfig.intro) cleanConfig.intro = {};
-       cleanConfig.intro = {
-           enabled: cleanConfig.intro.enabled ?? false,
-           videoUrl: cleanConfig.intro.videoUrl || '',
-           duration: cleanConfig.intro.duration || 5,
-           fadeOut: cleanConfig.intro.fadeOut || 'fade'
-       };
+       cleanConfig.intro.enabled = cleanConfig.intro.enabled ?? false;
 
        await setDoc(doc(this.db, 'settings', this.DOC_ID), cleanConfig);
-       console.log("Config saved successfully");
     } catch (error: any) {
       console.error("Error saving config:", error);
       throw error;
     }
   }
   
-  async uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
+  async uploadFile(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event: any) => {
-            if (file.type.startsWith('video/')) {
-                 resolve(event.target.result);
-                 return;
-            }
+        // Video check (unchanged, just read as DataURL)
+        if (file.type.startsWith('video/')) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event: any) => resolve(event.target.result);
+            reader.onerror = reject;
+            return;
+        }
 
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
             const img = new Image();
-            img.src = event.target.result;
+            img.src = e.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                const MAX_WIDTH = 800; 
-                const MAX_HEIGHT = 800;
+                
+                // 1. Set Target to HD (1600px) instead of low res
+                // This is the key fix for "buram" (blurry)
+                const MAX_DIMENSION = 1600; // Safe high quality for Hero
                 
                 if (width > height) {
-                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    if (width > MAX_DIMENSION) {
+                        height *= MAX_DIMENSION / width;
+                        width = MAX_DIMENSION;
+                    }
                 } else {
-                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    if (height > MAX_DIMENSION) {
+                        width *= MAX_DIMENSION / height;
+                        height = MAX_DIMENSION;
+                    }
                 }
+
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
-                if (!ctx) { reject(new Error("Canvas error")); return; }
-                ctx.drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/jpeg', 0.7));
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                // 2. High Quality JPEG (0.85)
+                // This preserves details much better than default 0.7 or 0.5
+                let dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+                // 3. Firestore Safety Check (Max ~1MB)
+                // If image is too complex/large, reduce quality slowly, 
+                // avoiding resizing unless absolutely necessary.
+                // 950,000 chars is roughly 950KB (safe margin for 1MB limit)
+                if (dataUrl.length > 950000) { 
+                    // Try lower quality (0.65 is still okay for web bg)
+                    dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+                }
+                
+                // If STILL too big (very rare for 1600px jpg), scale down to 1000px
+                if (dataUrl.length > 950000) {
+                     const scale = 1000 / width;
+                     canvas.width = width * scale;
+                     canvas.height = height * scale;
+                     const ctx2 = canvas.getContext('2d');
+                     ctx2?.drawImage(img, 0, 0, canvas.width, canvas.height);
+                     // 1000px at 0.7 is guaranteed < 500KB
+                     dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                }
+
+                resolve(dataUrl);
             };
             img.onerror = () => reject(new Error("Invalid image"));
         };
         reader.onerror = (e) => reject(e);
+        reader.readAsDataURL(file);
     });
   }
 
