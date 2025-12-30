@@ -75,16 +75,34 @@ import { ConfigService } from '../services/config.service';
             <!-- Stats Dynamic -->
             <div class="grid grid-cols-3 gap-4 border-t pt-8" [style.borderColor]="config().about.style.accentColor + '30'">
                <div class="text-center">
-                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">{{ config().about.stats.val1 }}</span>
-                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">{{ config().about.stats.label1 }}</span>
+                  <span class="block font-bold" 
+                        [style.fontFamily]="config().about.statsStyle.fontFamily"
+                        [style.fontSize]="config().about.statsStyle.fontSize"
+                        [style.color]="config().about.statsStyle.color">{{ config().about.stats.val1 }}</span>
+                  <span class="block uppercase tracking-wide font-bold opacity-60"
+                        [style.fontFamily]="config().about.statsLabelStyle.fontFamily"
+                        [style.fontSize]="config().about.statsLabelStyle.fontSize"
+                        [style.color]="config().about.statsLabelStyle.color">{{ config().about.stats.label1 }}</span>
                </div>
                <div class="text-center">
-                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">{{ config().about.stats.val2 }}</span>
-                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">{{ config().about.stats.label2 }}</span>
+                  <span class="block font-bold"
+                        [style.fontFamily]="config().about.statsStyle.fontFamily"
+                        [style.fontSize]="config().about.statsStyle.fontSize"
+                        [style.color]="config().about.statsStyle.color">{{ config().about.stats.val2 }}</span>
+                  <span class="block uppercase tracking-wide font-bold opacity-60"
+                        [style.fontFamily]="config().about.statsLabelStyle.fontFamily"
+                        [style.fontSize]="config().about.statsLabelStyle.fontSize"
+                        [style.color]="config().about.statsLabelStyle.color">{{ config().about.stats.label2 }}</span>
                </div>
                <div class="text-center">
-                  <span class="block text-2xl font-bold" [style.color]="config().about.style.accentColor">{{ config().about.stats.val3 }}</span>
-                  <span class="text-xs uppercase tracking-wide font-bold opacity-60">{{ config().about.stats.label3 }}</span>
+                  <span class="block font-bold"
+                        [style.fontFamily]="config().about.statsStyle.fontFamily"
+                        [style.fontSize]="config().about.statsStyle.fontSize"
+                        [style.color]="config().about.statsStyle.color">{{ config().about.stats.val3 }}</span>
+                  <span class="block uppercase tracking-wide font-bold opacity-60"
+                        [style.fontFamily]="config().about.statsLabelStyle.fontFamily"
+                        [style.fontSize]="config().about.statsLabelStyle.fontSize"
+                        [style.color]="config().about.statsLabelStyle.color">{{ config().about.stats.label3 }}</span>
                </div>
             </div>
           </div>

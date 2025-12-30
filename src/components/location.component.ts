@@ -19,7 +19,10 @@ import { ConfigService } from '../services/config.service';
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center mb-10">
-          <span class="font-bold tracking-widest uppercase text-xs mb-2 block" [style.color]="config().locationPage.style.accentColor">Temukan Kami</span>
+          <span class="font-bold tracking-widest uppercase mb-2 block" 
+                [style.fontFamily]="config().locationPage.labelStyle.fontFamily"
+                [style.fontSize]="config().locationPage.labelStyle.fontSize"
+                [style.color]="config().locationPage.labelStyle.color">Temukan Kami</span>
           <h2 class="font-bold mb-4" 
               [style.color]="config().locationPage.titleStyle.color"
               [style.fontFamily]="config().locationPage.titleStyle.fontFamily"

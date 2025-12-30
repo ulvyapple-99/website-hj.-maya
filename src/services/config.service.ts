@@ -163,6 +163,8 @@ export interface AppConfig {
       val2: string; label2: string;
       val3: string; label3: string;
     };
+    statsStyle: TextStyle; // NEW
+    statsLabelStyle: TextStyle; // NEW
     style: PageStyle;
   };
   menuPage: {
@@ -204,6 +206,7 @@ export interface AppConfig {
     titleStyle: TextStyle; // NEW
     subtitle: string;
     subtitleStyle: TextStyle; // NEW
+    labelStyle: TextStyle; // NEW for "TEMUKAN KAMI"
     style: PageStyle;
     cardBorderRadius: string;
     mapHeight: string;
@@ -346,6 +349,8 @@ export class ConfigService {
         val2: '4.9', label2: 'Rating Rasa',
         val3: '1980', label3: 'Sejak'
       },
+      statsStyle: { fontFamily: 'Lato', fontSize: '1.5rem', color: '#D84315' },
+      statsLabelStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#4E342E' },
       style: {
         backgroundColor: '#FFF8E1',
         textColor: '#4E342E',
@@ -417,6 +422,7 @@ export class ConfigService {
       titleStyle: { fontFamily: 'Playfair Display', fontSize: '2.25rem', color: '#3E2723' }, // Default
       subtitle: 'Nikmati suasana makan yang nyaman di lokasi kami.',
       subtitleStyle: { fontFamily: 'Playfair Display', fontSize: '1rem', color: '#3E2723' }, // Default
+      labelStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#FFD54F' }, // Default
       style: {
         backgroundColor: '#3E2723',
         textColor: '#FFF8E1',
@@ -727,6 +733,8 @@ export class ConfigService {
                 titleStyle: mergeText(current.about.titleStyle, data.about?.titleStyle),
                 descriptionStyle: mergeText(current.about.descriptionStyle, data.about?.descriptionStyle),
                 stats: { ...current.about.stats, ...(data.about?.stats || {}) },
+                statsStyle: mergeText(current.about.statsStyle, data.about?.statsStyle),
+                statsLabelStyle: mergeText(current.about.statsLabelStyle, data.about?.statsLabelStyle),
                 style: mergeStyle(current.about.style, data.about?.style)
             },
             menuPage: { 
@@ -755,6 +763,7 @@ export class ConfigService {
                 ...(data.locationPage || {}),
                 titleStyle: mergeText(current.locationPage.titleStyle, data.locationPage?.titleStyle),
                 subtitleStyle: mergeText(current.locationPage.subtitleStyle, data.locationPage?.subtitleStyle),
+                labelStyle: mergeText(current.locationPage.labelStyle, data.locationPage?.labelStyle),
                 style: mergeStyle(current.locationPage.style, data.locationPage?.style)
             },
             testimonialStyles: {

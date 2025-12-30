@@ -434,6 +434,47 @@ import { ToastService } from '../services/toast.service';
                                   <option value="right">Kanan (Teks Kiri)</option>
                                 </select>
                               </div>
+
+                              <div class="bg-blue-50 p-4 rounded-lg mt-4 border border-blue-100">
+                                 <label class="label text-blue-900 mb-2">Statistik Angka & Label</label>
+                                 
+                                 <!-- New: Stats Style Config -->
+                                 <div class="flex gap-4 mb-4">
+                                     <div class="flex-1">
+                                        <label class="label text-[10px]">Font Angka</label>
+                                        <div class="flex gap-1 bg-white p-1 rounded border">
+                                           <select [(ngModel)]="config().about.statsStyle.fontFamily" class="input text-[10px] w-full py-0 h-6 border-none">
+                                              @for (f of fontList; track f) { <option [value]="f">{{ f }}</option> }
+                                           </select>
+                                           <input type="text" [(ngModel)]="config().about.statsStyle.fontSize" class="input text-[10px] w-12 py-0 h-6 border-none" placeholder="Size">
+                                           <input type="color" [(ngModel)]="config().about.statsStyle.color" class="w-6 h-6 p-0 border-none cursor-pointer">
+                                        </div>
+                                     </div>
+                                     <div class="flex-1">
+                                        <label class="label text-[10px]">Font Label</label>
+                                        <div class="flex gap-1 bg-white p-1 rounded border">
+                                           <select [(ngModel)]="config().about.statsLabelStyle.fontFamily" class="input text-[10px] w-full py-0 h-6 border-none">
+                                              @for (f of fontList; track f) { <option [value]="f">{{ f }}</option> }
+                                           </select>
+                                           <input type="text" [(ngModel)]="config().about.statsLabelStyle.fontSize" class="input text-[10px] w-12 py-0 h-6 border-none" placeholder="Size">
+                                           <input type="color" [(ngModel)]="config().about.statsLabelStyle.color" class="w-6 h-6 p-0 border-none cursor-pointer">
+                                        </div>
+                                     </div>
+                                 </div>
+
+                                 <div class="grid grid-cols-2 gap-2 mb-2">
+                                    <input type="text" [(ngModel)]="config().about.stats.val1" class="input text-sm" placeholder="100%">
+                                    <input type="text" [(ngModel)]="config().about.stats.label1" class="input text-sm" placeholder="Daging Segar">
+                                 </div>
+                                 <div class="grid grid-cols-2 gap-2 mb-2">
+                                    <input type="text" [(ngModel)]="config().about.stats.val2" class="input text-sm" placeholder="4.9">
+                                    <input type="text" [(ngModel)]="config().about.stats.label2" class="input text-sm" placeholder="Rating">
+                                 </div>
+                                 <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" [(ngModel)]="config().about.stats.val3" class="input text-sm" placeholder="1980">
+                                    <input type="text" [(ngModel)]="config().about.stats.label3" class="input text-sm" placeholder="Sejak">
+                                 </div>
+                              </div>
                            </div>
                         </div>
 
@@ -766,6 +807,19 @@ import { ToastService } from '../services/toast.service';
                         <div class="section-box">
                            <h3 class="section-title">Halaman Lokasi</h3>
                            <div class="space-y-3">
+                              
+                              <!-- New: Label Style Config -->
+                              <div class="bg-yellow-50 p-3 rounded border border-yellow-100 mb-2">
+                                 <label class="label text-yellow-900 mb-1">Label "Temukan Kami"</label>
+                                 <div class="flex gap-2">
+                                    <select [(ngModel)]="config().locationPage.labelStyle.fontFamily" class="input text-xs w-32 bg-white py-1">
+                                       @for (f of fontList; track f) { <option [value]="f">{{ f }}</option> }
+                                    </select>
+                                    <input type="text" [(ngModel)]="config().locationPage.labelStyle.fontSize" class="input text-xs w-20 py-1" placeholder="Size">
+                                    <input type="color" [(ngModel)]="config().locationPage.labelStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                 </div>
+                              </div>
+
                               <div>
                                  <label class="label">Judul</label>
                                  <input type="text" [(ngModel)]="config().locationPage.title" class="input">
