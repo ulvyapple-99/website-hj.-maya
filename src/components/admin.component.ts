@@ -652,7 +652,10 @@ import { ToastService } from '../services/toast.service';
 
                               @for (pkg of config().branches[selectedBranchIndex()].packages; track $index) {
                                  <div class="border rounded-lg p-4 bg-gray-50 relative group">
-                                    <button (click)="removePackage($index)" class="absolute top-2 right-2 text-gray-300 hover:text-red-500 p-1">✕</button>
+                                    <!-- FIXED: Added Z-Index and Background for better clickability -->
+                                    <button (click)="removePackage($index)" class="absolute top-2 right-2 z-20 bg-white/80 hover:bg-red-100 text-gray-500 hover:text-red-600 p-1.5 rounded-full shadow-sm transition-all" title="Hapus Paket">
+                                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    </button>
                                     
                                     <div class="grid md:grid-cols-[120px_1fr] gap-4">
                                        <!-- Image -->
@@ -1281,7 +1284,10 @@ export class AdminComponent {
   }
   removePackage(i: number) {
     if(confirm('Hapus paket ini?')) {
-        this.config().branches[this.selectedBranchIndex()].packages?.splice(i, 1);
+        // Ensuring we mutate via update to trigger change detection in UI immediately
+        const c = this.config();
+        c.branches[this.selectedBranchIndex()].packages?.splice(i, 1);
+        this.config.set({...c});
         this.toastService.show('Paket dihapus.', 'info');
     }
   }
