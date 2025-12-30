@@ -1,42 +1,54 @@
 
-import { Component, signal, HostListener, inject, OnInit, OnDestroy, ElementRef, ViewChildren, QueryList, NgZone } from '@angular/core';
+import { Component, signal, HostListener, inject, OnInit, OnDestroy, ElementRef, ViewChildren, QueryList, NgZone, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfigService } from '../services/config.service';
 
 interface SatePart {
   x: number;
   y: number;
+  angle: number;
 }
 
 @Component({
   selector: 'app-cursor',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     @if (config().features.enableCursor) {
       <div class="fixed top-0 left-0 w-full h-full pointer-events-none z-[9999] overflow-hidden">
         
-        <!-- BAGIAN DAGING SATE (Ekor) -->
-        <!-- Kita render dari belakang ke depan agar tumpukannya benar -->
-        @for (i of meatIndices; track i) {
+        <!-- VISUAL SATE -->
+        <!-- Loop render daging + tusuk sekaligus agar menyatu -->
+        @for (part of parts; track $index) {
           <div #meatPart 
-               class="absolute w-8 h-7 rounded-lg shadow-lg flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 will-change-transform border border-black/10"
-               [style.backgroundColor]="getMeatColor(i)"
-               [style.zIndex]="100 - i">
-               <!-- Efek Bakaran / Gosong -->
-               <div class="absolute w-full h-px bg-black/30 rotate-12 top-2"></div>
-               <div class="absolute w-full h-px bg-black/30 -rotate-6 bottom-2"></div>
-               <!-- Tusuk Sate di tengah daging -->
-               <div class="absolute w-1 h-full bg-[#D7CCC8]"></div>
+               class="absolute w-5 h-4 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 will-change-transform"
+               [style.zIndex]="100 - $index">
+               
+               <!-- 1. TUSUK BAMBU (Lidi) -->
+               <!-- Dirender DI DALAM div daging agar bergerak sinkron 100% -->
+               <!-- Ukuran diperkecil: w-1 -->
+               <div class="absolute w-1 bg-[#D7CCC8] left-1/2 -translate-x-1/2 shadow-sm"
+                    [ngClass]="{
+                      'rounded-t-full': $index === 0,
+                      '-top-3 h-[180%]': $index === 0, 
+                      '-top-1.5 h-[200%]': $index > 0 && $index < parts.length - 1,
+                      '-top-1.5 h-[300%]': $index === parts.length - 1
+                    }">
+               </div>
+
+               <!-- 2. DAGING (Meat) -->
+               <!-- Menutupi tusuk bambu -->
+               <div class="relative z-10 w-full h-full shadow-md overflow-hidden border border-black/20"
+                    [style.backgroundColor]="getMeatColor($index)"
+                    style="border-radius: 35% 55% 50% 45% / 45% 50% 60% 50%;"> <!-- Bentuk Organic -->
+                    
+                    <!-- Detail: Gosong / Bakaran (Diperkecil) -->
+                    <div class="absolute w-2.5 h-2.5 bg-black/30 rounded-full blur-[2px] -top-1 -right-1"></div>
+                    <div class="absolute w-full h-px bg-black/20 bottom-1.5 rotate-12"></div>
+                    <div class="absolute w-1.5 h-1.5 bg-black/20 rounded-full blur-[1px] bottom-0.5 left-0.5"></div>
+               </div>
           </div>
         }
-
-        <!-- BAGIAN UJUNG TUSUK (Kepala Kursor) -->
-        <div #stickTip
-             class="absolute w-1.5 h-10 bg-[#D7CCC8] rounded-full transform -translate-x-1/2 -translate-y-1/2 origin-bottom will-change-transform shadow-sm z-[110]">
-             <!-- Ujung runcing visual -->
-             <div class="absolute -top-1 left-0 w-1.5 h-2 bg-[#D7CCC8] rounded-t-full"></div>
-        </div>
 
       </div>
     }
@@ -53,33 +65,31 @@ export class CursorComponent implements OnInit, OnDestroy {
   config = this.configService.config;
   ngZone = inject(NgZone);
 
-  // Setup Fisika Sate
-  // 0 = daging paling depan (dekat mouse), 4 = daging paling belakang
-  meatCount = 5;
-  meatIndices = [4, 3, 2, 1, 0]; // Render order reversed for visual stacking logic if needed, but flex handles z-index
+  // KONFIGURASI FISIKA
+  meatCount = 5; 
+  spacing = 6;  // Jarak diperkecil menyesuaikan ukuran daging baru
+  stiffness = 0.45; 
   
-  // Posisi Mouse Target
+  // Posisi Mouse
   mouseX = signal(-100);
   mouseY = signal(-100);
 
-  // Posisi Aktual setiap bagian (x, y)
+  // State Fisika
   parts: SatePart[] = [];
-  
-  // Referensi DOM untuk animasi performa tinggi (menghindari Angular Change Detection di loop)
+  time = 0; // Untuk animasi goyang
+
   @ViewChildren('meatPart') meatElements!: QueryList<ElementRef<HTMLDivElement>>;
-  @ViewChildren('stickTip') stickElement!: QueryList<ElementRef<HTMLDivElement>>;
 
   private animationId: number | null = null;
 
   constructor() {
     // Inisialisasi posisi awal di luar layar
     for (let i = 0; i < this.meatCount; i++) {
-      this.parts.push({ x: -100, y: -100 });
+      this.parts.push({ x: -100, y: -100, angle: 0 });
     }
   }
 
   ngOnInit() {
-    // Jalankan loop animasi di luar zona Angular agar tidak memicu re-render seluruh aplikasi setiap frame
     this.ngZone.runOutsideAngular(() => {
       const loop = () => {
         this.updatePositions();
@@ -102,97 +112,85 @@ export class CursorComponent implements OnInit, OnDestroy {
   }
 
   updatePositions() {
+    this.time += 0.25; // Kecepatan getar api/bara
+
     const targetX = this.mouseX();
     const targetY = this.mouseY();
-    
-    // Update posisi elemen stick/ujung (mengikuti mouse langsung tapi sedikit smooth)
-    if (this.stickElement && this.stickElement.first) {
-      const el = this.stickElement.first.nativeElement;
-      // Rotasi stick berdasarkan gerakan (opsional, untuk saat ini tegak lurus mengikuti arah sate)
-      // Kita buat stick mengarah ke daging pertama
-      let angle = 0;
-      if (this.parts.length > 0) {
-        const dx = targetX - this.parts[0].x;
-        const dy = targetY - this.parts[0].y;
-        angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90; 
-      }
-      
-      el.style.transform = `translate3d(${targetX}px, ${targetY}px, 0) rotate(${angle}deg)`;
-    }
 
-    // Update posisi daging (Meliuk-liuk Logic)
-    // Setiap bagian mengikuti bagian sebelumnya dengan delay (lerp)
+    // --- 1. UPDATE FISIKA (Snake Logic) ---
     
-    // Daging pertama mengikuti mouse
-    this.parts[0].x += (targetX - this.parts[0].x) * 0.3; // Speed 0.3
-    this.parts[0].y += (targetY - this.parts[0].y) * 0.3;
+    // Head (Daging paling atas) mengejar mouse
+    const head = this.parts[0];
+    const dx = targetX - head.x;
+    const dy = targetY - head.y;
+    
+    // Gerakan smooth menuju mouse
+    head.x += dx * this.stiffness;
+    head.y += dy * this.stiffness;
 
-    // Daging sisanya mengikuti daging di depannya
+    // Kalkulasi intensitas goyang berdasarkan kecepatan gerak
+    const speed = Math.sqrt(dx*dx + dy*dy);
+    const wiggleIntensity = Math.min(speed * 0.08, 2.5);
+
+    // Loop bagian tubuh (sisa daging)
     for (let i = 1; i < this.parts.length; i++) {
-      const leader = this.parts[i - 1];
-      const follower = this.parts[i];
+      const current = this.parts[i];
+      const prev = this.parts[i - 1];
 
-      const dx = leader.x - follower.x;
-      const dy = leader.y - follower.y;
-      
-      // Jarak antar daging (biar tidak numpuk total)
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const minDistance = 20; // Jarak tusukan
+      const dxPart = prev.x - current.x;
+      const dyPart = prev.y - current.y;
+      const dist = Math.sqrt(dxPart*dxPart + dyPart*dyPart);
+      const angle = Math.atan2(dyPart, dxPart);
 
-      // Logika "Tarik" seperti tali/sate
-      if (distance > minDistance) {
-         // Follower bergerak mendekati leader sampai jarak minDistance
-         const ratio = (distance - minDistance) / distance;
-         const moveX = dx * ratio * 0.5; // Stiffness 0.5
-         const moveY = dy * ratio * 0.5;
+      // Constraint Jarak (agar menyatu seperti ditusuk)
+      if (dist > this.spacing) {
+         const tx = prev.x - Math.cos(angle) * this.spacing;
+         const ty = prev.y - Math.sin(angle) * this.spacing;
          
-         follower.x += moveX;
-         follower.y += moveY;
-      } else {
-         // Lerp biasa untuk smoothing saat diam
-         follower.x += dx * 0.2;
-         follower.y += dy * 0.2;
+         // Interpolasi posisi (follow leader)
+         current.x += (tx - current.x) * 0.65;
+         current.y += (ty - current.y) * 0.65;
       }
+
+      // EFEK GOYANG (JIGGLE) KE ATAS & BAWAH
+      // Gelombang sinus offset per index
+      const wave = Math.sin(this.time + (i * 0.6)) * wiggleIntensity;
+      
+      // Aplikasikan goyang tegak lurus arah gerakan
+      current.x += Math.cos(angle + Math.PI/2) * wave * 0.15;
+      current.y += Math.sin(angle + Math.PI/2) * wave * 0.15;
+
+      // Update angle visual agar tegak lurus terhadap "tali" imajiner
+      current.angle = angle * (180 / Math.PI) + 90;
+    }
+    
+    // Update angle head mengikuti body di belakangnya agar natural
+    if (this.parts.length > 1) {
+        head.angle = this.parts[1].angle;
     }
 
-    // Render ke DOM
+    // --- 2. RENDER KE DOM ---
     if (this.meatElements) {
       const elements = this.meatElements.toArray();
-      // Kita perlu map index array parts ke elements. 
-      // Karena di template kita loop reversed (meatIndices), kita perlu hati-hati.
-      // meatIndices = [4, 3, 2, 1, 0]. Element 0 di QueryList adalah index 4 di logic kita?
-      // Tidak, QueryList urut sesuai DOM. DOM urut sesuai meatIndices loop.
-      // Jadi Element[0] adalah meatIndices[0] yaitu index 4 (Ekor).
-      
-      elements.forEach((el, index) => {
-        // meatIndices[index] memberikan index "logika" sate (0 = kepala, 4 = ekor)
-        const logicIndex = this.meatIndices[index];
-        const part = this.parts[logicIndex];
-
-        // Hitung rotasi agar daging tegak lurus dengan tusuknya
-        let angle = 0;
-        if (logicIndex > 0) {
-            // Lihat ke daging depannya
-            const prev = this.parts[logicIndex - 1];
-            angle = Math.atan2(part.y - prev.y, part.x - prev.x) * (180 / Math.PI) + 90;
-        } else {
-            // Daging pertama lihat ke mouse
-            angle = Math.atan2(part.y - targetY, part.x - targetX) * (180 / Math.PI) + 90;
-        }
-
-        el.nativeElement.style.transform = `translate3d(${part.x}px, ${part.y}px, 0) rotate(${angle}deg)`;
+      elements.forEach((el, i) => {
+        const part = this.parts[i];
+        
+        // Random rotation kecil agar daging terlihat tidak seragam/kaku
+        // Index genap miring kiri, ganjil miring kanan
+        const organicRot = (i % 2 === 0 ? 3 : -3); 
+        
+        el.nativeElement.style.transform = `translate3d(${part.x}px, ${part.y}px, 0) rotate(${part.angle + organicRot}deg)`;
       });
     }
   }
 
-  // Warna gradasi daging matang
   getMeatColor(i: number): string {
     const colors = [
+      '#4E342E', // Brown 800 (Gosong dikit)
       '#5D4037', // Brown 700
-      '#4E342E', // Brown 800
-      '#3E2723', // Brown 900
-      '#5D4037', 
-      '#6D4C41'  // Brown 600
+      '#3E2723', // Brown 900 (Sangat matang)
+      '#6D4C41', // Brown 600
+      '#4E342E'  
     ];
     return colors[i % colors.length];
   }
