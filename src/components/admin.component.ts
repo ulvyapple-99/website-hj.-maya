@@ -848,6 +848,19 @@ import { ToastService } from '../services/toast.service';
                                     <input type="color" [(ngModel)]="config().locationPage.subtitleStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
                                  </div>
                               </div>
+
+                              <!-- NEW: Branch Name Style Config -->
+                              <div class="bg-gray-50 p-3 rounded border border-gray-200 mt-2">
+                                 <label class="label text-gray-700 mb-1">Style Nama Cabang (Card)</label>
+                                 <div class="flex gap-2">
+                                    <select [(ngModel)]="config().locationPage.branchNameStyle.fontFamily" class="input text-xs w-32 bg-white py-1">
+                                       @for (f of fontList; track f) { <option [value]="f">{{ f }}</option> }
+                                    </select>
+                                    <input type="text" [(ngModel)]="config().locationPage.branchNameStyle.fontSize" class="input text-xs w-20 py-1" placeholder="Size">
+                                    <input type="color" [(ngModel)]="config().locationPage.branchNameStyle.color" class="w-8 h-8 rounded p-0 border-none cursor-pointer">
+                                 </div>
+                              </div>
+
                            </div>
                            <div class="grid grid-cols-4 gap-2 mt-4">
                               <div><label class="label">BG Color</label><input type="color" [(ngModel)]="config().locationPage.style.backgroundColor" class="w-full h-8"></div>

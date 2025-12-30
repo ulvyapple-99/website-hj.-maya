@@ -207,6 +207,7 @@ export interface AppConfig {
     subtitle: string;
     subtitleStyle: TextStyle; // NEW
     labelStyle: TextStyle; // NEW for "TEMUKAN KAMI"
+    branchNameStyle: TextStyle; // NEW for Branch Names
     style: PageStyle;
     cardBorderRadius: string;
     mapHeight: string;
@@ -423,6 +424,7 @@ export class ConfigService {
       subtitle: 'Nikmati suasana makan yang nyaman di lokasi kami.',
       subtitleStyle: { fontFamily: 'Playfair Display', fontSize: '1rem', color: '#3E2723' }, // Default
       labelStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#FFD54F' }, // Default
+      branchNameStyle: { fontFamily: 'Playfair Display', fontSize: '1.25rem', color: '#D84315' }, // Default
       style: {
         backgroundColor: '#3E2723',
         textColor: '#FFF8E1',
@@ -764,6 +766,7 @@ export class ConfigService {
                 titleStyle: mergeText(current.locationPage.titleStyle, data.locationPage?.titleStyle),
                 subtitleStyle: mergeText(current.locationPage.subtitleStyle, data.locationPage?.subtitleStyle),
                 labelStyle: mergeText(current.locationPage.labelStyle, data.locationPage?.labelStyle),
+                branchNameStyle: mergeText(current.locationPage.branchNameStyle, data.locationPage?.branchNameStyle),
                 style: mergeStyle(current.locationPage.style, data.locationPage?.style)
             },
             testimonialStyles: {

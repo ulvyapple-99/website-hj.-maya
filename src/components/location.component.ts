@@ -40,7 +40,14 @@ import { ConfigService } from '../services/config.service';
             <div class="p-6 border hover:bg-white/5 transition group flex flex-col h-full"
                  [style.borderColor]="config().locationPage.style.textColor + '20'"
                  [style.borderRadius]="config().locationPage.cardBorderRadius">
-              <h4 class="text-xl font-bold mb-4" [style.color]="config().locationPage.style.accentColor">{{ branch.name }}</h4>
+              
+              <!-- Dynamic Branch Name Style -->
+              <h4 class="font-bold mb-4" 
+                  [style.fontFamily]="config().locationPage.branchNameStyle.fontFamily"
+                  [style.fontSize]="config().locationPage.branchNameStyle.fontSize"
+                  [style.color]="config().locationPage.branchNameStyle.color">
+                  {{ branch.name }}
+              </h4>
               
               <div class="space-y-4 text-sm opacity-90 mb-6 flex-grow">
                 <div class="flex items-start gap-3">
