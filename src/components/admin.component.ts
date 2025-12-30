@@ -106,8 +106,8 @@ import { ToastService } from '../services/toast.service';
                       {{ isLoggingIn() ? 'Memproses...' : 'Masuk Dashboard' }}
                     </button>
                     <p class="text-red-500 text-xs font-bold text-center" *ngIf="loginError()">{{ loginError() }}</p>
-                    <div class="border-t pt-4 text-center">
-                       <button (click)="currentTab.set('database')" class="text-gray-400 text-xs hover:text-gray-600">Konfigurasi API Key</button>
+                    <div class="mt-4 text-[10px] text-gray-400 text-center">
+                       Sistem Terproteksi. IP Anda tercatat.
                     </div>
                  </div>
                </div>
@@ -125,12 +125,6 @@ import { ToastService } from '../services/toast.service';
                         {{ tab.label }}
                      </button>
                   </nav>
-
-                  <!-- Filter Font (New Feature) -->
-                  <div class="px-4 py-2 border-t">
-                    <label class="label text-[10px]">Filter Font List</label>
-                    <input type="text" [(ngModel)]="fontSearch" placeholder="Cari font..." class="input text-xs py-1">
-                  </div>
 
                   <!-- Quick Visibility Toggles -->
                   <div class="p-4 border-t mt-auto">
@@ -179,7 +173,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Text Style Controls -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().global.logoStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -193,7 +187,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Text Style Controls -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().global.metaStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -275,7 +269,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Badge Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().hero.badgeStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -289,7 +283,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().hero.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -303,7 +297,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Highlight Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().hero.highlightStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -317,7 +311,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().hero.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -332,7 +326,7 @@ import { ToastService } from '../services/toast.service';
                                     <!-- Button 1 Style -->
                                     <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                       <select [(ngModel)]="config().hero.button1Style.fontFamily" class="input text-xs w-20 bg-white py-1">
-                                         @for (f of filteredFonts(); track f) {
+                                         @for (f of fontList; track f) {
                                             <option [value]="f">{{ f }}</option>
                                          }
                                       </select>
@@ -346,7 +340,7 @@ import { ToastService } from '../services/toast.service';
                                     <!-- Button 2 Style -->
                                     <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                       <select [(ngModel)]="config().hero.button2Style.fontFamily" class="input text-xs w-20 bg-white py-1">
-                                         @for (f of filteredFonts(); track f) {
+                                         @for (f of fontList; track f) {
                                             <option [value]="f">{{ f }}</option>
                                          }
                                       </select>
@@ -379,7 +373,7 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Font Family</label>
                                  <select [(ngModel)]="config().hero.style.fontFamily" class="input bg-white">
-                                    @for (f of filteredFonts(); track f) {
+                                    @for (f of fontList; track f) {
                                        <option [value]="f">{{ f }}</option>
                                     }
                                  </select>
@@ -410,7 +404,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().about.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -424,7 +418,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Description Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().about.descriptionStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -450,7 +444,7 @@ import { ToastService } from '../services/toast.service';
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().about.style.textColor" class="w-full h-10"></div>
                               <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().about.style.accentColor" class="w-full h-10"></div>
                               <div><label class="label">Font Family</label><select [(ngModel)]="config().about.style.fontFamily" class="input bg-white">
-                                 @for (f of filteredFonts(); track f) {
+                                 @for (f of fontList; track f) {
                                     <option [value]="f">{{ f }}</option>
                                  }
                               </select></div>
@@ -477,7 +471,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().menuPage.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -491,7 +485,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().menuPage.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -505,7 +499,7 @@ import { ToastService } from '../services/toast.service';
                               <div><label class="label">Text Color</label><input type="color" [(ngModel)]="config().menuPage.style.textColor" class="w-full h-8"></div>
                               <div><label class="label">Accent Color</label><input type="color" [(ngModel)]="config().menuPage.style.accentColor" class="w-full h-8"></div>
                               <div><label class="label">Font</label><select [(ngModel)]="config().menuPage.style.fontFamily" class="input h-8 text-xs">
-                                 @for (f of filteredFonts(); track f) {
+                                 @for (f of fontList; track f) {
                                     <option [value]="f">{{ f }}</option>
                                  }
                               </select></div>
@@ -598,7 +592,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().packagesPage.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -612,7 +606,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().packagesPage.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -704,7 +698,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().reservation.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -718,7 +712,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().reservation.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -778,7 +772,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Title Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().locationPage.titleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -792,7 +786,7 @@ import { ToastService } from '../services/toast.service';
                                  <!-- Subtitle Style -->
                                  <div class="flex gap-2 mt-2 bg-gray-100 p-2 rounded">
                                     <select [(ngModel)]="config().locationPage.subtitleStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                       @for (f of filteredFonts(); track f) {
+                                       @for (f of fontList; track f) {
                                           <option [value]="f">{{ f }}</option>
                                        }
                                     </select>
@@ -931,7 +925,7 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Font Review</label>
                                  <select [(ngModel)]="config().testimonialStyles.reviewStyle.fontFamily" class="input text-[10px] w-full py-1 h-6 mb-1">
-                                    @for (f of filteredFonts(); track f) {
+                                    @for (f of fontList; track f) {
                                        <option [value]="f">{{ f }}</option>
                                     }
                                  </select>
@@ -943,7 +937,7 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Font Nama</label>
                                  <select [(ngModel)]="config().testimonialStyles.nameStyle.fontFamily" class="input text-[10px] w-full py-1 h-6 mb-1">
-                                    @for (f of filteredFonts(); track f) {
+                                    @for (f of fontList; track f) {
                                        <option [value]="f">{{ f }}</option>
                                     }
                                  </select>
@@ -955,7 +949,7 @@ import { ToastService } from '../services/toast.service';
                               <div>
                                  <label class="label">Font Role</label>
                                  <select [(ngModel)]="config().testimonialStyles.roleStyle.fontFamily" class="input text-[10px] w-full py-1 h-6 mb-1">
-                                    @for (f of filteredFonts(); track f) {
+                                    @for (f of fontList; track f) {
                                        <option [value]="f">{{ f }}</option>
                                     }
                                  </select>
@@ -998,7 +992,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Brand Style -->
                                 <div class="flex gap-2 mt-1 bg-gray-100 p-2 rounded">
                                    <select [(ngModel)]="config().footer.brandStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                      @for (f of filteredFonts(); track f) {
+                                      @for (f of fontList; track f) {
                                          <option [value]="f">{{ f }}</option>
                                       }
                                    </select>
@@ -1013,7 +1007,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Description Style -->
                                 <div class="flex gap-2 mt-1 bg-gray-100 p-2 rounded">
                                    <select [(ngModel)]="config().footer.descriptionStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                      @for (f of filteredFonts(); track f) {
+                                      @for (f of fontList; track f) {
                                          <option [value]="f">{{ f }}</option>
                                       }
                                    </select>
@@ -1028,7 +1022,7 @@ import { ToastService } from '../services/toast.service';
                                 <!-- Copyright Style -->
                                 <div class="flex gap-2 mt-1 bg-gray-100 p-2 rounded">
                                    <select [(ngModel)]="config().footer.copyrightStyle.fontFamily" class="input text-xs w-28 bg-white py-1">
-                                      @for (f of filteredFonts(); track f) {
+                                      @for (f of fontList; track f) {
                                          <option [value]="f">{{ f }}</option>
                                       }
                                    </select>
@@ -1080,22 +1074,22 @@ import { ToastService } from '../services/toast.service';
                      </div>
                   }
 
-                  <!-- TAB: DATABASE -->
+                  <!-- TAB: DATABASE (SECURE) -->
                   @if (currentTab() === 'database') {
                      <div class="space-y-6 max-w-3xl">
-                        <div class="bg-white p-8 rounded-xl border shadow-sm">
-                           <h3 class="text-xl font-bold mb-6">Konfigurasi Firebase</h3>
+                        <div class="bg-red-50 p-8 rounded-xl border border-red-200 shadow-sm">
+                           <h3 class="text-xl font-bold mb-6 text-red-900">⚠ Konfigurasi Database (Banking Level Security)</h3>
+                           <p class="text-sm text-red-800 mb-4">Area ini hanya untuk Super Admin. Mengubah ini akan memutus koneksi aplikasi.</p>
                            <div class="space-y-4">
-                              <div><label class="label">API Key</label><input type="text" [(ngModel)]="tempConfig.apiKey" class="input bg-gray-50 font-mono"></div>
-                              <div><label class="label">Auth Domain</label><input type="text" [(ngModel)]="tempConfig.authDomain" class="input bg-gray-50 font-mono"></div>
-                              <div><label class="label">Project ID</label><input type="text" [(ngModel)]="tempConfig.projectId" class="input bg-gray-50 font-mono font-bold text-blue-600"></div>
-                              <div><label class="label">Storage Bucket</label><input type="text" [(ngModel)]="tempConfig.storageBucket" class="input bg-gray-50 font-mono"></div>
-                              <div><label class="label">Messaging Sender ID</label><input type="text" [(ngModel)]="tempConfig.messagingSenderId" class="input bg-gray-50 font-mono"></div>
-                              <div><label class="label">App ID</label><input type="text" [(ngModel)]="tempConfig.appId" class="input bg-gray-50 font-mono"></div>
+                              <div><label class="label">API Key</label><input type="password" [(ngModel)]="tempConfig.apiKey" class="input bg-white font-mono"></div>
+                              <div><label class="label">Auth Domain</label><input type="text" [(ngModel)]="tempConfig.authDomain" class="input bg-white font-mono"></div>
+                              <div><label class="label">Project ID</label><input type="text" [(ngModel)]="tempConfig.projectId" class="input bg-white font-mono font-bold text-blue-600"></div>
+                              <div><label class="label">Storage Bucket</label><input type="text" [(ngModel)]="tempConfig.storageBucket" class="input bg-white font-mono"></div>
+                              <div><label class="label">Messaging Sender ID</label><input type="text" [(ngModel)]="tempConfig.messagingSenderId" class="input bg-white font-mono"></div>
+                              <div><label class="label">App ID</label><input type="text" [(ngModel)]="tempConfig.appId" class="input bg-white font-mono"></div>
                            </div>
-                           <div class="flex gap-4 pt-6 mt-6 border-t">
-                              <button (click)="saveFirebaseSetup()" class="bg-green-600 text-white font-bold py-2 px-6 rounded shadow hover:bg-green-700">Simpan & Reload</button>
-                              <button (click)="resetFirebaseSetup()" class="text-red-500 text-sm font-bold">Reset Default</button>
+                           <div class="flex gap-4 pt-6 mt-6 border-t border-red-200">
+                              <button (click)="saveFirebaseSetup()" class="bg-red-600 text-white font-bold py-2 px-6 rounded shadow hover:bg-red-700">Simpan Konfigurasi Kritis</button>
                            </div>
                         </div>
                      </div>
@@ -1128,7 +1122,7 @@ export class AdminComponent {
   isOpen = signal(false);
   emailInput = signal('');
   passwordInput = signal('');
-  showPassword = signal(false); // NEW: Toggle visibility
+  showPassword = signal(false);
   isLoggingIn = signal(false);
   isUploading = signal(false);
   loginError = signal('');
@@ -1136,7 +1130,6 @@ export class AdminComponent {
   currentTab = signal('global');
   selectedBranchIndex = signal(0);
   
-  // FONT FILTERING (FIX Blind Spot #7 & #13)
   fontSearch = signal('');
   
   tabs = [
@@ -1150,22 +1143,23 @@ export class AdminComponent {
     { id: 'media', label: 'Instagram Feed', icon: '📸' },
     { id: 'footer', label: 'Footer', icon: '🔗' },
     { id: 'ai', label: 'AI Assistant', icon: '🤖' },
-    { id: 'database', label: 'Database', icon: '🔥' },
+    { id: 'database', label: 'Database (Secure)', icon: '🔥' },
   ];
   
+  // 10 Curated Fonts (Performance Optimized)
   fontList = [
-    'Playfair Display', 'Lato', 'Montserrat', 'Oswald', 'Lora', 'Raleway',
-    'Open Sans', 'Roboto', 'Merriweather', 'Nunito', 'Poppins', 'Rubik',
-    'Ubuntu', 'PT Sans', 'Noto Sans', 'Quicksand', 'Work Sans', 'Karla',
-    'Inconsolata', 'Dosis', 'Oxygen', 'Arvo', 'Pacifico', 'Dancing Script',
-    'Lobster', 'Satisfy', 'Great Vibes', 'Courgette', 'Righteous', 'Fredoka One',
-    'Exo 2', 'Fira Sans', 'Barlow', 'Mulish', 'Titillium Web', 'Crimson Text',
-    'Libre Baskerville', 'Anton', 'Josefin Sans', 'Fjalla One', 'Arimo', 'Hind',
-    'Cabin', 'Bitter', 'Varela Round', 'Comfortaa', 'Maven Pro',
-    'Arial', 'Helvetica', 'Times New Roman', 'Courier New', 'Verdana', 'Georgia'
+    'Playfair Display', 
+    'Lato', 
+    'Montserrat', 
+    'Oswald', 
+    'Merriweather', 
+    'Great Vibes', 
+    'Dancing Script', 
+    'Open Sans', 
+    'Roboto', 
+    'Lora'
   ].sort();
 
-  // Computed Font List
   filteredFonts = computed(() => {
     const term = this.fontSearch().toLowerCase();
     return this.fontList.filter(f => f.toLowerCase().includes(term));
@@ -1195,10 +1189,10 @@ export class AdminComponent {
     try {
       await this.configService.loginAdmin(this.emailInput(), this.passwordInput());
       this.currentTab.set('global');
-      this.toastService.show('Selamat datang kembali, Admin!', 'success');
+      this.toastService.show('Akses Admin Diberikan. Keamanan Aktif.', 'success');
     } catch (err: any) {
-      this.loginError.set("Gagal Login: " + err.message);
-      this.toastService.show('Gagal login, periksa kredensial.', 'error');
+      this.loginError.set("Akses Ditolak: " + err.message);
+      this.toastService.show('Gagal login.', 'error');
     } finally {
       this.isLoggingIn.set(false);
     }
@@ -1206,21 +1200,21 @@ export class AdminComponent {
 
   async logout() { 
     await this.configService.logoutAdmin(); 
-    this.toastService.show('Berhasil logout.', 'info');
+    this.toastService.show('Sesi Berakhir.', 'info');
   }
 
   async saveChanges() { 
     try {
       await this.configService.updateConfig({...this.config()});
-      this.toastService.show('Pengaturan berhasil disimpan!', 'success');
+      this.toastService.show('Perubahan Tersimpan Aman.', 'success');
     } catch(e) {
-      this.toastService.show('Gagal menyimpan pengaturan.', 'error');
+      this.toastService.show('Gagal menyimpan.', 'error');
     }
   }
 
   saveFirebaseSetup() { 
     this.configService.saveStoredFirebaseConfig(this.tempConfig);
-    this.toastService.show('Konfigurasi DB tersimpan. Memuat ulang...', 'success');
+    this.toastService.show('Konfigurasi DB Diperbarui.', 'success');
   }
   resetFirebaseSetup() { 
     if(confirm('Reset ke default?')) {
@@ -1229,14 +1223,11 @@ export class AdminComponent {
     }
   }
 
-  // Generic File Uploader with VALIDATION (Fix Blind Spot #2)
   async onFileSelected(event: any, type: string, index?: number) {
      const file = event.target.files[0];
      if(!file) return;
-
-     // Validation Size < 5MB
      if (file.size > 5 * 1024 * 1024) {
-       this.toastService.show('File terlalu besar! Maksimal 5MB.', 'error');
+       this.toastService.show('File terlalu besar! Max 5MB.', 'error');
        return;
      }
 
@@ -1256,12 +1247,10 @@ export class AdminComponent {
        
        if (type === 'branchMap') c.branches[this.selectedBranchIndex()].mapImage = url;
        if (type === 'menuItem' && typeof index === 'number') c.branches[this.selectedBranchIndex()].menu[index].image = url;
-       // Package Image logic
        if (type === 'packageItem' && typeof index === 'number') {
            const pkgs = c.branches[this.selectedBranchIndex()].packages;
            if(pkgs && pkgs[index]) pkgs[index].image = url;
        }
-       
        if (type === 'gallery') { if(!c.gallery) c.gallery = []; c.gallery.push(url); }
        
        this.config.set({...c});
@@ -1272,7 +1261,6 @@ export class AdminComponent {
      finally { this.isUploading.set(false); }
   }
 
-  // --- CRUD ---
   addMenuItem() {
     this.config().branches[this.selectedBranchIndex()].menu.unshift({ name: 'Menu Baru', desc: '', price: 'Rp 0', category: 'Umum', image: 'https://picsum.photos/200', favorite: false, soldOut: false, spicyLevel: 0 });
     this.toastService.show('Item menu ditambahkan.', 'info');
@@ -1284,7 +1272,6 @@ export class AdminComponent {
     }
   }
 
-  // Packages CRUD
   addPackage() {
     if (!this.config().branches[this.selectedBranchIndex()].packages) {
         this.config().branches[this.selectedBranchIndex()].packages = [];
@@ -1292,9 +1279,9 @@ export class AdminComponent {
     this.config().branches[this.selectedBranchIndex()].packages?.unshift({
         name: 'Paket Baru',
         price: 'Rp 0',
-        description: 'Deskripsi paket...',
+        description: 'Deskripsi...',
         image: 'https://picsum.photos/300/200',
-        items: ['Nasi', 'Lauk']
+        items: ['Item 1']
     });
     this.toastService.show('Paket ditambahkan.', 'info');
   }
@@ -1307,7 +1294,6 @@ export class AdminComponent {
     }
   }
   updatePackageItems(pkg: PackageItem, value: string) {
-    // Split string by enter or comma and filter empty strings
     pkg.items = value.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
   }
 

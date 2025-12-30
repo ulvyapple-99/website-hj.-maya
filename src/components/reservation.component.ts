@@ -71,7 +71,6 @@ interface GuestOrder {
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs font-bold mb-1 uppercase">Tanggal</label>
-                    <!-- FIX: Added min attribute -->
                     <input type="date" [(ngModel)]="formDate" [min]="today"
                            class="w-full border px-3 py-2 text-sm bg-white"
                            [style.height]="config().reservation.inputHeight"
@@ -81,10 +80,17 @@ interface GuestOrder {
                     <label class="block text-xs font-bold mb-1 uppercase">Jam</label>
                     <input type="time" [(ngModel)]="formTime" 
                            class="w-full border px-3 py-2 text-sm bg-white"
+                           [class.border-red-500]="timeError()"
                            [style.height]="config().reservation.inputHeight"
                            [style.borderRadius]="config().reservation.inputBorderRadius">
                   </div>
                 </div>
+                
+                @if (timeError()) {
+                   <div class="text-[10px] text-red-600 font-bold bg-red-50 p-2 rounded border border-red-200">
+                      {{ timeError() }}
+                   </div>
+                }
 
                 <div class="bg-gray-50 p-3 border" [style.borderRadius]="config().reservation.inputBorderRadius">
                    <label class="block text-xs font-bold mb-2 uppercase" [style.color]="config().reservation.style.accentColor">Jenis Acara</label>
@@ -113,17 +119,17 @@ interface GuestOrder {
                    <div class="flex justify-between text-sm mb-1 opacity-90">Total:</div>
                    <div class="text-2xl font-bold mb-4">{{ formatRupiah(grandTotal()) }}</div>
                    <button (click)="submitReservation()" [disabled]="!isValid()"
-                     class="w-full bg-white text-black font-bold py-3 shadow transition hover:bg-gray-100 disabled:opacity-50"
+                     class="w-full bg-white text-black font-bold py-3 shadow transition hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                      [style.height]="config().reservation.buttonHeight"
                      [style.borderRadius]="config().reservation.inputBorderRadius">
-                     Kirim WhatsApp
+                     {{ isValid() ? 'Kirim WhatsApp' : 'Lengkapi Data' }}
                    </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- COLUMN 2 & 3: Guest & Menu (Combined for brevity in styles, kept logical structure) -->
+          <!-- COLUMN 2 & 3: Guest & Menu -->
           <div class="lg:col-span-4 text-gray-800">
              <div class="bg-white p-6 shadow-lg h-full flex flex-col" [style.borderRadius]="config().reservation.cardBorderRadius">
                 <h3 class="text-lg font-bold mb-4 border-b pb-2 flex justify-between items-center" [style.color]="config().reservation.style.accentColor">
@@ -201,10 +207,8 @@ export class ReservationComponent {
   formDate = signal('');
   formTime = signal('');
   formPax = signal(0);
-  formNotes = signal('');
   isRamadan = signal(false);
   
-  // DATE Validation
   today = new Date().toISOString().split('T')[0];
 
   guests = signal<GuestOrder[]>([{ id: 1, name: 'Pemesan', cart: new Map() }]);
@@ -214,7 +218,39 @@ export class ReservationComponent {
   currentBranchMenu = computed(() => this.currentBranch().menu);
   minPax = computed(() => this.isRamadan() ? this.config().reservation.minPaxRamadan : this.config().reservation.minPaxRegular);
 
-  isValid = computed(() => this.formName() !== '' && this.formDate() !== '' && this.formPax() >= this.minPax());
+  // LOGIC: Check Opening Hours
+  timeError = computed(() => {
+    const time = this.formTime();
+    if (!time) return null;
+
+    const hoursStr = this.currentBranch().hours; // e.g., "10.00 - 22.00"
+    if (!hoursStr) return null; // If no hours defined, skip check
+
+    // Extract numbers: "10.00" -> 10, "22.00" -> 22
+    const matches = hoursStr.match(/(\d{1,2})[:.](\d{2})/g);
+    if (!matches || matches.length < 2) return null;
+
+    const parseTime = (t: string) => {
+       const [h, m] = t.replace('.', ':').split(':').map(Number);
+       return h * 60 + m;
+    };
+
+    const start = parseTime(matches[0]);
+    const end = parseTime(matches[1]);
+    const selected = parseTime(time);
+
+    if (selected < start || selected > end) {
+       return `Cabang tutup pada jam ${time}. Buka: ${matches[0]} - ${matches[1]}`;
+    }
+    return null;
+  });
+
+  isValid = computed(() => 
+    this.formName() !== '' && 
+    this.formDate() !== '' && 
+    this.formPax() >= this.minPax() &&
+    this.timeError() === null
+  );
 
   grandTotal = computed(() => {
     let total = 0;
@@ -279,6 +315,8 @@ export class ReservationComponent {
        }
     });
     msg += `\n*Total Estimasi: ${this.formatRupiah(this.grandTotal())}*`;
+    // Add "Status" placeholder to help Admin in chat
+    msg += `\n\n*Status: Menunggu Konfirmasi Admin*`; 
 
     const phone = this.configService.formatPhoneNumber(b.whatsappNumber);
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');

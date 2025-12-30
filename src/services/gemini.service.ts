@@ -57,10 +57,19 @@ export class GeminiService {
       const config = this.configService.config();
       const menuList = this.configService.getMenuContext();
 
+      // INSTRUCTION TO PREVENT STOCK HALLUCINATION
+      const strictRules = `
+        ATURAN PENTING:
+        1. JANGAN PERNAH menyebutkan stok (sisa porsi, tersedia/tidak). Anggap semua menu di list tersedia kecuali tertulis [HABIS].
+        2. Fokus pada rekomendasi rasa, bahan, dan kecocokan menu.
+        3. Jawab dengan ramah dan singkat.
+      `;
+
       const prompt = `
+        ${strictRules}
         ${config.ai.systemInstruction}
         
-        DATA MENU RESTORAN KAMI SAAT INI (Gunakan data ini untuk rekomendasi):
+        DATA MENU RESTORAN KAMI (Gunakan data ini untuk rekomendasi):
         ${menuList}
         
         Pelanggan bertanya: "${query}"

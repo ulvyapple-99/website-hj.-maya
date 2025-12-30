@@ -3,10 +3,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
-      // PUBLIK: Boleh baca semua data (agar menu tampil di web)
+      // PUBLIK: Boleh baca semua data (Menu harus tampil di publik)
       allow read: if true;
       
-      // ADMIN: Hanya boleh tulis/edit jika sudah login
+      // ADMIN: Hanya boleh tulis jika login.
+      // KEAMANAN: Aplikasi tidak memiliki form Register Publik.
+      // User harus dibuat manual di Firebase Console.
       allow write: if request.auth != null;
     }
   }
