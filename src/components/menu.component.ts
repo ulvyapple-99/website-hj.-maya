@@ -1,5 +1,5 @@
 
-import { Component, signal, inject, computed, effect } from '@angular/core';
+import { Component, signal, inject, computed, effect, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfigService, MenuItem } from '../services/config.service';
 import { ToastService } from '../services/toast.service';
@@ -22,7 +22,9 @@ import { ToastService } from '../services/toast.service';
               [style.fontFamily]="config().menuPage.titleStyle.fontFamily"
               [style.fontSize]="config().menuPage.titleStyle.fontSize"
               [style.color]="config().menuPage.titleStyle.color"
-          >{{ config().menuPage.title }}</h2>
+          >
+            {{ onlyFavorites() ? 'Menu Favorit' : config().menuPage.title }}
+          </h2>
           <div class="h-1 w-24 mx-auto rounded mb-6" [style.backgroundColor]="config().menuPage.style.accentColor"></div>
           <p class="max-w-2xl mx-auto opacity-70 font-light" 
              [style.fontFamily]="config().menuPage.subtitleStyle.fontFamily"
@@ -79,6 +81,9 @@ import { ToastService } from '../services/toast.service';
                            <button (click)="addToCart(item)" class="mt-4 bg-white text-black px-4 py-2 rounded-full text-xs font-bold hover:bg-gray-200 transition translate-y-4 group-hover:translate-y-0 delay-100">
                              + Pesan
                            </button>
+                           @if(isSate(item)) {
+                             <span class="text-[10px] mt-1 text-yellow-300 font-bold translate-y-4 group-hover:translate-y-0 delay-100">Min. 10 Tusuk</span>
+                           }
                         } @else {
                           <div class="mt-4 flex items-center gap-3 bg-white text-black rounded-full px-2 py-1 translate-y-4 group-hover:translate-y-0 delay-100">
                              <button (click)="removeFromCart(item)" class="px-2 font-bold">-</button>
@@ -106,14 +111,19 @@ import { ToastService } from '../services/toast.service';
                      <span class="font-bold text-gray-500" [style.fontSize]="config().menuPage.itemPriceSize">{{ item.price }}</span>
                   </div>
                   
-                  <!-- Spicy Level -->
-                  @if (item.spicyLevel && item.spicyLevel > 0) {
-                     <div class="flex mb-1">
-                       @for (s of [].constructor(item.spicyLevel); track $index) {
-                         <span class="text-red-500 text-xs">🌶️</span>
-                       }
-                     </div>
-                  }
+                  <!-- Spicy & Min Order Info -->
+                  <div class="flex items-center gap-2 mb-1">
+                    @if (item.spicyLevel && item.spicyLevel > 0) {
+                       <div class="flex">
+                         @for (s of [].constructor(item.spicyLevel); track $index) {
+                           <span class="text-red-500 text-xs">🌶️</span>
+                         }
+                       </div>
+                    }
+                    @if(isSate(item)) {
+                       <span class="text-[10px] font-bold text-orange-600 bg-orange-100 px-1.5 rounded">Min. 10</span>
+                    }
+                  </div>
 
                   <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">{{ item.desc }}</p>
                 </div>
@@ -123,7 +133,9 @@ import { ToastService } from '../services/toast.service';
           </div>
         } @else {
           <div class="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-            <p class="opacity-60 text-lg">Belum ada menu di cabang ini.</p>
+            <p class="opacity-60 text-lg">
+              {{ onlyFavorites() ? 'Belum ada menu favorit di cabang ini.' : 'Belum ada menu di cabang ini.' }}
+            </p>
           </div>
         }
       </div>
@@ -217,6 +229,8 @@ export class MenuComponent {
   toastService = inject(ToastService);
   config = this.configService.config;
   
+  onlyFavorites = input(false);
+
   selectedBranchIndex = signal(0);
   cart = signal<Map<string, number>>(new Map());
   showCartModal = signal(false);
@@ -240,22 +254,37 @@ export class MenuComponent {
   }
 
   currentBranch = computed(() => this.config().branches[this.selectedBranchIndex()]);
-  currentBranchMenu = computed(() => this.currentBranch().menu);
+  
+  currentBranchMenu = computed(() => {
+    let menu = this.currentBranch().menu;
+    if (this.onlyFavorites()) {
+      menu = menu.filter(item => item.favorite);
+    }
+    return menu;
+  });
   
   // Helper to generate unique key for cart items based on Branch + Name
   private getItemKey(item: MenuItem): string {
     return `${this.currentBranch().id}_${item.name}`;
   }
 
+  // Check if item is Sate (Sapi, Kambing, Ayam) for Min order logic
+  isSate(item: MenuItem): boolean {
+    const textToCheck = (item.name + ' ' + item.category).toLowerCase();
+    return textToCheck.includes('sate');
+  }
+
   cartItemsList = computed(() => {
     const list: {menu: MenuItem, qty: number}[] = [];
-    const currentMenu = this.currentBranchMenu();
+    // Important: We need to access the FULL menu to find items in cart even if they are not favorites
+    // However, for display efficiency we use currentBranch().menu as the source of truth
+    const fullMenu = this.currentBranch().menu;
     const branchPrefix = this.currentBranch().id + '_';
     
     this.cart().forEach((qty, key) => { 
         if (qty > 0 && key.startsWith(branchPrefix)) {
             const originalName = key.replace(branchPrefix, '');
-            const item = currentMenu.find(m => m.name === originalName);
+            const item = fullMenu.find(m => m.name === originalName);
             if (item) {
                 list.push({menu: item, qty});
             }
@@ -280,13 +309,13 @@ export class MenuComponent {
 
   totalPrice = computed(() => {
     let total = 0;
-    const currentMenu = this.currentBranchMenu();
+    const fullMenu = this.currentBranch().menu;
     const branchPrefix = this.currentBranch().id + '_';
 
     this.cart().forEach((qty, key) => { 
         if (key.startsWith(branchPrefix)) {
           const originalName = key.replace(branchPrefix, '');
-          const item = currentMenu.find(m => m.name === originalName);
+          const item = fullMenu.find(m => m.name === originalName);
           if (item) {
               total += this.parsePrice(item.price) * qty;
           }
@@ -303,22 +332,52 @@ export class MenuComponent {
 
   addToCart(item: MenuItem) {
     const key = this.getItemKey(item);
+    const isSateItem = this.isSate(item);
+
     this.cart.update(currentMap => {
       const newMap = new Map<string, number>(currentMap);
-      newMap.set(key, (newMap.get(key) || 0) + 1);
+      const currentQty = newMap.get(key) || 0;
+      
+      let nextQty = currentQty + 1;
+      
+      // LOGIC MINIMAL 10 TUSUK UNTUK SATE (SAAT PERTAMA KALI NAMBAH)
+      if (currentQty === 0 && isSateItem) {
+         nextQty = 10;
+         this.toastService.show(`Min. pembelian ${item.name} adalah 10 tusuk`, 'info');
+      } else {
+         this.toastService.show(`Ditambahkan: ${item.name}`, 'success');
+      }
+
+      newMap.set(key, nextQty);
       return newMap;
     });
-    this.toastService.show(`Ditambahkan: ${item.name}`, 'success');
+    
     this.configService.logEvent('add_to_cart', { item: item.name, price: item.price });
   }
 
   removeFromCart(item: MenuItem) {
     const key = this.getItemKey(item);
+    const isSateItem = this.isSate(item);
+
     this.cart.update(currentMap => {
       const newMap = new Map<string, number>(currentMap);
       const currentQty = newMap.get(key) || 0;
-      if (currentQty > 1) newMap.set(key, currentQty - 1);
-      else newMap.delete(key);
+      
+      if (currentQty > 0) {
+        let nextQty = currentQty - 1;
+
+        // LOGIC MINIMAL 10: JIKA TURUN DI BAWAH 10, LANGSUNG HAPUS (0)
+        if (isSateItem && currentQty <= 10) {
+           nextQty = 0;
+           this.toastService.show(`${item.name} dihapus (min. 10 tusuk)`, 'info');
+        }
+
+        if (nextQty > 0) {
+           newMap.set(key, nextQty);
+        } else {
+           newMap.delete(key);
+        }
+      }
       return newMap;
     });
   }

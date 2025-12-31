@@ -24,7 +24,7 @@ import { ConfigService } from '../services/config.service';
   template: `
     @if (config().features.showHero) { <app-hero></app-hero> }
     @if (config().features.showAbout) { <app-about></app-about> }
-    @if (config().features.showMenu) { <app-menu></app-menu> }
+    @if (config().features.showMenu) { <app-menu [onlyFavorites]="true"></app-menu> }
     @if (config().features.showTestimonials) { <app-testimonials></app-testimonials> }
     @if (config().features.showGallery) { <app-gallery></app-gallery> }
     @if (config().features.showLocation) { <app-location></app-location> }
