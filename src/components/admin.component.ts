@@ -272,19 +272,137 @@ import { ToastService } from '../services/toast.service';
                    <!-- === ABOUT === -->
                    @if (currentTab() === 'about') {
                       <div class="admin-card">
-                         <div class="admin-card-header">Tentang Kami</div>
+                         <div class="admin-card-header">Konten & Informasi</div>
                          <div class="p-6 space-y-4">
-                            <div><label class="form-label">Judul</label><input [(ngModel)]="config().about.title" class="form-input"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                               <div><label class="form-label">Judul</label><input [(ngModel)]="config().about.title" class="form-input"></div>
+                               <div><label class="form-label">Nama Founder</label><input [(ngModel)]="config().about.founderName" class="form-input"></div>
+                            </div>
                             <div><label class="form-label">Deskripsi</label><textarea [(ngModel)]="config().about.description" class="form-input h-32"></textarea></div>
-                            <div><label class="form-label">Gambar Utama</label><input type="file" (change)="onFileSelected($event, 'aboutImage')" class="form-input"></div>
+                            <div><label class="form-label">Kutipan Founder</label><textarea [(ngModel)]="config().about.quote" class="form-input h-20"></textarea></div>
+                            
+                            <div class="grid grid-cols-2 gap-4 border-t pt-4">
+                               <div>
+                                  <label class="form-label">Gambar Utama</label>
+                                  <input type="file" (change)="onFileSelected($event, 'aboutImage')" class="form-input mb-2">
+                                  <img [src]="config().about.image" class="h-24 object-cover rounded bg-gray-200">
+                               </div>
+                               <div class="space-y-2">
+                                  <div><label class="form-label">Image Alt Text (SEO)</label><input [(ngModel)]="config().about.imageAlt" class="form-input"></div>
+                                  <div><label class="form-label">Posisi Gambar</label>
+                                     <select [(ngModel)]="config().about.imagePosition" class="form-select">
+                                        <option value="left">Left</option>
+                                        <option value="right">Right</option>
+                                     </select>
+                                  </div>
+                               </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 border-t pt-4">
+                               <div><label class="form-label">CTA Text (Tombol)</label><input [(ngModel)]="config().about.ctaText" class="form-input"></div>
+                               <div><label class="form-label">CTA Link</label><input [(ngModel)]="config().about.ctaLink" class="form-input"></div>
+                            </div>
+
                             <div class="grid grid-cols-3 gap-4 border-t pt-4">
                                <div><label class="form-label">Stat 1 Angka</label><input [(ngModel)]="config().about.stats.val1" class="form-input"></div>
                                <div><label class="form-label">Stat 1 Label</label><input [(ngModel)]="config().about.stats.label1" class="form-input"></div>
-                               <div class="row-span-3 flex items-center justify-center"><div class="text-xs text-gray-500">Edit 3 statistik utama</div></div>
+                               <div class="row-span-3 flex items-center justify-center flex-col gap-2">
+                                  <div class="text-xs text-gray-500">Styling Tambahan</div>
+                                  <label class="flex items-center gap-1 text-xs"><input type="checkbox" [(ngModel)]="config().about.showPattern"> Show Pattern</label>
+                                  <label class="flex items-center gap-1 text-xs"><input type="checkbox" [(ngModel)]="config().about.enableGlassEffect"> Glass Effect</label>
+                               </div>
                                <div><label class="form-label">Stat 2 Angka</label><input [(ngModel)]="config().about.stats.val2" class="form-input"></div>
                                <div><label class="form-label">Stat 2 Label</label><input [(ngModel)]="config().about.stats.label2" class="form-input"></div>
                                <div><label class="form-label">Stat 3 Angka</label><input [(ngModel)]="config().about.stats.val3" class="form-input"></div>
                                <div><label class="form-label">Stat 3 Label</label><input [(ngModel)]="config().about.stats.label3" class="form-input"></div>
+                            </div>
+
+                            <!-- Logo Upload Logic -->
+                            <div class="border-t pt-4">
+                               <div class="flex justify-between items-center mb-2">
+                                  <label class="form-label">Logo Partner / Media</label>
+                                  <label class="cursor-pointer bg-blue-500 text-white text-[10px] px-2 py-1 rounded">
+                                     + Upload Logo
+                                     <input type="file" (change)="onFileSelected($event, 'trustedLogo')" class="hidden">
+                                  </label>
+                               </div>
+                               <div class="flex gap-2 flex-wrap">
+                                  @for (logo of config().about.trustedLogos; track $index) {
+                                     <div class="relative group h-10 w-10">
+                                        <img [src]="logo" class="h-full w-full object-cover rounded border">
+                                        <button (click)="removeTrustedLogo($index)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">x</button>
+                                     </div>
+                                  }
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+
+                      <!-- FULL COLOR CONTROL FOR ABOUT -->
+                      <div class="admin-card">
+                         <div class="admin-card-header">Kustomisasi Warna Lengkap (About)</div>
+                         <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <!-- Background -->
+                            <div class="col-span-1">
+                               <label class="form-label">Background</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().about.style.backgroundColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().about.style.backgroundColor" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Accent -->
+                            <div class="col-span-1">
+                               <label class="form-label">Aksen (Tombol/Garis)</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().about.style.accentColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().about.style.accentColor" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Text Default -->
+                            <div class="col-span-1">
+                               <label class="form-label">Teks Default</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().about.style.textColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().about.style.textColor" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Spacer -->
+                            <div class="hidden md:block"></div>
+
+                            <!-- Granular Controls -->
+                            <div class="col-span-2 border-t mt-2 pt-2 md:col-span-4"><span class="text-[10px] font-bold text-gray-400 uppercase">Detail Elemen</span></div>
+
+                            <!-- Title Color -->
+                            <div>
+                               <label class="form-label">Warna Judul</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().about.titleStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().about.titleStyle.color" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Desc Color -->
+                            <div>
+                               <label class="form-label">Warna Deskripsi</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().about.descriptionStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().about.descriptionStyle.color" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Stats Number Color -->
+                            <div>
+                               <label class="form-label">Warna Angka Stats</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().about.statsStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().about.statsStyle.color" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Stats Label Color -->
+                            <div>
+                               <label class="form-label">Warna Label Stats</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().about.statsLabelStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().about.statsLabelStyle.color" class="form-input text-xs">
+                               </div>
                             </div>
                          </div>
                       </div>
@@ -633,6 +751,7 @@ export class AdminComponent {
         if (type === 'heroBg') newC.hero.bgImage = base64;
         if (type === 'heroFallback') newC.hero.fallbackImage = base64; // BS 2
         if (type === 'aboutImage') newC.about.image = base64;
+        if (type === 'trustedLogo') newC.about.trustedLogos = [...(newC.about.trustedLogos || []), base64];
         if (type === 'galleryImage') newC.gallery.push(base64);
         
         // ITEMS
@@ -656,6 +775,14 @@ export class AdminComponent {
     } finally {
       this.isUploading.set(false);
     }
+  }
+
+  removeTrustedLogo(index: number) {
+    this.config.update(c => {
+       const newC = {...c};
+       newC.about.trustedLogos = newC.about.trustedLogos.filter((_, i) => i !== index);
+       return newC;
+    });
   }
 
   removeGalleryImage(index: number) {

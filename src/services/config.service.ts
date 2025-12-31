@@ -152,6 +152,7 @@ export interface AppConfig {
     description: string;
     descriptionStyle: TextStyle; 
     image: string;
+    imageAlt: string; // BS 7 (About)
     imagePosition: 'left' | 'right'; 
     stats: {
       val1: string; label1: string;
@@ -160,6 +161,14 @@ export interface AppConfig {
     };
     statsStyle: TextStyle; 
     statsLabelStyle: TextStyle; 
+    // New Fields for Blind Spots
+    ctaText: string; // BS 1
+    ctaLink: string; // BS 1
+    quote: string; // BS 4
+    founderName: string; // BS 4
+    trustedLogos: string[]; // BS 2
+    showPattern: boolean; // BS 6
+    enableGlassEffect: boolean; // BS 10
     style: PageStyle;
   };
   menuPage: {
@@ -365,6 +374,7 @@ export class ConfigService {
       description: 'Sate Maranggi Hj. Maya menghadirkan cita rasa autentik yang telah melegenda. Daging sapi pilihan yang dimarinasi dengan bumbu rempah alami, dibakar dengan kematangan sempurna, disajikan dengan sambal oncom dan ketan bakar yang khas.\n\nKami berkomitmen menjaga kualitas rasa dan pelayanan untuk kepuasan pelanggan setia kami.',
       descriptionStyle: { fontFamily: 'Lato', fontSize: '1.125rem', color: '#5D4037' },
       image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=1000',
+      imageAlt: 'Sate Maranggi Hj. Maya Authentic Grill',
       imagePosition: 'right',
       stats: {
         val1: '100%', label1: 'Daging Segar',
@@ -373,6 +383,13 @@ export class ConfigService {
       },
       statsStyle: { fontFamily: 'Oswald', fontSize: '2rem', color: '#D84315' },
       statsLabelStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#3E2723' },
+      ctaText: 'Lihat Menu Kami',
+      ctaLink: '/menu',
+      quote: 'Kualitas rasa adalah janji kami kepada setiap pelanggan.',
+      founderName: 'Hj. Maya',
+      trustedLogos: [],
+      showPattern: true,
+      enableGlassEffect: false,
       style: {
         backgroundColor: '#FFF8E1',
         textColor: '#3E2723',
@@ -641,7 +658,8 @@ export class ConfigService {
             packagesPage: { ...c.packagesPage, ...(parsed.packagesPage || {}) },
             // Blind Spot Safe Merge
             global: { ...c.global, ...(parsed.global || {}) },
-            hero: { ...c.hero, ...(parsed.hero || {}) }
+            hero: { ...c.hero, ...(parsed.hero || {}) },
+            about: { ...c.about, ...(parsed.about || {}) }
         }));
       }
     } catch(e) {}
@@ -875,6 +893,14 @@ export class ConfigService {
                 stats: ensure(data.about?.stats, current.about.stats),
                 statsStyle: text(data.about?.statsStyle),
                 statsLabelStyle: text(data.about?.statsLabelStyle),
+                // Ensure new fields have defaults
+                ctaText: data.about?.ctaText || 'Lihat Menu',
+                ctaLink: data.about?.ctaLink || '/menu',
+                quote: data.about?.quote || '',
+                founderName: data.about?.founderName || '',
+                trustedLogos: data.about?.trustedLogos || [],
+                showPattern: data.about?.showPattern ?? true,
+                enableGlassEffect: data.about?.enableGlassEffect ?? false,
                 style: ensure(data.about?.style, current.about.style)
             },
             menuPage: { 
