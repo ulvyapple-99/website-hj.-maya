@@ -97,7 +97,7 @@ export interface AppConfig {
     logoImage: string;
     favicon: string; 
     metaDescription: string;
-    metaKeywords: string; // BLIND SPOT 2
+    metaKeywords: string; 
     metaStyle: TextStyle; 
     navbarColor: string;
     navbarTextColor: string;
@@ -106,12 +106,12 @@ export interface AppConfig {
     navLinkFontSize: string;
     navLinkGap: string;
     analyticsId: string;
-    maintenanceMode: boolean; // BLIND SPOT 3
-    customCss: string; // BLIND SPOT 6
-    customJs: string; // BLIND SPOT 6
-    scrollbarColor: string; // BLIND SPOT 4
-    floatingWhatsapp: string; // BLIND SPOT 5
-    enableSmoothScroll: boolean; // BLIND SPOT 9
+    maintenanceMode: boolean; 
+    customCss: string; 
+    customJs: string; 
+    scrollbarColor: string; 
+    floatingWhatsapp: string; 
+    enableSmoothScroll: boolean; 
   };
   intro: {
     enabled: boolean;
@@ -135,15 +135,15 @@ export interface AppConfig {
     button2Link: string;
     button2Style: TextStyle; 
     bgImage: string;
-    fallbackImage: string; // BS 2
+    fallbackImage: string; 
     overlayOpacity: number; 
     textAlign: 'left' | 'center' | 'right'; 
-    height: string; // BS 4
-    bgPosition: string; // BS 6
-    textShadow: string; // BS 5
-    gradientDirection: string; // BS 7
-    blurLevel: string; // BS 9
-    socialProofText: string; // BS 8
+    height: string; 
+    bgPosition: string; 
+    textShadow: string; 
+    gradientDirection: string; 
+    blurLevel: string; 
+    socialProofText: string; 
     style: PageStyle;
   };
   about: {
@@ -152,7 +152,7 @@ export interface AppConfig {
     description: string;
     descriptionStyle: TextStyle; 
     image: string;
-    imageAlt: string; // BS 7 (About)
+    imageAlt: string; 
     imagePosition: 'left' | 'right'; 
     stats: {
       val1: string; label1: string;
@@ -161,14 +161,13 @@ export interface AppConfig {
     };
     statsStyle: TextStyle; 
     statsLabelStyle: TextStyle; 
-    // New Fields for Blind Spots
-    ctaText: string; // BS 1
-    ctaLink: string; // BS 1
-    quote: string; // BS 4
-    founderName: string; // BS 4
-    trustedLogos: string[]; // BS 2
-    showPattern: boolean; // BS 6
-    enableGlassEffect: boolean; // BS 10
+    ctaText: string; 
+    ctaLink: string; 
+    quote: string; 
+    founderName: string; 
+    trustedLogos: string[]; 
+    showPattern: boolean; 
+    enableGlassEffect: boolean; 
     style: PageStyle;
   };
   menuPage: {
@@ -203,7 +202,19 @@ export interface AppConfig {
     subtitleStyle: TextStyle;
     minPaxRegular: number;
     minPaxRamadan: number;
-    whatsappTemplate: string; 
+    maxPax: number;
+    tableTypes: string[];
+    enableSpecialRequest: boolean;
+    termsAndConditions: string;
+    whatsappTemplate: string;
+    
+    // NEW: Blind Spot Logics
+    bookingLeadTimeHours: number; // Minimal jam sebelum datang
+    requireEmail: boolean;
+    enableDownPaymentCalc: boolean;
+    downPaymentPercentage: number;
+
+    // NEW: Granular Styles
     style: PageStyle;
     cardBorderRadius: string;
     cardBackgroundColor: string; 
@@ -211,6 +222,10 @@ export interface AppConfig {
     inputHeight: string;
     inputBorderRadius: string;
     buttonHeight: string;
+    
+    labelStyle: TextStyle;
+    inputStyle: TextStyle;
+    summaryStyle: TextStyle;
   };
   locationPage: {
     title: string;
@@ -447,7 +462,18 @@ export class ConfigService {
       subtitleStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#5D4037' },
       minPaxRegular: 5,
       minPaxRamadan: 10,
-      whatsappTemplate: 'Halo Admin *{branch}*,\nSaya mau reservasi meja:\n\nNama: *{name}*\nTanggal: {date}\nJam: {time}\nJumlah: {pax} orang\n\nMohon konfirmasinya.',
+      maxPax: 100,
+      tableTypes: ['Indoor (AC)', 'Outdoor (Smoking Area)', 'Lesehan', 'VIP Room'],
+      enableSpecialRequest: true,
+      termsAndConditions: '1. DP 50% wajib dibayarkan maksimal 1x24 jam setelah konfirmasi admin.\n2. Pembatalan H-1 uang muka hangus.\n3. Datang tepat waktu, toleransi keterlambatan 15 menit.',
+      whatsappTemplate: 'Halo Admin *{branch}*,\nSaya mau reservasi meja:\n\nNama: *{name}*\nKontak: {contact}\nTanggal: {date}\nJam: {time}\nJumlah: {pax} orang\nArea: {tableType}\nCatatan: {notes}\n\nMohon konfirmasinya.',
+      
+      // NEW DEFAULT VALUES
+      bookingLeadTimeHours: 2,
+      requireEmail: false,
+      enableDownPaymentCalc: true,
+      downPaymentPercentage: 50,
+
       style: {
         backgroundColor: '#F5F5F5',
         textColor: '#3E2723', 
@@ -461,7 +487,12 @@ export class ConfigService {
       cardTextColor: '#3E2723',
       inputHeight: '48px',
       inputBorderRadius: '8px',
-      buttonHeight: '52px'
+      buttonHeight: '52px',
+      
+      // NEW STYLE DEFAULTS
+      labelStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#5D4037' },
+      inputStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#1F2937' },
+      summaryStyle: { fontFamily: 'Oswald', fontSize: '1.5rem', color: '#FFFFFF' }
     },
     locationPage: {
       title: 'Lokasi Outlet',
@@ -568,14 +599,18 @@ export class ConfigService {
        root.style.setProperty('--color-brand-brown', c.hero.style.backgroundColor);
        root.style.setProperty('--color-brand-orange', c.hero.style.accentColor);
        
-       // BLIND SPOT 1: Dynamic Font Injection & Smooth Scroll
        this.injectFont(c.global.logoStyle.fontFamily);
        this.injectFont(c.global.metaStyle.fontFamily);
        this.injectFont(c.hero.titleStyle.fontFamily);
        this.injectFont(c.hero.highlightStyle.fontFamily);
+       
+       // Inject Font for Reservation Granular Styles
+       this.injectFont(c.reservation?.labelStyle?.fontFamily);
+       this.injectFont(c.reservation?.inputStyle?.fontFamily);
+       this.injectFont(c.reservation?.summaryStyle?.fontFamily);
+
        root.style.scrollBehavior = c.global.enableSmoothScroll ? 'smooth' : 'auto';
 
-       // BLIND SPOT 4: Scrollbar Style Injection
        const scrollCss = `
          ::-webkit-scrollbar { width: 10px; }
          ::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -584,18 +619,14 @@ export class ConfigService {
        `;
        this.injectStyle('scrollbar-style', scrollCss);
 
-       // BLIND SPOT 6: Custom CSS Injection
        this.injectStyle('custom-user-css', c.global.customCss || '');
        
-       // BLIND SPOT 2: Meta Tags & OG Tags
        document.title = c.global.logoText;
        this.setMeta('description', c.global.metaDescription);
        this.setMeta('keywords', c.global.metaKeywords || 'sate maranggi, kuliner cimahi, sate enak');
-       // OG Tags
        this.setMeta('og:title', c.global.logoText, 'property');
        this.setMeta('og:description', c.global.metaDescription, 'property');
        this.setMeta('og:image', c.global.logoImage || c.hero.bgImage, 'property');
-       // BLIND SPOT 7: PWA Theme Color
        this.setMeta('theme-color', c.global.navbarColor);
 
        if (c.global.favicon) {
@@ -656,13 +687,30 @@ export class ConfigService {
             ...parsed,
             intro: { ...c.intro, ...(parsed.intro || {}) },
             packagesPage: { ...c.packagesPage, ...(parsed.packagesPage || {}) },
-            // Blind Spot Safe Merge
             global: { ...c.global, ...(parsed.global || {}) },
             hero: { ...c.hero, ...(parsed.hero || {}) },
-            about: { ...c.about, ...(parsed.about || {}) }
+            about: { ...c.about, ...(parsed.about || {}) },
+            reservation: { 
+                ...c.reservation, 
+                ...(parsed.reservation || {}),
+                titleStyle: this.ensureStyle(parsed.reservation?.titleStyle, c.reservation.titleStyle),
+                subtitleStyle: this.ensureStyle(parsed.reservation?.subtitleStyle, c.reservation.subtitleStyle),
+                // SAFE MERGE FOR NEW FIELDS
+                labelStyle: this.ensureStyle(parsed.reservation?.labelStyle, c.reservation.labelStyle),
+                inputStyle: this.ensureStyle(parsed.reservation?.inputStyle, c.reservation.inputStyle),
+                summaryStyle: this.ensureStyle(parsed.reservation?.summaryStyle, c.reservation.summaryStyle),
+            } 
         }));
       }
     } catch(e) {}
+  }
+
+  private ensureStyle(source: any, defaultStyle: TextStyle): TextStyle {
+      return {
+          fontFamily: source?.fontFamily || defaultStyle.fontFamily,
+          fontSize: source?.fontSize || defaultStyle.fontSize,
+          color: source?.color || defaultStyle.color
+      };
   }
 
   private injectAnalytics(id: string) {
@@ -858,8 +906,6 @@ export class ConfigService {
       this.firestoreError.set(null);
       if (docSnap.exists()) {
         const data = docSnap.data() as AppConfig;
-        
-        // Helper to ensure objects exist
         const ensure = (obj: any, def: any) => ({ ...def, ...(obj || {}) });
         const text = (obj: any) => ensure(obj, {fontFamily:'Lato',fontSize:'1rem',color:'#000'});
 
@@ -867,88 +913,36 @@ export class ConfigService {
             ...current,
             ...data,
             features: ensure(data.features, current.features),
-            global: { 
-                ...current.global, 
-                ...(data.global || {}),
-                logoStyle: text(data.global?.logoStyle),
-                metaStyle: text(data.global?.metaStyle)
-            },
+            global: { ...current.global, ...(data.global || {}), logoStyle: text(data.global?.logoStyle), metaStyle: text(data.global?.metaStyle) },
             intro: ensure(data.intro, current.intro),
-            hero: { 
-                ...current.hero, 
-                ...(data.hero || {}),
-                badgeStyle: text(data.hero?.badgeStyle),
-                titleStyle: text(data.hero?.titleStyle),
-                highlightStyle: text(data.hero?.highlightStyle),
-                subtitleStyle: text(data.hero?.subtitleStyle),
-                button1Style: text(data.hero?.button1Style),
-                button2Style: text(data.hero?.button2Style),
-                style: ensure(data.hero?.style, current.hero.style)
-            },
-            about: { 
-                ...current.about, 
-                ...(data.about || {}),
-                titleStyle: text(data.about?.titleStyle),
-                descriptionStyle: text(data.about?.descriptionStyle),
-                stats: ensure(data.about?.stats, current.about.stats),
-                statsStyle: text(data.about?.statsStyle),
-                statsLabelStyle: text(data.about?.statsLabelStyle),
-                // Ensure new fields have defaults
-                ctaText: data.about?.ctaText || 'Lihat Menu',
-                ctaLink: data.about?.ctaLink || '/menu',
-                quote: data.about?.quote || '',
-                founderName: data.about?.founderName || '',
-                trustedLogos: data.about?.trustedLogos || [],
-                showPattern: data.about?.showPattern ?? true,
-                enableGlassEffect: data.about?.enableGlassEffect ?? false,
-                style: ensure(data.about?.style, current.about.style)
-            },
-            menuPage: { 
-                ...current.menuPage, 
-                ...(data.menuPage || {}),
-                titleStyle: text(data.menuPage?.titleStyle),
-                subtitleStyle: text(data.menuPage?.subtitleStyle),
-                style: ensure(data.menuPage?.style, current.menuPage.style)
-            },
-            packagesPage: {
-                ...current.packagesPage,
-                ...(data.packagesPage || {}),
-                titleStyle: text(data.packagesPage?.titleStyle),
-                subtitleStyle: text(data.packagesPage?.subtitleStyle),
-                style: ensure(data.packagesPage?.style, current.packagesPage.style)
-            },
+            hero: { ...current.hero, ...(data.hero || {}), badgeStyle: text(data.hero?.badgeStyle), titleStyle: text(data.hero?.titleStyle), highlightStyle: text(data.hero?.highlightStyle), subtitleStyle: text(data.hero?.subtitleStyle), button1Style: text(data.hero?.button1Style), button2Style: text(data.hero?.button2Style), style: ensure(data.hero?.style, current.hero.style) },
+            about: { ...current.about, ...(data.about || {}), titleStyle: text(data.about?.titleStyle), descriptionStyle: text(data.about?.descriptionStyle), stats: ensure(data.about?.stats, current.about.stats), statsStyle: text(data.about?.statsStyle), statsLabelStyle: text(data.about?.statsLabelStyle), ctaText: data.about?.ctaText || 'Lihat Menu', ctaLink: data.about?.ctaLink || '/menu', quote: data.about?.quote || '', founderName: data.about?.founderName || '', trustedLogos: data.about?.trustedLogos || [], showPattern: data.about?.showPattern ?? true, enableGlassEffect: data.about?.enableGlassEffect ?? false, style: ensure(data.about?.style, current.about.style) },
+            menuPage: { ...current.menuPage, ...(data.menuPage || {}), titleStyle: text(data.menuPage?.titleStyle), subtitleStyle: text(data.menuPage?.subtitleStyle), style: ensure(data.menuPage?.style, current.menuPage.style) },
+            packagesPage: { ...current.packagesPage, ...(data.packagesPage || {}), titleStyle: text(data.packagesPage?.titleStyle), subtitleStyle: text(data.packagesPage?.subtitleStyle), style: ensure(data.packagesPage?.style, current.packagesPage.style) },
             reservation: { 
                 ...current.reservation, 
                 ...(data.reservation || {}),
                 titleStyle: text(data.reservation?.titleStyle),
                 subtitleStyle: text(data.reservation?.subtitleStyle),
+                // Ensure defaults for new fields
+                maxPax: data.reservation?.maxPax || 100,
+                tableTypes: data.reservation?.tableTypes || ['Indoor (AC)', 'Outdoor'],
+                enableSpecialRequest: data.reservation?.enableSpecialRequest ?? true,
+                termsAndConditions: data.reservation?.termsAndConditions || '',
+                // New Blind Spot Logic Defaults
+                bookingLeadTimeHours: data.reservation?.bookingLeadTimeHours ?? 2,
+                requireEmail: data.reservation?.requireEmail ?? false,
+                enableDownPaymentCalc: data.reservation?.enableDownPaymentCalc ?? true,
+                downPaymentPercentage: data.reservation?.downPaymentPercentage ?? 50,
+                // Granular Styles Defaults
+                labelStyle: text(data.reservation?.labelStyle),
+                inputStyle: text(data.reservation?.inputStyle),
+                summaryStyle: text(data.reservation?.summaryStyle),
                 style: ensure(data.reservation?.style, current.reservation.style)
             },
-            locationPage: { 
-                ...current.locationPage, 
-                ...(data.locationPage || {}),
-                titleStyle: text(data.locationPage?.titleStyle),
-                subtitleStyle: text(data.locationPage?.subtitleStyle),
-                labelStyle: text(data.locationPage?.labelStyle),
-                branchNameStyle: text(data.locationPage?.branchNameStyle),
-                branchDetailStyle: text(data.locationPage?.branchDetailStyle),
-                style: ensure(data.locationPage?.style, current.locationPage.style)
-            },
-            testimonialStyles: {
-               ...current.testimonialStyles,
-               reviewStyle: text(data.testimonialStyles?.reviewStyle),
-               nameStyle: text(data.testimonialStyles?.nameStyle),
-               roleStyle: text(data.testimonialStyles?.roleStyle),
-            },
-            footer: { 
-                ...current.footer, 
-                ...(data.footer || {}),
-                descriptionStyle: text(data.footer?.descriptionStyle),
-                copyrightStyle: text(data.footer?.copyrightStyle),
-                brandStyle: text(data.footer?.brandStyle),
-                socialMediaHeaderStyle: text(data.footer?.socialMediaHeaderStyle),
-                style: ensure(data.footer?.style, current.footer.style)
-            },
+            locationPage: { ...current.locationPage, ...(data.locationPage || {}), titleStyle: text(data.locationPage?.titleStyle), subtitleStyle: text(data.locationPage?.subtitleStyle), labelStyle: text(data.locationPage?.labelStyle), branchNameStyle: text(data.locationPage?.branchNameStyle), branchDetailStyle: text(data.locationPage?.branchDetailStyle), style: ensure(data.locationPage?.style, current.locationPage.style) },
+            testimonialStyles: { ...current.testimonialStyles, reviewStyle: text(data.testimonialStyles?.reviewStyle), nameStyle: text(data.testimonialStyles?.nameStyle), roleStyle: text(data.testimonialStyles?.roleStyle) },
+            footer: { ...current.footer, ...(data.footer || {}), descriptionStyle: text(data.footer?.descriptionStyle), copyrightStyle: text(data.footer?.copyrightStyle), brandStyle: text(data.footer?.brandStyle), socialMediaHeaderStyle: text(data.footer?.socialMediaHeaderStyle), style: ensure(data.footer?.style, current.footer.style) },
             branches: data.branches || current.branches,
             instagramProfile: data.instagramProfile || current.instagramProfile,
             gallery: data.gallery || current.gallery,

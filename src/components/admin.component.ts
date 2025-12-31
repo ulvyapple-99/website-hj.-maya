@@ -111,76 +111,177 @@ import { ToastService } from '../services/toast.service';
              <div class="flex-1 overflow-y-auto p-8 custom-scrollbar pb-32">
                 <div class="max-w-5xl mx-auto space-y-8">
                    
-                   <!-- === GLOBAL & INTRO === -->
+                   <!-- === GLOBAL & INTRO (RE-ENGINEERED) === -->
                    @if (currentTab() === 'global') {
+                      
+                      <!-- 1. Emergency Status -->
                       <div class="admin-card">
                          <div class="admin-card-header bg-red-50 text-red-800 border-red-200">
-                            <span class="flex items-center gap-2">⚠️ Emergency & Maintenance</span>
+                            <span class="flex items-center gap-2">⚠️ Emergency Status</span>
                          </div>
                          <div class="p-6">
                             <label class="flex items-center gap-2 cursor-pointer">
                                <input type="checkbox" [(ngModel)]="config().global.maintenanceMode" class="w-5 h-5 text-red-600 rounded">
-                               <span class="font-bold text-red-600">Aktifkan Maintenance Mode (Tutup Website Sementara)</span>
+                               <span class="font-bold text-red-600">Aktifkan Maintenance Mode (Tutup Website)</span>
                             </label>
-                            <p class="text-xs text-gray-500 mt-1 pl-7">Admin panel akan tetap bisa diakses melalui tombol rahasia.</p>
+                            <p class="text-xs text-gray-500 mt-1 pl-7">Pengunjung akan melihat layar "Under Maintenance".</p>
                          </div>
                       </div>
 
+                      <!-- 2. Brand Identity & Logo Styling -->
                       <div class="admin-card">
-                         <div class="admin-card-header">General & SEO</div>
-                         <div class="p-6 grid grid-cols-2 gap-4">
-                           <div><label class="form-label">Nama Website</label><input [(ngModel)]="config().global.logoText" class="form-input"></div>
-                           
-                           <!-- RESTORED: Logo Upload -->
+                         <div class="admin-card-header">Brand Identity & Logo Styling</div>
+                         <div class="p-6 grid grid-cols-2 gap-6">
                            <div>
-                              <label class="form-label">Logo Image (Upload)</label>
+                              <label class="form-label">Nama Brand / Text Logo</label>
+                              <input [(ngModel)]="config().global.logoText" class="form-input" placeholder="Nama Website">
+                           </div>
+                           
+                           <div>
+                              <label class="form-label">Upload Logo Image (Opsional)</label>
                               <div class="flex items-center gap-2">
                                 <input type="file" (change)="onFileSelected($event, 'logoImage')" class="form-input text-xs">
                                 @if(config().global.logoImage) {
                                     <div class="h-10 w-10 border rounded bg-gray-100 flex items-center justify-center overflow-hidden">
                                         <img [src]="config().global.logoImage" class="w-full h-full object-contain">
                                     </div>
+                                    <button (click)="config().global.logoImage = ''" class="text-xs text-red-500 underline">Hapus</button>
                                 }
                               </div>
                            </div>
 
-                           <div><label class="form-label">Favicon (Upload)</label><input type="file" (change)="onFileSelected($event, 'favicon')" class="form-input text-xs"></div>
-                           <div class="col-span-2">
-                             <label class="form-label">Meta Description (SEO)</label>
-                             <textarea [(ngModel)]="config().global.metaDescription" class="form-input h-20" placeholder="Deskripsi singkat untuk Google..."></textarea>
+                           <div class="col-span-2 border-t pt-4">
+                              <span class="form-label mb-2 block">Logo Text Typography</span>
+                              <div class="grid grid-cols-3 gap-4">
+                                 <div>
+                                    <label class="text-[10px] text-gray-400 uppercase">Font Family</label>
+                                    <input [(ngModel)]="config().global.logoStyle.fontFamily" class="form-input" placeholder="Oswald, Lato, etc">
+                                 </div>
+                                 <div>
+                                    <label class="text-[10px] text-gray-400 uppercase">Font Size</label>
+                                    <input [(ngModel)]="config().global.logoStyle.fontSize" class="form-input" placeholder="1.5rem">
+                                 </div>
+                                 <div>
+                                    <label class="text-[10px] text-gray-400 uppercase">Warna Text</label>
+                                    <div class="flex gap-2">
+                                       <input type="color" [(ngModel)]="config().global.logoStyle.color" class="h-10 w-10 p-0 border rounded cursor-pointer">
+                                       <input [(ngModel)]="config().global.logoStyle.color" class="form-input">
+                                    </div>
+                                 </div>
+                              </div>
                            </div>
+
                            <div class="col-span-2">
-                             <label class="form-label">Meta Keywords (SEO)</label>
-                             <input [(ngModel)]="config().global.metaKeywords" class="form-input" placeholder="sate, enak, cimahi, kuliner (pisahkan koma)">
+                              <label class="form-label">Favicon (Icon Browser)</label>
+                              <input type="file" (change)="onFileSelected($event, 'favicon')" class="form-input text-xs">
                            </div>
                          </div>
                       </div>
 
+                      <!-- 3. Navigation Bar Styling (THE HIDDEN SETTINGS) -->
                       <div class="admin-card">
-                         <div class="admin-card-header">UX & Floating Features</div>
+                         <div class="admin-card-header bg-blue-50 text-blue-800 border-blue-200">Navigation Bar Styling</div>
+                         <div class="p-6 grid grid-cols-2 gap-6">
+                            <!-- Colors -->
+                            <div class="col-span-2 grid grid-cols-2 gap-6 border-b pb-6">
+                               <div>
+                                  <label class="form-label">Navbar Background</label>
+                                  <div class="flex gap-2">
+                                     <input type="color" [(ngModel)]="config().global.navbarColor" class="h-10 w-10 p-0 border rounded cursor-pointer">
+                                     <input [(ngModel)]="config().global.navbarColor" class="form-input">
+                                  </div>
+                               </div>
+                               <div>
+                                  <label class="form-label">Navbar Text Color</label>
+                                  <div class="flex gap-2">
+                                     <input type="color" [(ngModel)]="config().global.navbarTextColor" class="h-10 w-10 p-0 border rounded cursor-pointer">
+                                     <input [(ngModel)]="config().global.navbarTextColor" class="form-input">
+                                  </div>
+                               </div>
+                            </div>
+
+                            <!-- Dimensions -->
+                            <div>
+                               <label class="form-label">Tinggi Navbar</label>
+                               <input [(ngModel)]="config().global.navHeight" class="form-input" placeholder="80px">
+                            </div>
+                            <div>
+                               <label class="form-label">Tinggi Logo (Max)</label>
+                               <input [(ngModel)]="config().global.navLogoHeight" class="form-input" placeholder="50px">
+                            </div>
+
+                            <!-- Links -->
+                            <div>
+                               <label class="form-label">Ukuran Font Menu</label>
+                               <input [(ngModel)]="config().global.navLinkFontSize" class="form-input" placeholder="16px">
+                            </div>
+                            <div>
+                               <label class="form-label">Jarak Antar Menu (Gap)</label>
+                               <input [(ngModel)]="config().global.navLinkGap" class="form-input" placeholder="32px">
+                            </div>
+                         </div>
+                      </div>
+
+                      <!-- 4. UX & Floating Elements -->
+                      <div class="admin-card">
+                         <div class="admin-card-header">UX & Experience</div>
                          <div class="p-6 grid grid-cols-2 gap-4">
                             <div>
-                               <label class="form-label">Scrollbar Color</label>
+                               <label class="form-label">Warna Scrollbar</label>
                                <div class="flex items-center gap-2">
                                   <input type="color" [(ngModel)]="config().global.scrollbarColor" class="h-10 w-10 p-0 border-0">
                                   <input type="text" [(ngModel)]="config().global.scrollbarColor" class="form-input">
                                </div>
                             </div>
                             <div>
-                               <label class="form-label">Floating WhatsApp Number</label>
+                               <label class="form-label">Nomor WhatsApp Floating</label>
                                <input type="text" [(ngModel)]="config().global.floatingWhatsapp" class="form-input" placeholder="62812345678">
                             </div>
                             <div class="col-span-2">
-                               <label class="flex items-center gap-2">
+                               <label class="flex items-center gap-2 font-bold">
                                   <input type="checkbox" [(ngModel)]="config().global.enableSmoothScroll"> 
-                                  <span class="text-sm">Aktifkan Smooth Scrolling</span>
+                                  Aktifkan Smooth Scrolling
                                </label>
                             </div>
                          </div>
                       </div>
 
+                      <!-- 5. SEO Configuration -->
                       <div class="admin-card">
-                         <div class="admin-card-header">Advanced Injection</div>
+                         <div class="admin-card-header">SEO (Search Engine Optimization)</div>
+                         <div class="p-6 space-y-4">
+                           <div>
+                             <label class="form-label">Meta Description</label>
+                             <textarea [(ngModel)]="config().global.metaDescription" class="form-input h-20" placeholder="Deskripsi singkat untuk Google..."></textarea>
+                           </div>
+                           <div>
+                             <label class="form-label">Meta Keywords</label>
+                             <input [(ngModel)]="config().global.metaKeywords" class="form-input" placeholder="sate, enak, cimahi, kuliner (pisahkan koma)">
+                           </div>
+                         </div>
+                      </div>
+
+                      <!-- 6. Intro Video -->
+                      <div class="admin-card">
+                         <div class="admin-card-header">Intro Video (Splash Screen)</div>
+                         <div class="p-6">
+                            <label class="flex items-center gap-2 mb-4"><input type="checkbox" [(ngModel)]="config().intro.enabled"> Aktifkan Intro Video</label>
+                            @if(config().intro.enabled){
+                              <div class="grid grid-cols-2 gap-4">
+                                 <div>
+                                    <label class="form-label">Upload Video</label>
+                                    <input type="file" (change)="onFileSelected($event, 'introVideo')" accept="video/*" class="form-input">
+                                    <p class="text-[10px] text-gray-500 mt-1">Format MP4/WebM disarankan.</p>
+                                 </div>
+                                 <div><label class="form-label">Durasi Maksimal (Detik)</label><input type="number" [(ngModel)]="config().intro.duration" class="form-input"></div>
+                              </div>
+                            }
+                         </div>
+                      </div>
+
+                      <!-- 7. Advanced / Developer -->
+                      <div class="admin-card">
+                         <div class="admin-card-header">Developer Zone (Injection)</div>
                          <div class="p-6 space-y-4">
                             <div>
                                <label class="form-label">Custom CSS</label>
@@ -190,19 +291,6 @@ import { ToastService } from '../services/toast.service';
                                <label class="form-label">Custom JS (Analytics/Pixel)</label>
                                <textarea [(ngModel)]="config().global.customJs" class="form-input h-24 font-mono text-xs" placeholder="console.log('Loaded');"></textarea>
                             </div>
-                         </div>
-                      </div>
-
-                      <div class="admin-card">
-                         <div class="admin-card-header">Intro Video</div>
-                         <div class="p-6">
-                            <label class="flex items-center gap-2 mb-4"><input type="checkbox" [(ngModel)]="config().intro.enabled"> Aktifkan Intro</label>
-                            @if(config().intro.enabled){
-                              <div class="grid grid-cols-2 gap-4">
-                                 <div><label class="form-label">Upload Video</label><input type="file" (change)="onFileSelected($event, 'introVideo')" accept="video/*" class="form-input"></div>
-                                 <div><label class="form-label">Durasi (Detik)</label><input type="number" [(ngModel)]="config().intro.duration" class="form-input"></div>
-                              </div>
-                            }
                          </div>
                       </div>
                    }
@@ -239,352 +327,86 @@ import { ToastService } from '../services/toast.service';
                             </div>
                          </div>
                       </div>
-                      <div class="admin-card">
-                         <div class="admin-card-header">Layout & Overlay</div>
-                         <div class="p-6 grid grid-cols-3 gap-4">
-                            <div><label class="form-label">Section Height</label><input [(ngModel)]="config().hero.height" class="form-input" placeholder="95vh"></div>
-                            <div><label class="form-label">Background Position</label>
-                                <select [(ngModel)]="config().hero.bgPosition" class="form-select">
-                                    <option value="center center">Center</option>
-                                    <option value="top center">Top</option>
-                                    <option value="bottom center">Bottom</option>
-                                </select>
-                            </div>
-                            <div><label class="form-label">Blur Level</label><input [(ngModel)]="config().hero.blurLevel" class="form-input" placeholder="0px"></div>
-                            
-                            <div><label class="form-label">Gradient Direction</label>
-                                <select [(ngModel)]="config().hero.gradientDirection" class="form-select">
-                                    <option value="radial">Radial</option>
-                                    <option value="to bottom">Top to Bottom</option>
-                                    <option value="to top">Bottom to Top</option>
-                                </select>
-                            </div>
-                            <div><label class="form-label">Text Shadow</label><input [(ngModel)]="config().hero.textShadow" class="form-input" placeholder="2px 2px 4px black"></div>
-                            <div><label class="form-label">Text Align</label><select [(ngModel)]="config().hero.textAlign" class="form-select"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></div>
-                            
-                            <div><label class="form-label">Overlay Opacity</label><input type="number" step="0.1" max="1" [(ngModel)]="config().hero.overlayOpacity" class="form-input"></div>
-                         </div>
-                      </div>
-
-                      <!-- FULL COLOR CONTROL FOR HERO (NEW) -->
-                      <div class="admin-card">
-                         <div class="admin-card-header">Kustomisasi Warna Lengkap (Hero)</div>
-                         <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <!-- Background Color -->
-                            <div class="col-span-1">
-                               <label class="form-label">Background/Overlay</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.style.backgroundColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.style.backgroundColor" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Accent Color -->
-                            <div class="col-span-1">
-                               <label class="form-label">Accent (Tombol Utama)</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.style.accentColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.style.accentColor" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Default Text Color -->
-                            <div class="col-span-1">
-                               <label class="form-label">Default Text</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.style.textColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.style.textColor" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Spacer -->
-                            <div class="hidden md:block"></div>
-
-                            <!-- Granular Controls -->
-                            <div class="col-span-2 border-t mt-2 pt-2 md:col-span-4"><span class="text-[10px] font-bold text-gray-400 uppercase">Detail Elemen</span></div>
-
-                            <!-- Badge Color -->
-                            <div>
-                               <label class="form-label">Warna Badge</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.badgeStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.badgeStyle.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Title Color -->
-                            <div>
-                               <label class="form-label">Warna Judul</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.titleStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.titleStyle.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Highlight Color -->
-                            <div>
-                               <label class="form-label">Warna Highlight</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.highlightStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.highlightStyle.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Subtitle Color -->
-                            <div>
-                               <label class="form-label">Warna Sub-Judul</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.subtitleStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.subtitleStyle.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Button 1 Text Color -->
-                            <div>
-                               <label class="form-label">Teks Tombol 1</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.button1Style.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.button1Style.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Button 2 Text Color -->
-                            <div>
-                               <label class="form-label">Teks Tombol 2</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().hero.button2Style.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().hero.button2Style.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                         </div>
-                      </div>
-                   }
-
-                   <!-- === ABOUT === -->
-                   @if (currentTab() === 'about') {
-                      <div class="admin-card">
-                         <div class="admin-card-header">Konten & Informasi</div>
-                         <div class="p-6 space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                               <div><label class="form-label">Judul</label><input [(ngModel)]="config().about.title" class="form-input"></div>
-                               <div><label class="form-label">Nama Founder</label><input [(ngModel)]="config().about.founderName" class="form-input"></div>
-                            </div>
-                            <div><label class="form-label">Deskripsi</label><textarea [(ngModel)]="config().about.description" class="form-input h-32"></textarea></div>
-                            <div><label class="form-label">Kutipan Founder</label><textarea [(ngModel)]="config().about.quote" class="form-input h-20"></textarea></div>
-                            
-                            <div class="grid grid-cols-2 gap-4 border-t pt-4">
-                               <div>
-                                  <label class="form-label">Gambar Utama</label>
-                                  <input type="file" (change)="onFileSelected($event, 'aboutImage')" class="form-input mb-2">
-                                  <img [src]="config().about.image" class="h-24 object-cover rounded bg-gray-200">
-                               </div>
-                               <div class="space-y-2">
-                                  <div><label class="form-label">Image Alt Text (SEO)</label><input [(ngModel)]="config().about.imageAlt" class="form-input"></div>
-                                  <div><label class="form-label">Posisi Gambar</label>
-                                     <select [(ngModel)]="config().about.imagePosition" class="form-select">
-                                        <option value="left">Left</option>
-                                        <option value="right">Right</option>
-                                     </select>
-                                  </div>
-                               </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4 border-t pt-4">
-                               <div><label class="form-label">CTA Text (Tombol)</label><input [(ngModel)]="config().about.ctaText" class="form-input"></div>
-                               <div><label class="form-label">CTA Link</label><input [(ngModel)]="config().about.ctaLink" class="form-input"></div>
-                            </div>
-
-                            <div class="grid grid-cols-3 gap-4 border-t pt-4">
-                               <div><label class="form-label">Stat 1 Angka</label><input [(ngModel)]="config().about.stats.val1" class="form-input"></div>
-                               <div><label class="form-label">Stat 1 Label</label><input [(ngModel)]="config().about.stats.label1" class="form-input"></div>
-                               <div class="row-span-3 flex items-center justify-center flex-col gap-2">
-                                  <div class="text-xs text-gray-500">Styling Tambahan</div>
-                                  <label class="flex items-center gap-1 text-xs"><input type="checkbox" [(ngModel)]="config().about.showPattern"> Show Pattern</label>
-                                  <label class="flex items-center gap-1 text-xs"><input type="checkbox" [(ngModel)]="config().about.enableGlassEffect"> Glass Effect</label>
-                               </div>
-                               <div><label class="form-label">Stat 2 Angka</label><input [(ngModel)]="config().about.stats.val2" class="form-input"></div>
-                               <div><label class="form-label">Stat 2 Label</label><input [(ngModel)]="config().about.stats.label2" class="form-input"></div>
-                               <div><label class="form-label">Stat 3 Angka</label><input [(ngModel)]="config().about.stats.val3" class="form-input"></div>
-                               <div><label class="form-label">Stat 3 Label</label><input [(ngModel)]="config().about.stats.label3" class="form-input"></div>
-                            </div>
-
-                            <!-- Logo Upload Logic -->
-                            <div class="border-t pt-4">
-                               <div class="flex justify-between items-center mb-2">
-                                  <label class="form-label">Logo Partner / Media</label>
-                                  <label class="cursor-pointer bg-blue-500 text-white text-[10px] px-2 py-1 rounded">
-                                     + Upload Logo
-                                     <input type="file" (change)="onFileSelected($event, 'trustedLogo')" class="hidden">
-                                  </label>
-                               </div>
-                               <div class="flex gap-2 flex-wrap">
-                                  @for (logo of config().about.trustedLogos; track $index) {
-                                     <div class="relative group h-10 w-10">
-                                        <img [src]="logo" class="h-full w-full object-cover rounded border">
-                                        <button (click)="removeTrustedLogo($index)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">x</button>
-                                     </div>
-                                  }
-                               </div>
-                            </div>
-                         </div>
-                      </div>
-
-                      <!-- FULL COLOR CONTROL FOR ABOUT -->
-                      <div class="admin-card">
-                         <div class="admin-card-header">Kustomisasi Warna Lengkap (About)</div>
-                         <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <!-- Background -->
-                            <div class="col-span-1">
-                               <label class="form-label">Background</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().about.style.backgroundColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().about.style.backgroundColor" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Accent -->
-                            <div class="col-span-1">
-                               <label class="form-label">Aksen (Tombol/Garis)</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().about.style.accentColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().about.style.accentColor" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Text Default -->
-                            <div class="col-span-1">
-                               <label class="form-label">Teks Default</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().about.style.textColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().about.style.textColor" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Spacer -->
-                            <div class="hidden md:block"></div>
-
-                            <!-- Granular Controls -->
-                            <div class="col-span-2 border-t mt-2 pt-2 md:col-span-4"><span class="text-[10px] font-bold text-gray-400 uppercase">Detail Elemen</span></div>
-
-                            <!-- Title Color -->
-                            <div>
-                               <label class="form-label">Warna Judul</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().about.titleStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().about.titleStyle.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Desc Color -->
-                            <div>
-                               <label class="form-label">Warna Deskripsi</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().about.descriptionStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().about.descriptionStyle.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Stats Number Color -->
-                            <div>
-                               <label class="form-label">Warna Angka Stats</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().about.statsStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().about.statsStyle.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                            <!-- Stats Label Color -->
-                            <div>
-                               <label class="form-label">Warna Label Stats</label>
-                               <div class="flex items-center gap-2">
-                                  <input type="color" [(ngModel)]="config().about.statsLabelStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
-                                  <input type="text" [(ngModel)]="config().about.statsLabelStyle.color" class="form-input text-xs">
-                               </div>
-                            </div>
-                         </div>
-                      </div>
-                   }
-
-                   <!-- === MENU === -->
-                   @if (currentTab() === 'menu') {
-                      <div class="admin-card">
-                         <div class="admin-card-header flex justify-between">
-                            <span>Manajemen Menu</span>
-                            <div class="flex gap-2">
-                               <select [(ngModel)]="selectedBranchIndex" class="form-select w-40 h-8 py-0 text-xs">
-                                  @for (b of config().branches; track $index) { <option [value]="$index">{{ b.name }}</option> }
-                               </select>
-                               <button (click)="addMenuItem()" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">+ Item</button>
-                            </div>
-                         </div>
-                         <div class="p-6 space-y-6">
-                            @for (item of config().branches[selectedBranchIndex()].menu; track $index) {
-                               <div class="border rounded-lg p-4 bg-gray-50 relative group">
-                                  <button (click)="removeMenuItem($index)" class="absolute top-2 right-2 text-red-500 font-bold hover:scale-110">✕</button>
-                                  <div class="grid md:grid-cols-4 gap-4">
-                                     <div class="col-span-1">
-                                        <div class="w-full h-24 bg-gray-200 rounded mb-2 overflow-hidden">
-                                           <img [src]="item.image" class="w-full h-full object-cover">
-                                        </div>
-                                        <input type="file" (change)="onFileSelected($event, 'menuItem', $index)" class="text-[10px] w-full">
-                                     </div>
-                                     <div class="col-span-3 grid grid-cols-2 gap-3">
-                                        <div><label class="form-label">Nama Menu</label><input [(ngModel)]="item.name" class="form-input"></div>
-                                        <div><label class="form-label">Harga</label><input [(ngModel)]="item.price" class="form-input"></div>
-                                        <div class="col-span-2"><label class="form-label">Deskripsi</label><input [(ngModel)]="item.desc" class="form-input"></div>
-                                        <div class="flex gap-4 col-span-2">
-                                           <label class="flex items-center gap-1 text-xs"><input type="checkbox" [(ngModel)]="item.favorite"> Favorit</label>
-                                           <label class="flex items-center gap-1 text-xs"><input type="checkbox" [(ngModel)]="item.soldOut"> Habis</label>
-                                           <label class="flex items-center gap-1 text-xs">Pedas: <input type="number" [(ngModel)]="item.spicyLevel" class="w-12 border rounded px-1"></label>
-                                        </div>
-                                     </div>
-                                  </div>
-                               </div>
-                            }
-                         </div>
-                      </div>
-                   }
-
-                   <!-- === PACKAGES === -->
-                   @if (currentTab() === 'packages') {
-                      <div class="admin-card">
-                         <div class="admin-card-header flex justify-between">
-                            <span>Manajemen Paket</span>
-                            <div class="flex gap-2">
-                               <select [(ngModel)]="selectedBranchIndex" class="form-select w-40 h-8 py-0 text-xs">
-                                  @for (b of config().branches; track $index) { <option [value]="$index">{{ b.name }}</option> }
-                               </select>
-                               <button (click)="addPackage()" class="bg-green-600 text-white px-3 py-1 rounded text-xs">+ Paket</button>
-                            </div>
-                         </div>
-                         <div class="p-6 space-y-6">
-                            @if (config().branches[selectedBranchIndex()].packages; as packages) {
-                                @for (pkg of packages; track $index) {
-                                   <div class="border rounded-lg p-4 bg-gray-50 relative">
-                                      <button (click)="removePackage($index)" class="absolute top-2 right-2 text-red-500 font-bold">✕</button>
-                                      <div class="grid md:grid-cols-4 gap-4">
-                                         <div class="col-span-1">
-                                            <img [src]="pkg.image" class="w-full h-24 object-cover rounded mb-2">
-                                            <input type="file" (change)="onFileSelected($event, 'packageItem', $index)" class="text-[10px] w-full">
-                                         </div>
-                                         <div class="col-span-3 space-y-2">
-                                            <div class="grid grid-cols-2 gap-2">
-                                               <input [(ngModel)]="pkg.name" placeholder="Nama Paket" class="form-input">
-                                               <input [(ngModel)]="pkg.price" placeholder="Harga" class="form-input">
-                                            </div>
-                                            <input [(ngModel)]="pkg.description" placeholder="Deskripsi Singkat" class="form-input">
-                                            <textarea [ngModel]="pkg.items.join('\\n')" (ngModelChange)="updatePackageItems(pkg, $event)" placeholder="Isi paket (pisahkan baris)" class="form-input h-20"></textarea>
-                                         </div>
-                                      </div>
-                                   </div>
-                                }
-                            }
-                         </div>
-                      </div>
                    }
 
                    <!-- === RESERVATION === -->
                    @if (currentTab() === 'reservation') {
                       <div class="admin-card">
-                         <div class="admin-card-header">Pengaturan Reservasi</div>
+                         <div class="admin-card-header">Logic & Rules (Blind Spots)</div>
+                         <div class="p-6 grid grid-cols-2 gap-4">
+                             <div><label class="form-label">Min Pax (Reguler)</label><input type="number" [(ngModel)]="config().reservation.minPaxRegular" class="form-input"></div>
+                             <div><label class="form-label">Min Pax (Puasa)</label><input type="number" [(ngModel)]="config().reservation.minPaxRamadan" class="form-input"></div>
+                             <div><label class="form-label">Max Capacity</label><input type="number" [(ngModel)]="config().reservation.maxPax" class="form-input"></div>
+                             <div><label class="form-label">Booking Lead Time (Jam)</label><input type="number" [(ngModel)]="config().reservation.bookingLeadTimeHours" class="form-input" title="User harus booking X jam sebelum kedatangan"></div>
+                             
+                             <div class="col-span-2">
+                                <label class="form-label">Tipe Meja (Pisahkan Koma)</label>
+                                <input [ngModel]="config().reservation.tableTypes.join(', ')" (ngModelChange)="updateTableTypes($event)" class="form-input">
+                             </div>
+                             
+                             <div class="col-span-2 flex gap-6 mt-2">
+                                <label class="flex items-center gap-2"><input type="checkbox" [(ngModel)]="config().reservation.enableSpecialRequest"> <span class="text-sm">Allow Special Request</span></label>
+                                <label class="flex items-center gap-2"><input type="checkbox" [(ngModel)]="config().reservation.requireEmail"> <span class="text-sm">Wajib Isi Email</span></label>
+                             </div>
+
+                             <div class="col-span-2 border-t pt-4 mt-2">
+                                <label class="flex items-center gap-2 mb-2 font-bold"><input type="checkbox" [(ngModel)]="config().reservation.enableDownPaymentCalc"> Aktifkan Kalkulasi DP Otomatis</label>
+                                @if (config().reservation.enableDownPaymentCalc) {
+                                   <div class="flex items-center gap-2 text-sm">
+                                      Persentase DP: <input type="number" [(ngModel)]="config().reservation.downPaymentPercentage" class="form-input w-20"> %
+                                   </div>
+                                }
+                             </div>
+                         </div>
+                      </div>
+
+                      <div class="admin-card">
+                         <div class="admin-card-header">Tampilan & Teks</div>
                          <div class="p-6 space-y-4">
-                            <div><label class="form-label">Judul Halaman</label><input [(ngModel)]="config().reservation.title" class="form-input"></div>
-                            <div><label class="form-label">Sub-Judul</label><input [(ngModel)]="config().reservation.subtitle" class="form-input"></div>
                             <div class="grid grid-cols-2 gap-4">
-                               <div><label class="form-label">Min Pax (Biasa)</label><input type="number" [(ngModel)]="config().reservation.minPaxRegular" class="form-input"></div>
-                               <div><label class="form-label">Min Pax (Puasa)</label><input type="number" [(ngModel)]="config().reservation.minPaxRamadan" class="form-input"></div>
+                               <div><label class="form-label">Judul</label><input [(ngModel)]="config().reservation.title" class="form-input"></div>
+                               <div><label class="form-label">Sub-Judul</label><input [(ngModel)]="config().reservation.subtitle" class="form-input"></div>
                             </div>
+
                             <div>
-                               <label class="form-label">Template WhatsApp</label>
-                               <textarea [(ngModel)]="config().reservation.whatsappTemplate" class="form-input h-24"></textarea>
-                               <p class="text-[10px] text-gray-500">Variables: &#123;name&#125;, &#123;branch&#125;, &#123;date&#125;, &#123;time&#125;, &#123;pax&#125;</p>
+                               <label class="form-label">Syarat & Ketentuan</label>
+                               <textarea [(ngModel)]="config().reservation.termsAndConditions" class="form-input h-20"></textarea>
                             </div>
+
+                            <div>
+                               <label class="form-label">WhatsApp Template</label>
+                               <textarea [(ngModel)]="config().reservation.whatsappTemplate" class="form-input h-24 font-mono text-xs"></textarea>
+                               <p class="text-[10px] text-gray-500 mt-1">Vars: {{ '{name}, {contact}, {date}, {time}, {pax}, {tableType}, {notes}' }}</p>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div class="admin-card">
+                         <div class="admin-card-header">Full Style Customization (Fonts & Colors)</div>
+                         <div class="p-6 grid grid-cols-3 gap-6 text-xs">
+                             <!-- Labels -->
+                             <div class="space-y-2 border p-3 rounded">
+                                <span class="font-bold block mb-2 text-center bg-gray-100 p-1">Label Styles</span>
+                                <div>Font: <input [(ngModel)]="config().reservation.labelStyle.fontFamily" class="form-input h-8"></div>
+                                <div>Size: <input [(ngModel)]="config().reservation.labelStyle.fontSize" class="form-input h-8"></div>
+                                <div>Color: <div class="flex"><input type="color" [(ngModel)]="config().reservation.labelStyle.color"><input [(ngModel)]="config().reservation.labelStyle.color" class="form-input h-8 ml-1"></div></div>
+                             </div>
+                             
+                             <!-- Inputs -->
+                             <div class="space-y-2 border p-3 rounded">
+                                <span class="font-bold block mb-2 text-center bg-gray-100 p-1">Input Styles</span>
+                                <div>Font: <input [(ngModel)]="config().reservation.inputStyle.fontFamily" class="form-input h-8"></div>
+                                <div>Size: <input [(ngModel)]="config().reservation.inputStyle.fontSize" class="form-input h-8"></div>
+                                <div>Color: <div class="flex"><input type="color" [(ngModel)]="config().reservation.inputStyle.color"><input [(ngModel)]="config().reservation.inputStyle.color" class="form-input h-8 ml-1"></div></div>
+                             </div>
+
+                             <!-- Summary/Total -->
+                             <div class="space-y-2 border p-3 rounded">
+                                <span class="font-bold block mb-2 text-center bg-gray-100 p-1">Total/Summary</span>
+                                <div>Font: <input [(ngModel)]="config().reservation.summaryStyle.fontFamily" class="form-input h-8"></div>
+                                <div>Size: <input [(ngModel)]="config().reservation.summaryStyle.fontSize" class="form-input h-8"></div>
+                                <div>Color: <div class="flex"><input type="color" [(ngModel)]="config().reservation.summaryStyle.color"><input [(ngModel)]="config().reservation.summaryStyle.color" class="form-input h-8 ml-1"></div></div>
+                             </div>
                          </div>
                       </div>
                    }
@@ -612,103 +434,7 @@ import { ToastService } from '../services/toast.service';
                                   <div><label class="form-label">Jam Buka</label><input [(ngModel)]="br.hours" class="form-input"></div>
                                   <div><label class="form-label">Link Google Maps</label><input [(ngModel)]="br.googleMapsUrl" class="form-input"></div>
                                </div>
-                               <div>
-                                  <label class="form-label">Gambar Peta / Lokasi</label>
-                                  <input type="file" (change)="onFileSelected($event, 'branchMap')" class="form-input mb-2">
-                                  <img [src]="br.mapImage" class="h-32 object-cover rounded">
-                               </div>
-                               <div class="grid grid-cols-3 gap-4 border-t pt-4">
-                                  <div><label class="form-label">Instagram Link</label><input [(ngModel)]="br.instagramLink" class="form-input"></div>
-                                  <div><label class="form-label">Facebook Link</label><input [(ngModel)]="br.facebookLink" class="form-input"></div>
-                                  <div><label class="form-label">TikTok Link</label><input [(ngModel)]="br.tiktokLink" class="form-input"></div>
-                               </div>
                             }
-                         </div>
-                      </div>
-                   }
-
-                   <!-- === MEDIA === -->
-                   @if (currentTab() === 'media') {
-                      <div class="admin-card">
-                         <div class="admin-card-header">Galeri Foto</div>
-                         <div class="p-6">
-                            <div class="grid grid-cols-4 gap-4 mb-4">
-                               @for (img of config().gallery; track $index) {
-                                  <div class="relative group aspect-square">
-                                     <img [src]="img" class="w-full h-full object-cover rounded">
-                                     <button (click)="removeGalleryImage($index)" class="absolute inset-0 bg-red-500/50 text-white opacity-0 group-hover:opacity-100 font-bold">HAPUS</button>
-                                  </div>
-                               }
-                               <div class="border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer aspect-square hover:bg-gray-50 relative">
-                                  <input type="file" (change)="onFileSelected($event, 'galleryImage')" class="absolute inset-0 opacity-0 cursor-pointer">
-                                  <span class="text-gray-400 font-bold">+ Upload</span>
-                               </div>
-                            </div>
-                         </div>
-                      </div>
-                      <div class="admin-card">
-                         <div class="admin-card-header flex justify-between">
-                            <span>Testimoni</span>
-                            <button (click)="addTestimonial()" class="bg-green-600 text-white px-2 py-1 rounded text-xs">+ Tambah</button>
-                         </div>
-                         <div class="p-6 space-y-4">
-                            @for (t of config().testimonials; track $index) {
-                               <div class="border rounded p-3 relative bg-gray-50">
-                                  <button (click)="removeTestimonial($index)" class="absolute top-2 right-2 text-red-500">✕</button>
-                                  <div class="grid grid-cols-2 gap-2 mb-2">
-                                     <input [(ngModel)]="t.name" placeholder="Nama" class="form-input">
-                                     <input [(ngModel)]="t.role" placeholder="Status (e.g Foodie)" class="form-input">
-                                  </div>
-                                  <textarea [(ngModel)]="t.text" placeholder="Isi testimoni" class="form-input h-16"></textarea>
-                               </div>
-                            }
-                         </div>
-                      </div>
-                   }
-
-                   <!-- === FOOTER === -->
-                   @if (currentTab() === 'footer') {
-                      <div class="admin-card">
-                         <div class="admin-card-header">Footer Info</div>
-                         <div class="p-6 space-y-4">
-                            <div><label class="form-label">Deskripsi Singkat</label><textarea [(ngModel)]="config().footer.description" class="form-input"></textarea></div>
-                            <div><label class="form-label">Teks Copyright</label><input [(ngModel)]="config().footer.copyrightText" class="form-input"></div>
-                         </div>
-                      </div>
-                      <div class="admin-card">
-                         <div class="admin-card-header">Warna Footer</div>
-                         <div class="p-6 grid grid-cols-2 gap-4">
-                            <div><label class="form-label">Background</label><input type="color" [(ngModel)]="config().footer.style.backgroundColor" class="w-full h-10"></div>
-                            <div><label class="form-label">Text Color</label><input type="color" [(ngModel)]="config().footer.style.textColor" class="w-full h-10"></div>
-                         </div>
-                      </div>
-                   }
-
-                   <!-- === AI === -->
-                   @if (currentTab() === 'ai') {
-                      <div class="admin-card">
-                         <div class="admin-card-header">Konfigurasi AI Assistant</div>
-                         <div class="p-6 space-y-4">
-                            <div><label class="form-label">Instruksi Sistem (System Prompt)</label><textarea [(ngModel)]="config().ai.systemInstruction" class="form-input h-32"></textarea></div>
-                            <div><label class="form-label">Pesan Pembuka</label><input [(ngModel)]="config().ai.initialMessage" class="form-input"></div>
-                            <div><label class="form-label">Warna Tombol</label><input type="color" [(ngModel)]="config().ai.buttonColor" class="w-full h-10"></div>
-                         </div>
-                      </div>
-                   }
-
-                   <!-- === DATABASE === -->
-                   @if (currentTab() === 'database') {
-                      <div class="admin-card">
-                         <div class="admin-card-header">Koneksi Firebase</div>
-                         <div class="p-6 space-y-4">
-                            <p class="text-xs text-red-500 font-bold bg-red-50 p-2 border border-red-200 rounded">PERINGATAN: Mengubah ini akan me-reload halaman. Pastikan config benar.</p>
-                            <div><label class="form-label">API Key</label><input [(ngModel)]="tempConfig.apiKey" class="form-input"></div>
-                            <div><label class="form-label">Auth Domain</label><input [(ngModel)]="tempConfig.authDomain" class="form-input"></div>
-                            <div><label class="form-label">Project ID</label><input [(ngModel)]="tempConfig.projectId" class="form-input"></div>
-                            <div><label class="form-label">Storage Bucket</label><input [(ngModel)]="tempConfig.storageBucket" class="form-input"></div>
-                            <div><label class="form-label">Messaging Sender ID</label><input [(ngModel)]="tempConfig.messagingSenderId" class="form-input"></div>
-                            <div><label class="form-label">App ID</label><input [(ngModel)]="tempConfig.appId" class="form-input"></div>
-                            <button (click)="saveFirebaseSetup()" class="bg-red-600 text-white font-bold px-4 py-2 rounded shadow hover:bg-red-700">Simpan Konfigurasi & Reload</button>
                          </div>
                       </div>
                    }
@@ -931,6 +657,14 @@ export class AdminComponent {
 
   updatePackageItems(pkg: PackageItem, text: string) {
     pkg.items = text.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
+  }
+
+  updateTableTypes(text: string) {
+     this.config.update(c => {
+         const newC = {...c};
+         newC.reservation.tableTypes = text.split(',').map(s => s.trim()).filter(s => s.length > 0);
+         return newC;
+     });
   }
 
   addBranch() {
