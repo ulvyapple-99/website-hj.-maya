@@ -207,14 +207,10 @@ export interface AppConfig {
     enableSpecialRequest: boolean;
     termsAndConditions: string;
     whatsappTemplate: string;
-    
-    // NEW: Blind Spot Logics
-    bookingLeadTimeHours: number; // Minimal jam sebelum datang
+    bookingLeadTimeHours: number;
     requireEmail: boolean;
     enableDownPaymentCalc: boolean;
     downPaymentPercentage: number;
-
-    // NEW: Granular Styles
     style: PageStyle;
     cardBorderRadius: string;
     cardBackgroundColor: string; 
@@ -222,7 +218,6 @@ export interface AppConfig {
     inputHeight: string;
     inputBorderRadius: string;
     buttonHeight: string;
-    
     labelStyle: TextStyle;
     inputStyle: TextStyle;
     summaryStyle: TextStyle;
@@ -467,13 +462,10 @@ export class ConfigService {
       enableSpecialRequest: true,
       termsAndConditions: '1. DP 50% wajib dibayarkan maksimal 1x24 jam setelah konfirmasi admin.\n2. Pembatalan H-1 uang muka hangus.\n3. Datang tepat waktu, toleransi keterlambatan 15 menit.',
       whatsappTemplate: 'Halo Admin *{branch}*,\nSaya mau reservasi meja:\n\nNama: *{name}*\nKontak: {contact}\nTanggal: {date}\nJam: {time}\nJumlah: {pax} orang\nArea: {tableType}\nCatatan: {notes}\n\nMohon konfirmasinya.',
-      
-      // NEW DEFAULT VALUES
       bookingLeadTimeHours: 2,
       requireEmail: false,
       enableDownPaymentCalc: true,
       downPaymentPercentage: 50,
-
       style: {
         backgroundColor: '#F5F5F5',
         textColor: '#3E2723', 
@@ -488,8 +480,6 @@ export class ConfigService {
       inputHeight: '48px',
       inputBorderRadius: '8px',
       buttonHeight: '52px',
-      
-      // NEW STYLE DEFAULTS
       labelStyle: { fontFamily: 'Lato', fontSize: '0.75rem', color: '#5D4037' },
       inputStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#1F2937' },
       summaryStyle: { fontFamily: 'Oswald', fontSize: '1.5rem', color: '#FFFFFF' }
@@ -603,6 +593,10 @@ export class ConfigService {
        this.injectFont(c.global.metaStyle.fontFamily);
        this.injectFont(c.hero.titleStyle.fontFamily);
        this.injectFont(c.hero.highlightStyle.fontFamily);
+       this.injectFont(c.hero.badgeStyle.fontFamily);
+       this.injectFont(c.hero.subtitleStyle.fontFamily);
+       this.injectFont(c.hero.button1Style.fontFamily);
+       this.injectFont(c.hero.button2Style.fontFamily);
        
        // Inject Font for Reservation Granular Styles
        this.injectFont(c.reservation?.labelStyle?.fontFamily);
@@ -688,14 +682,20 @@ export class ConfigService {
             intro: { ...c.intro, ...(parsed.intro || {}) },
             packagesPage: { ...c.packagesPage, ...(parsed.packagesPage || {}) },
             global: { ...c.global, ...(parsed.global || {}) },
-            hero: { ...c.hero, ...(parsed.hero || {}) },
+            hero: { ...c.hero, ...(parsed.hero || {}), 
+               badgeStyle: this.ensureStyle(parsed.hero?.badgeStyle, c.hero.badgeStyle),
+               titleStyle: this.ensureStyle(parsed.hero?.titleStyle, c.hero.titleStyle),
+               highlightStyle: this.ensureStyle(parsed.hero?.highlightStyle, c.hero.highlightStyle),
+               subtitleStyle: this.ensureStyle(parsed.hero?.subtitleStyle, c.hero.subtitleStyle),
+               button1Style: this.ensureStyle(parsed.hero?.button1Style, c.hero.button1Style),
+               button2Style: this.ensureStyle(parsed.hero?.button2Style, c.hero.button2Style),
+            },
             about: { ...c.about, ...(parsed.about || {}) },
             reservation: { 
                 ...c.reservation, 
                 ...(parsed.reservation || {}),
                 titleStyle: this.ensureStyle(parsed.reservation?.titleStyle, c.reservation.titleStyle),
                 subtitleStyle: this.ensureStyle(parsed.reservation?.subtitleStyle, c.reservation.subtitleStyle),
-                // SAFE MERGE FOR NEW FIELDS
                 labelStyle: this.ensureStyle(parsed.reservation?.labelStyle, c.reservation.labelStyle),
                 inputStyle: this.ensureStyle(parsed.reservation?.inputStyle, c.reservation.inputStyle),
                 summaryStyle: this.ensureStyle(parsed.reservation?.summaryStyle, c.reservation.summaryStyle),

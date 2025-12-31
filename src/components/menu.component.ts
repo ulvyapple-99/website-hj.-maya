@@ -103,8 +103,11 @@ import { ToastService } from '../services/toast.service';
               <div class="group relative overflow-hidden bg-white flex flex-col shadow-sm hover:shadow-xl transition-all duration-300"
                    [style.borderRadius]="config().menuPage.cardBorderRadius">
                 
-                <!-- Square Image (Like IG) -->
-                <div class="aspect-square relative overflow-hidden bg-gray-100">
+                <!-- Image Container with Configurable Height -->
+                <div class="relative overflow-hidden bg-gray-100"
+                     [style.height]="config().menuPage.cardImageHeight"
+                     [class.aspect-square]="!config().menuPage.cardImageHeight || config().menuPage.cardImageHeight === '100%'">
+                     
                    <!-- Blind Spot 3: Broken Image Handler -->
                    @if (isVideo(item.image)) {
                       <video [src]="item.image" class="w-full h-full object-cover" muted loop loading="lazy"></video>

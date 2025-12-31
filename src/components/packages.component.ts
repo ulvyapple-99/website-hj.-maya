@@ -10,9 +10,9 @@ import { ToastService } from '../services/toast.service';
   imports: [CommonModule],
   template: `
     <section class="py-20 min-h-screen transition-colors duration-500"
-      [style.backgroundColor]="config().packagesPage?.style?.backgroundColor || '#FFF3E0'"
-      [style.color]="config().packagesPage?.style?.textColor || '#3E2723'"
-      [style.fontFamily]="config().packagesPage?.style?.fontFamily || 'Playfair Display'"
+      [style.backgroundColor]="config().packagesPage?.style?.backgroundColor"
+      [style.color]="config().packagesPage?.style?.textColor"
+      [style.fontFamily]="config().packagesPage?.style?.fontFamily"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -37,10 +37,10 @@ import { ToastService } from '../services/toast.service';
              <button 
                (click)="setBranch($index)"
                class="px-6 py-2 rounded-full font-bold transition-all text-sm uppercase tracking-wider focus:ring-4 focus:ring-opacity-50"
-               [style.backgroundColor]="selectedBranchIndex() === $index ? (config().packagesPage?.style?.accentColor || '#D84315') : 'transparent'"
-               [style.borderColor]="config().packagesPage?.style?.accentColor || '#D84315'"
+               [style.backgroundColor]="selectedBranchIndex() === $index ? config().packagesPage?.style?.accentColor : 'transparent'"
+               [style.borderColor]="config().packagesPage?.style?.accentColor"
                [class.border]="selectedBranchIndex() !== $index"
-               [style.color]="selectedBranchIndex() === $index ? '#fff' : (config().packagesPage?.style?.textColor || '#3E2723')"
+               [style.color]="selectedBranchIndex() === $index ? '#fff' : config().packagesPage?.style?.textColor"
                [style.boxShadow]="selectedBranchIndex() === $index ? '0 4px 14px 0 rgba(0,0,0,0.2)' : 'none'"
              >
                {{ branch.name }}
@@ -63,9 +63,9 @@ import { ToastService } from '../services/toast.service';
                 @for (pkg of currentPackages(); track $index) {
                     <article class="relative overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col group h-full animate-scale-up"
                         [style.animationDelay]="$index * 100 + 'ms'"
-                        [style.backgroundColor]="config().packagesPage?.cardBackgroundColor || '#FFFFFF'"
-                        [style.color]="config().packagesPage?.cardTextColor || '#3E2723'"
-                        [style.borderRadius]="config().packagesPage?.cardBorderRadius || '16px'">
+                        [style.backgroundColor]="config().packagesPage?.cardBackgroundColor"
+                        [style.color]="config().packagesPage?.cardTextColor"
+                        [style.borderRadius]="config().packagesPage?.cardBorderRadius">
                     
                     <!-- Blind Spot 6: Visual Hierarchy (Badge) -->
                     @if ($index === 0) {
@@ -86,8 +86,8 @@ import { ToastService } from '../services/toast.service';
                         
                         <div class="absolute bottom-0 left-0 px-5 py-2 font-bold rounded-tr-2xl backdrop-blur-sm"
                             [style.backgroundColor]="'rgba(0,0,0,0.7)'"
-                            [style.color]="config().packagesPage?.priceColor || '#FFFFFF'"
-                            [style.fontSize]="config().packagesPage?.priceFontSize || '1rem'">
+                            [style.color]="config().packagesPage?.priceColor"
+                            [style.fontSize]="config().packagesPage?.priceFontSize">
                             {{ pkg.price }}
                         </div>
                     </div>
@@ -129,7 +129,7 @@ import { ToastService } from '../services/toast.service';
 
                         <button (click)="orderPackage(pkg)" 
                             class="w-full py-3.5 rounded-xl font-bold text-white shadow-lg transform active:scale-95 transition hover:brightness-110 flex items-center justify-center gap-2"
-                            [style.backgroundColor]="config().packagesPage?.style?.accentColor || '#D84315'">
+                            [style.backgroundColor]="config().packagesPage?.style?.accentColor">
                             <span>{{ config().packagesPage?.buttonText || 'Pesan Sekarang' }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </button>

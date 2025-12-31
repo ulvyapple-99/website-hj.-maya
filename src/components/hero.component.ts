@@ -10,13 +10,13 @@ import { CommonModule } from '@angular/common';
   imports: [RouterLink, CommonModule],
   template: `
     <section 
-      class="relative overflow-hidden flex items-center justify-center transition-colors duration-500"
+      class="relative overflow-hidden flex flex-col justify-center transition-colors duration-500"
       [style.minHeight]="config().hero.height || '95vh'"
       [style.backgroundColor]="config().hero.style.backgroundColor"
       [style.color]="config().hero.style.textColor"
       [style.fontFamily]="config().hero.style.fontFamily"
     >
-      <!-- Background overlay image with Parallax & Blur (BS 1, 2, 6, 9) -->
+      <!-- Background overlay image with Parallax & Blur -->
       <div class="absolute inset-0 overflow-hidden">
         <div class="absolute inset-0 scale-110 will-change-transform" 
              [style.transform]="'translateY(' + scrollY() * 0.5 + 'px)'"
@@ -32,7 +32,6 @@ import { CommonModule } from '@angular/common';
                 [style.objectPosition]="config().hero.bgPosition || 'center center'"
               ></video>
            } @else {
-              <!-- BS 1: LCP Optimized (fetchpriority) -->
               <img [src]="config().hero.bgImage" 
                    fetchpriority="high"
                    decoding="async"
@@ -43,7 +42,7 @@ import { CommonModule } from '@angular/common';
            }
         </div>
         
-        <!-- Gradient Overlay (BS 7) -->
+        <!-- Gradient Overlay -->
         <div 
           class="absolute inset-0 z-10" 
           [style.background]="getGradientStyle()"
@@ -52,6 +51,7 @@ import { CommonModule } from '@angular/common';
         <div class="absolute inset-0 bg-black z-10" [style.opacity]="config().hero.overlayOpacity"></div>
       </div>
 
+      <!-- Main Content Container -->
       <div class="relative z-20 max-w-5xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col w-full"
            [class.items-center]="!config().hero.textAlign || config().hero.textAlign === 'center'"
            [class.items-start]="config().hero.textAlign === 'left'"
@@ -71,7 +71,7 @@ import { CommonModule } from '@angular/common';
            </span>
         </div>
 
-        <!-- Title with Text Shadow (BS 5) -->
+        <!-- Title -->
         <h1 class="font-bold tracking-tight mb-6 animate-fade-in-up leading-tight drop-shadow-2xl"
             [style.textShadow]="config().hero.textShadow || 'none'"
             [style.fontFamily]="config().hero.titleStyle.fontFamily"
@@ -88,10 +88,11 @@ import { CommonModule } from '@angular/common';
           </span>
         </h1>
         
+        <!-- Decorative Line -->
         <div class="w-24 h-1.5 bg-white/60 mb-8 rounded-full animate-width-grow shadow-lg"
              [style.alignSelf]="config().hero.textAlign === 'left' ? 'flex-start' : (config().hero.textAlign === 'right' ? 'flex-end' : 'center')"></div>
 
-        <!-- Subtitle with Text Shadow (BS 5) -->
+        <!-- Subtitle -->
         <p class="max-w-2xl mb-10 font-light animate-fade-in-up opacity-0 leading-relaxed drop-shadow-md" 
            [style.textShadow]="config().hero.textShadow || 'none'"
            [style.fontFamily]="config().hero.subtitleStyle.fontFamily"
@@ -101,6 +102,7 @@ import { CommonModule } from '@angular/common';
           {{ config().hero.subtitle }}
         </p>
         
+        <!-- Buttons -->
         <div class="flex flex-col sm:flex-row gap-5 animate-fade-in-up opacity-0 mb-8" 
              style="animation-delay: 0.5s; animation-fill-mode: forwards;"
              [class.justify-center]="!config().hero.textAlign || config().hero.textAlign === 'center'"
@@ -140,7 +142,7 @@ import { CommonModule } from '@angular/common';
           </a>
         </div>
 
-        <!-- Social Proof Badge (BS 8) -->
+        <!-- Social Proof Badge -->
         @if (config().hero.socialProofText) {
            <div class="animate-fade-in-up opacity-0 flex items-center gap-2 bg-black/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/10"
                 style="animation-delay: 0.7s; animation-fill-mode: forwards;">
@@ -150,7 +152,7 @@ import { CommonModule } from '@angular/common';
         }
       </div>
       
-      <!-- Interactive Scroll Indicator (BS 3) -->
+      <!-- Interactive Scroll Indicator -->
       <div (click)="scrollToNext()"
            class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce opacity-60 z-20 text-white cursor-pointer hover:opacity-100 hover:scale-110 transition">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">

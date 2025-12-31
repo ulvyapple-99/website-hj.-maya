@@ -55,10 +55,11 @@ interface GuestOrder {
                 <div>
                   <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Pilih Cabang</label>
                   <select [ngModel]="selectedBranchIndex()" (ngModelChange)="setBranch($event)" 
-                          class="w-full border px-3 py-2 text-sm font-bold bg-white text-gray-800"
+                          class="w-full border px-3 py-2 text-sm font-bold bg-white text-gray-800 focus:outline-none focus:ring-1"
                           [ngStyle]="config().reservation.inputStyle"
                           [style.height]="config().reservation.inputHeight"
-                          [style.borderRadius]="config().reservation.inputBorderRadius">
+                          [style.borderRadius]="config().reservation.inputBorderRadius"
+                          [style.borderColor]="config().reservation.style.accentColor + '40'">
                     @for (branch of config().branches; track $index) {
                       <option [value]="$index">{{ branch.name }}</option>
                     }
@@ -68,20 +69,22 @@ interface GuestOrder {
                 <div>
                   <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Nama Pemesan</label>
                   <input type="text" [(ngModel)]="formName" 
-                         class="w-full border px-3 py-2 text-sm bg-white text-gray-800" placeholder="Bpk. Budi"
+                         class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1" placeholder="Bpk. Budi"
                          [ngStyle]="config().reservation.inputStyle"
                          [style.height]="config().reservation.inputHeight"
-                         [style.borderRadius]="config().reservation.inputBorderRadius">
+                         [style.borderRadius]="config().reservation.inputBorderRadius"
+                         [style.borderColor]="config().reservation.style.accentColor + '40'">
                 </div>
 
                 <!-- Blind Spot 1: Phone Contact -->
                 <div>
                    <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">No. WhatsApp</label>
                    <input type="tel" [(ngModel)]="formPhone"
-                          class="w-full border px-3 py-2 text-sm bg-white text-gray-800" placeholder="0812xxx"
+                          class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1" placeholder="0812xxx"
                           [ngStyle]="config().reservation.inputStyle"
                           [style.height]="config().reservation.inputHeight"
-                          [style.borderRadius]="config().reservation.inputBorderRadius">
+                          [style.borderRadius]="config().reservation.inputBorderRadius"
+                          [style.borderColor]="config().reservation.style.accentColor + '40'">
                 </div>
 
                 <!-- Blind Spot 5: Optional Email -->
@@ -89,10 +92,11 @@ interface GuestOrder {
                    <div>
                       <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Email</label>
                       <input type="email" [(ngModel)]="formEmail"
-                             class="w-full border px-3 py-2 text-sm bg-white text-gray-800" placeholder="email@contoh.com"
+                             class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1" placeholder="email@contoh.com"
                              [ngStyle]="config().reservation.inputStyle"
                              [style.height]="config().reservation.inputHeight"
-                             [style.borderRadius]="config().reservation.inputBorderRadius">
+                             [style.borderRadius]="config().reservation.inputBorderRadius"
+                             [style.borderColor]="config().reservation.style.accentColor + '40'">
                    </div>
                 }
 
@@ -100,19 +104,21 @@ interface GuestOrder {
                   <div>
                     <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Tanggal</label>
                     <input type="date" [(ngModel)]="formDate" [min]="today"
-                           class="w-full border px-3 py-2 text-sm bg-white text-gray-800"
+                           class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1"
                            [ngStyle]="config().reservation.inputStyle"
                            [style.height]="config().reservation.inputHeight"
-                           [style.borderRadius]="config().reservation.inputBorderRadius">
+                           [style.borderRadius]="config().reservation.inputBorderRadius"
+                           [style.borderColor]="config().reservation.style.accentColor + '40'">
                   </div>
                   <div>
                     <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Jam</label>
                     <input type="time" [(ngModel)]="formTime" 
-                           class="w-full border px-3 py-2 text-sm bg-white text-gray-800"
+                           class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1"
                            [class.border-red-500]="timeError()"
                            [ngStyle]="config().reservation.inputStyle"
                            [style.height]="config().reservation.inputHeight"
-                           [style.borderRadius]="config().reservation.inputBorderRadius">
+                           [style.borderRadius]="config().reservation.inputBorderRadius"
+                           [style.borderColor]="timeError() ? 'red' : config().reservation.style.accentColor + '40'">
                   </div>
                 </div>
                 
@@ -122,7 +128,9 @@ interface GuestOrder {
                    </div>
                 }
 
-                <div class="bg-black/5 p-3 border" [style.borderRadius]="config().reservation.inputBorderRadius">
+                <div class="bg-black/5 p-3 border" 
+                     [style.borderRadius]="config().reservation.inputBorderRadius"
+                     [style.borderColor]="config().reservation.style.accentColor + '40'">
                    <label class="block text-xs font-bold mb-2 uppercase" [style.color]="config().reservation.style.accentColor">Jenis Acara</label>
                    <div class="flex flex-col gap-2">
                      <label class="flex items-center gap-2 cursor-pointer">
@@ -139,11 +147,12 @@ interface GuestOrder {
                 <div>
                   <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Jumlah Pax (Max {{ config().reservation.maxPax }})</label>
                   <input type="number" [(ngModel)]="formPax" min="1" [max]="config().reservation.maxPax"
-                         class="w-full border px-3 py-2 text-sm bg-white text-gray-800"
+                         class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1"
                          [class.border-red-500]="paxError()"
                          [ngStyle]="config().reservation.inputStyle"
                          [style.height]="config().reservation.inputHeight"
-                         [style.borderRadius]="config().reservation.inputBorderRadius">
+                         [style.borderRadius]="config().reservation.inputBorderRadius"
+                         [style.borderColor]="paxError() ? 'red' : config().reservation.style.accentColor + '40'">
                   @if (paxError()) {
                      <p class="text-[10px] text-red-500 mt-1">{{ paxError() }}</p>
                   }
@@ -154,10 +163,11 @@ interface GuestOrder {
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Pilih Area</label>
                         <select [(ngModel)]="selectedTableType"
-                                class="w-full border px-3 py-2 text-sm bg-white text-gray-800"
+                                class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1"
                                 [ngStyle]="config().reservation.inputStyle"
                                 [style.height]="config().reservation.inputHeight"
-                                [style.borderRadius]="config().reservation.inputBorderRadius">
+                                [style.borderRadius]="config().reservation.inputBorderRadius"
+                                [style.borderColor]="config().reservation.style.accentColor + '40'">
                             <option value="">-- Pilih Area --</option>
                             @for (type of config().reservation.tableTypes; track $index) {
                                 <option [value]="type">{{ type }}</option>
@@ -170,11 +180,12 @@ interface GuestOrder {
                 @if (config().reservation.enableSpecialRequest) {
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Catatan Khusus</label>
-                        <textarea [(ngModel)]="specialRequest" class="w-full border px-3 py-2 text-sm bg-white text-gray-800"
+                        <textarea [(ngModel)]="specialRequest" class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1"
                                   placeholder="Contoh: Kursi bayi, alergi, hiasan ultah..."
                                   rows="2"
                                   [ngStyle]="config().reservation.inputStyle"
-                                  [style.borderRadius]="config().reservation.inputBorderRadius"></textarea>
+                                  [style.borderRadius]="config().reservation.inputBorderRadius"
+                                  [style.borderColor]="config().reservation.style.accentColor + '40'"></textarea>
                     </div>
                 }
 
@@ -198,8 +209,8 @@ interface GuestOrder {
                    @if (config().reservation.enableDownPaymentCalc) {
                       <div class="text-xs bg-black/20 p-2 rounded mb-4">
                          <div class="flex justify-between">
-                            <span>Wajib DP ({{ config().reservation.downPaymentPercentage }}%):</span>
-                            <span class="font-bold">{{ formatRupiah(grandTotal() * (config().reservation.downPaymentPercentage / 100)) }}</span>
+                            <span [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">Wajib DP ({{ config().reservation.downPaymentPercentage }}%):</span>
+                            <span class="font-bold" [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">{{ formatRupiah(grandTotal() * (config().reservation.downPaymentPercentage / 100)) }}</span>
                          </div>
                       </div>
                    }
@@ -225,7 +236,7 @@ interface GuestOrder {
                    <span>Pesanan Tamu</span>
                    <button (click)="addGuest()" class="text-xs bg-green-600 text-white px-2 py-1 rounded font-bold">+ Tambah</button>
                 </h3>
-                <div class="flex-1 overflow-y-auto space-y-3 max-h-[600px]">
+                <div class="flex-1 overflow-y-auto space-y-3 max-h-[600px] custom-scrollbar">
                    @for (guest of guests(); track guest.id) {
                       <div (click)="setActiveGuest(guest.id)" class="p-4 rounded border-2 cursor-pointer transition relative group"
                          [style.borderColor]="activeGuestId() === guest.id ? config().reservation.style.accentColor : '#eee'"
