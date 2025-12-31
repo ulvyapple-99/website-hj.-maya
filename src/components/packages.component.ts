@@ -50,29 +50,34 @@ import { ConfigService, PackageItem } from '../services/config.service';
         @if (currentPackages().length > 0) {
            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
              @for (pkg of currentPackages(); track $index) {
-                <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col group h-full"
+                <div class="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col group h-full"
+                     [style.backgroundColor]="config().packagesPage?.cardBackgroundColor || '#FFFFFF'"
+                     [style.color]="config().packagesPage?.cardTextColor || '#3E2723'"
                      [style.borderRadius]="config().packagesPage?.cardBorderRadius || '16px'">
                    
                    <!-- Image -->
                    <div class="h-48 overflow-hidden relative">
                       <img [src]="pkg.image || 'https://picsum.photos/400/300'" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                      <div class="absolute bottom-0 left-0 bg-black/70 text-white px-4 py-2 font-bold rounded-tr-xl">
+                      <div class="absolute bottom-0 left-0 px-4 py-2 font-bold rounded-tr-xl"
+                           [style.backgroundColor]="'rgba(0,0,0,0.7)'"
+                           [style.color]="config().packagesPage?.priceColor || '#FFFFFF'"
+                           [style.fontSize]="config().packagesPage?.priceFontSize || '1rem'">
                          {{ pkg.price }}
                       </div>
                    </div>
 
                    <!-- Content -->
                    <div class="p-6 flex-1 flex flex-col">
-                      <h3 class="font-bold text-xl mb-2 text-gray-900">{{ pkg.name }}</h3>
-                      <p class="text-sm text-gray-500 mb-4">{{ pkg.description }}</p>
+                      <h3 class="font-bold text-xl mb-2">{{ pkg.name }}</h3>
+                      <p class="text-sm opacity-70 mb-4">{{ pkg.description }}</p>
                       
                       <!-- Items List -->
-                      <div class="bg-orange-50 p-4 rounded-xl mb-6 flex-1 border border-orange-100">
-                         <h4 class="font-bold text-xs uppercase text-orange-800 mb-2">Isi Paket:</h4>
+                      <div class="bg-black/5 p-4 rounded-xl mb-6 flex-1 border border-black/5">
+                         <h4 class="font-bold text-xs uppercase opacity-60 mb-2">Isi Paket:</h4>
                          <ul class="space-y-1">
                             @for (item of pkg.items; track item) {
-                               <li class="text-sm text-gray-700 flex items-start gap-2">
-                                  <span class="text-orange-500 mt-1">✓</span> {{ item }}
+                               <li class="text-sm flex items-start gap-2">
+                                  <span class="mt-1" [style.color]="config().packagesPage?.style?.accentColor">✓</span> {{ item }}
                                </li>
                             }
                          </ul>
@@ -81,7 +86,7 @@ import { ConfigService, PackageItem } from '../services/config.service';
                       <button (click)="orderPackage(pkg)" 
                          class="w-full py-3 rounded-xl font-bold text-white shadow-md transform active:scale-95 transition hover:brightness-110"
                          [style.backgroundColor]="config().packagesPage?.style?.accentColor || '#D84315'">
-                         Pesan Sekarang
+                         {{ config().packagesPage?.buttonText || 'Pesan Sekarang' }}
                       </button>
                    </div>
                 </div>

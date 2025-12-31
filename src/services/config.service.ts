@@ -189,6 +189,12 @@ export interface AppConfig {
     subtitleStyle: TextStyle; 
     style: PageStyle;
     cardBorderRadius: string;
+    // New Fields for granular control
+    cardBackgroundColor: string;
+    cardTextColor: string;
+    priceColor: string;
+    priceFontSize: string;
+    buttonText: string;
   };
   reservation: {
     title: string;
@@ -405,7 +411,13 @@ export class ConfigService {
         titleFontSize: '2.5rem',
         subtitleFontSize: '1rem'
       },
-      cardBorderRadius: '16px'
+      cardBorderRadius: '16px',
+      // Defaults for new fields
+      cardBackgroundColor: '#FFFFFF',
+      cardTextColor: '#3E2723',
+      priceColor: '#FFFFFF',
+      priceFontSize: '1rem',
+      buttonText: 'Pesan Sekarang'
     },
     reservation: {
       title: 'Reservasi Meja',
@@ -558,7 +570,8 @@ export class ConfigService {
         this.config.update(c => ({
             ...c,
             ...parsed,
-            intro: { ...c.intro, ...(parsed.intro || {}) }
+            intro: { ...c.intro, ...(parsed.intro || {}) },
+            packagesPage: { ...c.packagesPage, ...(parsed.packagesPage || {}) }
         }));
         console.log("✅ Config loaded from LocalStorage");
       }
