@@ -227,7 +227,7 @@ import { ToastService } from '../services/toast.service';
                             
                             <div class="grid grid-cols-2 gap-4">
                               <div><label class="form-label">Judul Besar</label><input [(ngModel)]="config().hero.title" class="form-input"></div>
-                              <div><label class="form-label">Teks Highlight (Warna)</label><input [(ngModel)]="config().hero.highlight" class="form-input"></div>
+                              <div><label class="form-label">Teks Highlight</label><input [(ngModel)]="config().hero.highlight" class="form-input"></div>
                               <div class="col-span-2"><label class="form-label">Sub-Judul</label><textarea [(ngModel)]="config().hero.subtitle" class="form-input"></textarea></div>
                               <div class="col-span-2"><label class="form-label">Social Proof Badge (e.g. ⭐ 4.8/5)</label><input [(ngModel)]="config().hero.socialProofText" class="form-input"></div>
                             </div>
@@ -240,7 +240,7 @@ import { ToastService } from '../services/toast.service';
                          </div>
                       </div>
                       <div class="admin-card">
-                         <div class="admin-card-header">Styling & Layout (Advanced)</div>
+                         <div class="admin-card-header">Layout & Overlay</div>
                          <div class="p-6 grid grid-cols-3 gap-4">
                             <div><label class="form-label">Section Height</label><input [(ngModel)]="config().hero.height" class="form-input" placeholder="95vh"></div>
                             <div><label class="form-label">Background Position</label>
@@ -263,8 +263,91 @@ import { ToastService } from '../services/toast.service';
                             <div><label class="form-label">Text Align</label><select [(ngModel)]="config().hero.textAlign" class="form-select"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></div>
                             
                             <div><label class="form-label">Overlay Opacity</label><input type="number" step="0.1" max="1" [(ngModel)]="config().hero.overlayOpacity" class="form-input"></div>
-                            <div><label class="form-label">Accent Color</label><input type="color" [(ngModel)]="config().hero.style.accentColor" class="h-10 w-full"></div>
-                            <div><label class="form-label">Bg Color (Backup)</label><input type="color" [(ngModel)]="config().hero.style.backgroundColor" class="h-10 w-full"></div>
+                         </div>
+                      </div>
+
+                      <!-- FULL COLOR CONTROL FOR HERO (NEW) -->
+                      <div class="admin-card">
+                         <div class="admin-card-header">Kustomisasi Warna Lengkap (Hero)</div>
+                         <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <!-- Background Color -->
+                            <div class="col-span-1">
+                               <label class="form-label">Background/Overlay</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.style.backgroundColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.style.backgroundColor" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Accent Color -->
+                            <div class="col-span-1">
+                               <label class="form-label">Accent (Tombol Utama)</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.style.accentColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.style.accentColor" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Default Text Color -->
+                            <div class="col-span-1">
+                               <label class="form-label">Default Text</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.style.textColor" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.style.textColor" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Spacer -->
+                            <div class="hidden md:block"></div>
+
+                            <!-- Granular Controls -->
+                            <div class="col-span-2 border-t mt-2 pt-2 md:col-span-4"><span class="text-[10px] font-bold text-gray-400 uppercase">Detail Elemen</span></div>
+
+                            <!-- Badge Color -->
+                            <div>
+                               <label class="form-label">Warna Badge</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.badgeStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.badgeStyle.color" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Title Color -->
+                            <div>
+                               <label class="form-label">Warna Judul</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.titleStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.titleStyle.color" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Highlight Color -->
+                            <div>
+                               <label class="form-label">Warna Highlight</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.highlightStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.highlightStyle.color" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Subtitle Color -->
+                            <div>
+                               <label class="form-label">Warna Sub-Judul</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.subtitleStyle.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.subtitleStyle.color" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Button 1 Text Color -->
+                            <div>
+                               <label class="form-label">Teks Tombol 1</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.button1Style.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.button1Style.color" class="form-input text-xs">
+                               </div>
+                            </div>
+                            <!-- Button 2 Text Color -->
+                            <div>
+                               <label class="form-label">Teks Tombol 2</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [(ngModel)]="config().hero.button2Style.color" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                                  <input type="text" [(ngModel)]="config().hero.button2Style.color" class="form-input text-xs">
+                               </div>
+                            </div>
                          </div>
                       </div>
                    }
