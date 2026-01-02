@@ -1107,7 +1107,7 @@ import { ToastService } from '../services/toast.service';
                    @if (currentTab() === 'footer') {
                       <!-- Content & Links -->
                       <div class="admin-card">
-                          <div class="admin-card-header bg-gray-800 text-white">Content & Social Links</div>
+                          <div class="admin-card-header bg-gray-800 text-white">Content & Global Social Links</div>
                           <div class="p-6 space-y-4">
                               <div>
                                   <label class="form-label">Footer Description (supports newlines)</label>
@@ -1131,6 +1131,36 @@ import { ToastService } from '../services/toast.service';
                                       <input [(ngModel)]="config().footer.tiktokLink" class="form-input">
                                   </div>
                               </div>
+                          </div>
+                      </div>
+
+                      <!-- Branch Social Media Links -->
+                      <div class="admin-card">
+                          <div class="admin-card-header bg-indigo-800 text-white">Tautan Media Sosial Cabang</div>
+                          <div class="p-6 space-y-6">
+                              @if (config().branches.length > 0) {
+                                  @for (branch of config().branches; track $index) {
+                                      <div class="p-4 rounded-lg border bg-gray-50/50">
+                                          <h4 class="font-bold text-gray-800 mb-3 border-b pb-2">{{ branch.name }}</h4>
+                                          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                              <div>
+                                                  <label class="form-label">Instagram Link</label>
+                                                  <input [(ngModel)]="config().branches[$index].instagramLink" class="form-input" placeholder="https://instagram.com/...">
+                                              </div>
+                                              <div>
+                                                  <label class="form-label">Facebook Link</label>
+                                                  <input [(ngModel)]="config().branches[$index].facebookLink" class="form-input" placeholder="https://facebook.com/...">
+                                              </div>
+                                              <div>
+                                                  <label class="form-label">TikTok Link</label>
+                                                  <input [(ngModel)]="config().branches[$index].tiktokLink" class="form-input" placeholder="https://tiktok.com/...">
+                                              </div>
+                                          </div>
+                                      </div>
+                                  }
+                              } @else {
+                                  <p class="text-center text-gray-500">Belum ada cabang yang dikonfigurasi. Silakan tambah cabang di pengaturan 'Lokasi'.</p>
+                              }
                           </div>
                       </div>
 
