@@ -181,6 +181,12 @@ export interface AppConfig {
     showPattern: boolean; 
     enableGlassEffect: boolean; 
     style: PageStyle;
+    quoteStyle: TextStyle;
+    founderNameStyle: TextStyle;
+    ctaStyle: {
+      backgroundColor: string;
+      color: string;
+    };
   };
   menuPage: {
     title: string;
@@ -426,7 +432,10 @@ export class ConfigService {
         bodyFontSize: '1.125rem',
         sectionPaddingY: '80px',
         borderRadius: '24px'
-      }
+      },
+      quoteStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#5D4037' },
+      founderNameStyle: { fontFamily: 'Lato', fontSize: '0.875rem', color: '#3E2723' },
+      ctaStyle: { backgroundColor: '#D84315', color: '#FFFFFF' }
     },
     menuPage: {
       title: 'Menu Favorit',
@@ -724,7 +733,15 @@ export class ConfigService {
                button1Style: this.ensureStyle(parsed.hero?.button1Style, c.hero.button1Style),
                button2Style: this.ensureStyle(parsed.hero?.button2Style, c.hero.button2Style),
             },
-            about: { ...c.about, ...(parsed.about || {}) },
+            about: { ...c.about, ...(parsed.about || {}),
+              titleStyle: this.ensureStyle(parsed.about?.titleStyle, c.about.titleStyle),
+              descriptionStyle: this.ensureStyle(parsed.about?.descriptionStyle, c.about.descriptionStyle),
+              statsStyle: this.ensureStyle(parsed.about?.statsStyle, c.about.statsStyle),
+              statsLabelStyle: this.ensureStyle(parsed.about?.statsLabelStyle, c.about.statsLabelStyle),
+              quoteStyle: this.ensureStyle(parsed.about?.quoteStyle, c.about.quoteStyle),
+              founderNameStyle: this.ensureStyle(parsed.about?.founderNameStyle, c.about.founderNameStyle),
+              ctaStyle: { ...c.about.ctaStyle, ...(parsed.about?.ctaStyle || {}) }
+            },
             reservation: { 
                 ...c.reservation, 
                 ...(parsed.reservation || {}),
@@ -970,7 +987,7 @@ export class ConfigService {
             global: { ...current.global, ...(data.global || {}), logoStyle: text(data.global?.logoStyle), metaStyle: text(data.global?.metaStyle) },
             intro: ensure(data.intro, current.intro),
             hero: { ...current.hero, ...(data.hero || {}), badgeStyle: text(data.hero?.badgeStyle), titleStyle: text(data.hero?.titleStyle), highlightStyle: text(data.hero?.highlightStyle), subtitleStyle: text(data.hero?.subtitleStyle), button1Style: text(data.hero?.button1Style), button2Style: text(data.hero?.button2Style), style: ensure(data.hero?.style, current.hero.style) },
-            about: { ...current.about, ...(data.about || {}), titleStyle: text(data.about?.titleStyle), descriptionStyle: text(data.about?.descriptionStyle), stats: ensure(data.about?.stats, current.about.stats), statsStyle: text(data.about?.statsStyle), statsLabelStyle: text(data.about?.statsLabelStyle), ctaText: data.about?.ctaText || 'Lihat Menu', ctaLink: data.about?.ctaLink || '/menu', quote: data.about?.quote || '', founderName: data.about?.founderName || '', trustedLogos: data.about?.trustedLogos || [], showPattern: data.about?.showPattern ?? true, enableGlassEffect: data.about?.enableGlassEffect ?? false, style: ensure(data.about?.style, current.about.style) },
+            about: { ...current.about, ...(data.about || {}), titleStyle: text(data.about?.titleStyle), descriptionStyle: text(data.about?.descriptionStyle), quoteStyle: text(data.about?.quoteStyle), founderNameStyle: text(data.about?.founderNameStyle), ctaStyle: ensure(data.about?.ctaStyle, current.about.ctaStyle), stats: ensure(data.about?.stats, current.about.stats), statsStyle: text(data.about?.statsStyle), statsLabelStyle: text(data.about?.statsLabelStyle), ctaText: data.about?.ctaText || 'Lihat Menu', ctaLink: data.about?.ctaLink || '/menu', quote: data.about?.quote || '', founderName: data.about?.founderName || '', trustedLogos: data.about?.trustedLogos || [], showPattern: data.about?.showPattern ?? true, enableGlassEffect: data.about?.enableGlassEffect ?? false, style: ensure(data.about?.style, current.about.style) },
             menuPage: { ...current.menuPage, ...(data.menuPage || {}), titleStyle: text(data.menuPage?.titleStyle), subtitleStyle: text(data.menuPage?.subtitleStyle), style: ensure(data.menuPage?.style, current.menuPage.style) },
             packagesPage: { ...current.packagesPage, ...(data.packagesPage || {}), titleStyle: text(data.packagesPage?.titleStyle), subtitleStyle: text(data.packagesPage?.subtitleStyle), style: ensure(data.packagesPage?.style, current.packagesPage.style) },
             reservation: { ...current.reservation, ...(data.reservation || {}), titleStyle: text(data.reservation?.titleStyle), subtitleStyle: text(data.reservation?.subtitleStyle), labelStyle: text(data.reservation?.labelStyle), inputStyle: text(data.reservation?.inputStyle), summaryStyle: text(data.reservation?.summaryStyle), style: ensure(data.reservation?.style, current.reservation.style) },

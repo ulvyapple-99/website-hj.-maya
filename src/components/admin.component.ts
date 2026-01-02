@@ -578,11 +578,58 @@ import { ToastService } from '../services/toast.service';
                             </div>
 
                             <!-- Quote & CTA -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="form-label">Quote Text</label><textarea [(ngModel)]="config().about.quote" class="form-input" rows="2"></textarea></div>
-                                <div><label class="form-label">Founder Name</label><input [(ngModel)]="config().about.founderName" class="form-input"></div>
-                                <div><label class="form-label">CTA Text</label><input [(ngModel)]="config().about.ctaText" class="form-input"></div>
-                                <div><label class="form-label">CTA Link</label><input [(ngModel)]="config().about.ctaLink" class="form-input"></div>
+                            <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
+                                <div class="col-span-2 space-y-3">
+                                    <div>
+                                        <label class="form-label">Quote Text</label>
+                                        <textarea [(ngModel)]="config().about.quote" class="form-input" rows="2"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Quote Text Color</label>
+                                        <div class="flex gap-2">
+                                        <input type="color" [(ngModel)]="config().about.quoteStyle.color" class="h-9 w-9 border cursor-pointer p-0">
+                                        <input [(ngModel)]="config().about.quoteStyle.color" class="form-input">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <label class="form-label">Founder Name</label>
+                                    <input [(ngModel)]="config().about.founderName" class="form-input">
+                                </div>
+                                <div class="space-y-3">
+                                    <label class="form-label">Founder Name Color</label>
+                                    <div class="flex gap-2">
+                                    <input type="color" [(ngModel)]="config().about.founderNameStyle.color" class="h-9 w-9 border cursor-pointer p-0">
+                                    <input [(ngModel)]="config().about.founderNameStyle.color" class="form-input">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
+                                <div class="col-span-2 font-bold text-xs uppercase text-gray-400">CTA Button</div>
+                                <div>
+                                    <label class="form-label">CTA Text</label>
+                                    <input [(ngModel)]="config().about.ctaText" class="form-input">
+                                </div>
+                                <div>
+                                    <label class="form-label">CTA Link</label>
+                                    <input [(ngModel)]="config().about.ctaLink" class="form-input">
+                                </div>
+                                <div>
+                                    <label class="form-label">Background Color</label>
+                                    <div class="flex gap-2">
+                                        <input type="color" [(ngModel)]="config().about.ctaStyle.backgroundColor" class="h-9 w-9 border cursor-pointer p-0">
+                                        <input [(ngModel)]="config().about.ctaStyle.backgroundColor" class="form-input">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="form-label">Text Color</label>
+                                    <div class="flex gap-2">
+                                        <input type="color" [(ngModel)]="config().about.ctaStyle.color" class="h-9 w-9 border cursor-pointer p-0">
+                                        <input [(ngModel)]="config().about.ctaStyle.color" class="form-input">
+                                    </div>
+                                </div>
                             </div>
                          </div>
                       </div>

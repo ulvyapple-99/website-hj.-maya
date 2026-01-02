@@ -1,4 +1,3 @@
-
 import { Component, inject, computed, ElementRef, ViewChild, AfterViewInit, OnDestroy, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -82,7 +81,7 @@ import { ConfigService } from '../services/config.service';
                    } @else {
                      <img [src]="config().about.image" 
                           [alt]="config().about.imageAlt" 
-                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           (load)="onMediaLoad()"
                           (error)="onMediaError()"
                      >
@@ -132,10 +131,12 @@ import { ConfigService } from '../services/config.service';
             <!-- BS 4: Founder Quote -->
             @if (config().about.quote) {
                <div class="border-l-4 pl-4 py-2 mb-8 italic opacity-80"
-                    [style.borderColor]="config().about.style.accentColor">
+                    [style.borderColor]="config().about.style.accentColor"
+                    [style.color]="config().about.quoteStyle.color">
                   "{{ config().about.quote }}"
                   @if (config().about.founderName) {
-                     <div class="mt-2 font-bold not-italic text-sm">— {{ config().about.founderName }}</div>
+                     <div class="mt-2 font-bold not-italic text-sm"
+                        [style.color]="config().about.founderNameStyle.color">— {{ config().about.founderName }}</div>
                   }
                </div>
             }
@@ -173,8 +174,9 @@ import { ConfigService } from '../services/config.service';
             </div>
 
             <a [routerLink]="config().about.ctaLink" 
-               class="inline-flex items-center gap-2 font-bold px-8 py-4 rounded-full transition transform hover:translate-x-2 shadow-lg hover:shadow-xl text-white"
-               [style.backgroundColor]="config().about.style.accentColor">
+               class="inline-flex items-center gap-2 font-bold px-8 py-4 rounded-full transition transform hover:translate-x-2 shadow-lg hover:shadow-xl"
+               [style.backgroundColor]="config().about.ctaStyle.backgroundColor"
+               [style.color]="config().about.ctaStyle.color">
                {{ config().about.ctaText }}
                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
