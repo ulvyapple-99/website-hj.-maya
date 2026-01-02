@@ -213,6 +213,7 @@ export interface AppConfig {
     priceColor: string;
     priceFontSize: string;
     buttonText: string;
+    itemsHeaderText: string;
   };
   reservation: {
     title: string;
@@ -482,7 +483,8 @@ export class ConfigService {
       cardTextColor: '#3E2723',
       priceColor: '#FFFFFF',
       priceFontSize: '1rem',
-      buttonText: 'Pesan Paket Ini'
+      buttonText: 'Pesan Paket Ini',
+      itemsHeaderText: 'Isi Paket:',
     },
     reservation: {
       title: 'Reservasi Tempat',
