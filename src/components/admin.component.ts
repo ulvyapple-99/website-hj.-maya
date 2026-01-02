@@ -1334,6 +1334,36 @@ import { ToastService } from '../services/toast.service';
                               </div>
                           </div>
                       </div>
+
+                      <!-- Kelola Gambar Lokasi -->
+                      <div class="admin-card">
+                          <div class="admin-card-header bg-purple-900 text-white">Kelola Gambar Lokasi</div>
+                          <div class="p-6 space-y-6">
+                              @if(config().branches.length > 0) {
+                                  @for (branch of config().branches; track $index) {
+                                      <div class="p-4 rounded-lg border bg-gray-50/50">
+                                          <h4 class="font-bold text-gray-800 mb-3 border-b pb-2">{{ branch.name }}</h4>
+                                          <div>
+                                              <label class="form-label">Gambar Peta/Lokasi</label>
+                                              <div class="flex gap-2 items-center mb-2">
+                                                  <input type="file" (change)="onBranchFileSelected($event, $index)" class="form-input text-xs" accept="image/*">
+                                                  @if (branch.mapImage) {
+                                                      <button (click)="removeBranchMapImage($index)" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200" title="Hapus Gambar">✕</button>
+                                                  }
+                                              </div>
+                                              @if (branch.mapImage) {
+                                                  <div class="h-32 bg-gray-100 rounded border overflow-hidden">
+                                                      <img [src]="branch.mapImage" class="w-full h-full object-cover">
+                                                  </div>
+                                              }
+                                          </div>
+                                      </div>
+                                  }
+                              } @else {
+                                  <p class="text-center text-gray-500">Belum ada cabang yang dikonfigurasi.</p>
+                              }
+                          </div>
+                      </div>
                    }
 
                    <!-- === 8. TESTIMONIALS SETTINGS === -->
@@ -2125,6 +2155,43 @@ export class AdminComponent {
       }
       return { ...c, branches: branches };
     });
+  }
+
+  // === BRANCH IMAGE METHODS ===
+  async onBranchFileSelected(event: any, index: number) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.isUploading.set(true);
+      try {
+          const base64 = await this.configService.uploadFile(file);
+          
+          this.config.update(c => {
+              const newBranches = [...c.branches];
+              if (newBranches[index]) {
+                  newBranches[index] = { ...newBranches[index], mapImage: base64 };
+              }
+              return { ...c, branches: newBranches };
+          });
+          
+          this.toastService.show('Gambar lokasi berhasil diunggah', 'success');
+      } catch (e) {
+          this.toastService.show('Gagal mengunggah gambar', 'error');
+      } finally {
+          this.isUploading.set(false);
+      }
+  }
+
+  removeBranchMapImage(index: number) {
+      if (!confirm('Apakah Anda yakin ingin menghapus gambar ini?')) return;
+      this.config.update(c => {
+          const newBranches = [...c.branches];
+          if (newBranches[index]) {
+              newBranches[index] = { ...newBranches[index], mapImage: '' };
+          }
+          return { ...c, branches: newBranches };
+      });
+      this.toastService.show('Gambar lokasi dihapus', 'info');
   }
 
   // === TESTIMONIALS CRUD METHODS ===
