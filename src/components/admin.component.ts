@@ -670,6 +670,68 @@ import { ToastService } from '../services/toast.service';
                             </div>
                          </div>
                       </div>
+                      
+                      <!-- Menu Management -->
+                      <div class="admin-card">
+                        <div class="admin-card-header bg-orange-800 text-white">Kelola Item Menu</div>
+                        <div class="p-6 space-y-6">
+                            <!-- Branch Selector -->
+                            <div>
+                               <label class="form-label">Pilih Cabang untuk Dikelola:</label>
+                               <select [(ngModel)]="selectedMenuBranchIndex" class="form-select">
+                                  @for (branch of config().branches; track $index) {
+                                     <option [value]="$index">{{ branch.name }}</option>
+                                  }
+                               </select>
+                            </div>
+                            
+                            <!-- Add Button & List -->
+                            <div class="border-t pt-4">
+                               <button (click)="openMenuModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">+ Tambah Menu Baru</button>
+                               
+                               <!-- Menu Table -->
+                               <div class="overflow-x-auto bg-white rounded-lg border">
+                                   <table class="w-full text-sm text-left text-gray-500">
+                                       <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                           <tr>
+                                               <th scope="col" class="px-6 py-3">Nama</th>
+                                               <th scope="col" class="px-6 py-3">Harga</th>
+                                               <th scope="col" class="px-6 py-3">Kategori</th>
+                                               <th scope="col" class="px-6 py-3 text-center">Status</th>
+                                               <th scope="col" class="px-6 py-3 text-right">Aksi</th>
+                                           </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if(config().branches[selectedMenuBranchIndex()]?.menu.length > 0) {
+                                            @for (item of config().branches[selectedMenuBranchIndex()].menu; track $index) {
+                                                <tr class="bg-white border-b hover:bg-gray-50">
+                                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-3">
+                                                        <div class="w-10 h-10 rounded-md bg-gray-100 overflow-hidden flex-shrink-0">
+                                                            <img [src]="item.image" class="w-full h-full object-cover">
+                                                        </div>
+                                                        {{ item.name }}
+                                                    </th>
+                                                    <td class="px-6 py-4">{{ item.price }}</td>
+                                                    <td class="px-6 py-4">{{ item.category }}</td>
+                                                    <td class="px-6 py-4 text-center">
+                                                        @if(item.soldOut) { <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Habis</span> }
+                                                        @if(item.favorite) { <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Favorit</span> }
+                                                    </td>
+                                                    <td class="px-6 py-4 text-right">
+                                                        <button (click)="openMenuModal(item, $index)" class="font-medium text-blue-600 hover:underline mr-4">Edit</button>
+                                                        <button (click)="deleteMenuItem($index)" class="font-medium text-red-600 hover:underline">Hapus</button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                          } @else {
+                                             <tr><td colspan="5" class="text-center p-8 text-gray-400">Belum ada menu di cabang ini.</td></tr>
+                                          }
+                                       </tbody>
+                                   </table>
+                               </div>
+                            </div>
+                        </div>
+                      </div>
 
                       <!-- Grid & Card Styling -->
                       <div class="admin-card">
@@ -793,6 +855,63 @@ import { ToastService } from '../services/toast.service';
                             </div>
 
                          </div>
+                      </div>
+
+                       <!-- Package Management -->
+                       <div class="admin-card">
+                        <div class="admin-card-header bg-teal-800 text-white">Kelola Item Paket</div>
+                        <div class="p-6 space-y-6">
+                            <!-- Branch Selector -->
+                            <div>
+                               <label class="form-label">Pilih Cabang untuk Dikelola:</label>
+                               <select [(ngModel)]="selectedPackageBranchIndex" class="form-select">
+                                  @for (branch of config().branches; track $index) {
+                                     <option [value]="$index">{{ branch.name }}</option>
+                                  }
+                               </select>
+                            </div>
+                            
+                            <!-- Add Button & List -->
+                            <div class="border-t pt-4">
+                               <button (click)="openPackageModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">+ Tambah Paket Baru</button>
+                               
+                               <!-- Package Table -->
+                               <div class="overflow-x-auto bg-white rounded-lg border">
+                                   <table class="w-full text-sm text-left text-gray-500">
+                                       <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                           <tr>
+                                               <th scope="col" class="px-6 py-3">Nama Paket</th>
+                                               <th scope="col" class="px-6 py-3">Harga</th>
+                                               <th scope="col" class="px-6 py-3">Deskripsi</th>
+                                               <th scope="col" class="px-6 py-3 text-right">Aksi</th>
+                                           </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if(config().branches[selectedPackageBranchIndex()]?.packages?.length > 0) {
+                                            @for (pkg of config().branches[selectedPackageBranchIndex()].packages; track $index) {
+                                                <tr class="bg-white border-b hover:bg-gray-50">
+                                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-3">
+                                                        <div class="w-10 h-10 rounded-md bg-gray-100 overflow-hidden flex-shrink-0">
+                                                            <img [src]="pkg.image" class="w-full h-full object-cover">
+                                                        </div>
+                                                        {{ pkg.name }}
+                                                    </th>
+                                                    <td class="px-6 py-4">{{ pkg.price }}</td>
+                                                    <td class="px-6 py-4 line-clamp-2">{{ pkg.description }}</td>
+                                                    <td class="px-6 py-4 text-right">
+                                                        <button (click)="openPackageModal(pkg, $index)" class="font-medium text-blue-600 hover:underline mr-4">Edit</button>
+                                                        <button (click)="deletePackageItem($index)" class="font-medium text-red-600 hover:underline">Hapus</button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                          } @else {
+                                             <tr><td colspan="4" class="text-center p-8 text-gray-400">Belum ada paket di cabang ini.</td></tr>
+                                          }
+                                       </tbody>
+                                   </table>
+                               </div>
+                            </div>
+                        </div>
                       </div>
                    }
                    
@@ -1141,7 +1260,13 @@ import { ToastService } from '../services/toast.service';
                               @if (config().branches.length > 0) {
                                   @for (branch of config().branches; track $index) {
                                       <div class="p-4 rounded-lg border bg-gray-50/50">
-                                          <h4 class="font-bold text-gray-800 mb-3 border-b pb-2">{{ branch.name }}</h4>
+                                          <div class="flex items-center gap-4 mb-3 border-b pb-2">
+                                              <h4 class="font-bold text-gray-800 flex-1">{{ branch.name }}</h4>
+                                              <label class="form-label mb-0">Warna Judul</label>
+                                              <div class="flex items-center gap-2">
+                                                  <input type="color" [(ngModel)]="config().branches[$index].socialLinkColor" class="h-8 w-8 border cursor-pointer p-0 rounded">
+                                              </div>
+                                          </div>
                                           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                               <div>
                                                   <label class="form-label">Instagram Link</label>
@@ -1251,6 +1376,102 @@ import { ToastService } from '../services/toast.service';
                 </div>
              </div>
           </main>
+          
+          <!-- MENU MODAL -->
+          @if(isMenuModalOpen()) {
+            <div class="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+                   <div class="p-5 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                       <h3 class="text-lg font-bold">{{ editingMenuItemIndex() === null ? 'Tambah' : 'Edit' }} Item Menu</h3>
+                       <button (click)="closeMenuModal()" class="text-gray-400 hover:text-gray-600 font-bold">✕</button>
+                   </div>
+                   
+                   <!-- Modal Form -->
+                   <div class="p-6 overflow-y-auto space-y-4">
+                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div><label class="form-label">Nama Menu</label><input [(ngModel)]="tempMenuItem().name" class="form-input"></div>
+                          <div><label class="form-label">Harga</label><input [(ngModel)]="tempMenuItem().price" class="form-input" placeholder="Rp 50.000"></div>
+                       </div>
+                       <div><label class="form-label">Deskripsi Singkat</label><textarea [(ngModel)]="tempMenuItem().desc" class="form-input" rows="2"></textarea></div>
+                       
+                       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                           <div><label class="form-label">Kategori</label><input [(ngModel)]="tempMenuItem().category" class="form-input" placeholder="Sate, Sop, Minuman"></div>
+                           <div>
+                               <label class="form-label">Level Pedas (0-5)</label>
+                               <input type="number" min="0" max="5" [(ngModel)]="tempMenuItem().spicyLevel" class="form-input">
+                           </div>
+                           <div class="flex gap-6 items-center pt-6">
+                               <label class="flex items-center gap-2 cursor-pointer font-bold text-sm"><input type="checkbox" [(ngModel)]="tempMenuItem().favorite"> Favorit?</label>
+                               <label class="flex items-center gap-2 cursor-pointer font-bold text-sm"><input type="checkbox" [(ngModel)]="tempMenuItem().soldOut"> Habis?</label>
+                           </div>
+                       </div>
+                       
+                       <div>
+                          <label class="form-label">Gambar Menu</label>
+                          <input type="file" (change)="onMenuFileSelected($event)" class="form-input text-xs">
+                          @if(tempMenuItem().image) {
+                            <div class="mt-2 h-24 w-24 bg-gray-100 rounded border flex items-center justify-center p-2">
+                                <img [src]="tempMenuItem().image" class="h-full w-full object-cover">
+                            </div>
+                          }
+                       </div>
+                   </div>
+
+                   <div class="p-4 bg-gray-50 border-t rounded-b-2xl flex justify-end gap-3">
+                       <button (click)="closeMenuModal()" class="bg-gray-200 text-gray-700 font-bold py-2 px-5 rounded-lg">Batal</button>
+                       <button (click)="saveMenuItem()" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg">Simpan</button>
+                   </div>
+                </div>
+            </div>
+          }
+
+          <!-- PACKAGE MODAL -->
+          @if(isPackageModalOpen()) {
+            <div class="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+                   <div class="p-5 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                       <h3 class="text-lg font-bold">{{ editingPackageItemIndex() === null ? 'Tambah' : 'Edit' }} Item Paket</h3>
+                       <button (click)="closePackageModal()" class="text-gray-400 hover:text-gray-600 font-bold">✕</button>
+                   </div>
+                   
+                   <!-- Modal Form -->
+                   <div class="p-6 overflow-y-auto space-y-4">
+                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div><label class="form-label">Nama Paket</label><input [(ngModel)]="tempPackageItem().name" class="form-input"></div>
+                          <div><label class="form-label">Harga</label><input [(ngModel)]="tempPackageItem().price" class="form-input" placeholder="Rp 250.000"></div>
+                       </div>
+                       <div><label class="form-label">Deskripsi Singkat</label><textarea [(ngModel)]="tempPackageItem().description" class="form-input" rows="2"></textarea></div>
+                       
+                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <div>
+                               <label class="form-label">Minimal Pax (Opsional)</label>
+                               <input type="number" min="0" [(ngModel)]="tempPackageItem().minPax" class="form-input">
+                           </div>
+                           <div>
+                              <label class="form-label">Gambar Paket</label>
+                              <input type="file" (change)="onPackageFileSelected($event)" class="form-input text-xs">
+                              @if(tempPackageItem().image) {
+                                <div class="mt-2 h-24 w-24 bg-gray-100 rounded border flex items-center justify-center p-2">
+                                    <img [src]="tempPackageItem().image" class="h-full w-full object-cover">
+                                </div>
+                              }
+                           </div>
+                       </div>
+                       
+                       <div>
+                          <label class="form-label">Isi Paket (Satu item per baris)</label>
+                          <textarea [(ngModel)]="tempPackageItemsString" class="form-input font-mono text-xs" rows="5"></textarea>
+                       </div>
+                   </div>
+
+                   <div class="p-4 bg-gray-50 border-t rounded-b-2xl flex justify-end gap-3">
+                       <button (click)="closePackageModal()" class="bg-gray-200 text-gray-700 font-bold py-2 px-5 rounded-lg">Batal</button>
+                       <button (click)="savePackageItem()" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg">Simpan</button>
+                   </div>
+                </div>
+            </div>
+          }
+
         }
       </div>
     }
@@ -1272,6 +1493,19 @@ export class AdminComponent {
   
   selectedBranchIndex = signal(0);
   selectedReservationBranchIndex = signal(0);
+
+  // === MENU CRUD SIGNALS ===
+  selectedMenuBranchIndex = signal(0);
+  isMenuModalOpen = signal(false);
+  editingMenuItemIndex = signal<number | null>(null);
+  tempMenuItem = signal<MenuItem>(this.getNewMenuItem());
+
+  // === PACKAGE CRUD SIGNALS ===
+  selectedPackageBranchIndex = signal(0);
+  isPackageModalOpen = signal(false);
+  editingPackageItemIndex = signal<number | null>(null);
+  tempPackageItem = signal<PackageItem>(this.getNewPackageItem());
+  tempPackageItemsString = signal('');
   
   isAuthenticated = computed(() => this.configService.currentUser() !== null || this.configService.isDemoMode());
   firestoreError = this.configService.firestoreError;
@@ -1361,6 +1595,172 @@ export class AdminComponent {
       this.isUploading.set(false);
     }
   }
+
+  // === MENU CRUD METHODS ===
+
+  getNewMenuItem(): MenuItem {
+    return { name: '', desc: '', price: '', category: '', image: '', favorite: false, soldOut: false, spicyLevel: 0 };
+  }
+
+  openMenuModal(item: MenuItem | null = null, index: number | null = null) {
+    if (item && index !== null) {
+      this.editingMenuItemIndex.set(index);
+      this.tempMenuItem.set({ ...item });
+    } else {
+      this.editingMenuItemIndex.set(null);
+      this.tempMenuItem.set(this.getNewMenuItem());
+    }
+    this.isMenuModalOpen.set(true);
+  }
+
+  closeMenuModal() {
+    this.isMenuModalOpen.set(false);
+  }
+
+  async onMenuFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.isUploading.set(true);
+    try {
+      const base64 = await this.configService.uploadFile(file);
+      this.tempMenuItem.update(item => ({ ...item, image: base64 }));
+      this.toastService.show('Gambar menu diunggah', 'success');
+    } catch (e) {
+      this.toastService.show('Gagal upload gambar', 'error');
+    } finally {
+      this.isUploading.set(false);
+    }
+  }
+
+  saveMenuItem() {
+    const branchIndex = this.selectedMenuBranchIndex();
+    const itemToSave = this.tempMenuItem();
+    const editIndex = this.editingMenuItemIndex();
+
+    this.config.update(c => {
+      const newBranches = [...c.branches];
+      const branchToUpdate = { ...newBranches[branchIndex] };
+      const newMenu = [...(branchToUpdate.menu || [])];
+
+      if (editIndex !== null) {
+        newMenu[editIndex] = itemToSave;
+      } else {
+        newMenu.push(itemToSave);
+      }
+      
+      branchToUpdate.menu = newMenu;
+      newBranches[branchIndex] = branchToUpdate;
+
+      return { ...c, branches: newBranches };
+    });
+
+    this.toastService.show('Menu berhasil disimpan!', 'success');
+    this.closeMenuModal();
+  }
+
+  deleteMenuItem(index: number) {
+    if (!confirm('Apakah Anda yakin ingin menghapus item menu ini?')) return;
+
+    const branchIndex = this.selectedMenuBranchIndex();
+    this.config.update(c => {
+      const newBranches = [...c.branches];
+      const branchToUpdate = { ...newBranches[branchIndex] };
+      const newMenu = [...branchToUpdate.menu];
+      newMenu.splice(index, 1);
+      
+      branchToUpdate.menu = newMenu;
+      newBranches[branchIndex] = branchToUpdate;
+
+      return { ...c, branches: newBranches };
+    });
+
+    this.toastService.show('Menu berhasil dihapus.', 'info');
+  }
+
+  // === PACKAGE CRUD METHODS ===
+
+  getNewPackageItem(): PackageItem {
+    return { name: '', price: '', description: '', image: '', items: [], minPax: 0 };
+  }
+
+  openPackageModal(item: PackageItem | null = null, index: number | null = null) {
+    if (item && index !== null) {
+      this.editingPackageItemIndex.set(index);
+      this.tempPackageItem.set({ ...item });
+      this.tempPackageItemsString.set(item.items.join('\n'));
+    } else {
+      this.editingPackageItemIndex.set(null);
+      this.tempPackageItem.set(this.getNewPackageItem());
+      this.tempPackageItemsString.set('');
+    }
+    this.isPackageModalOpen.set(true);
+  }
+
+  closePackageModal() {
+    this.isPackageModalOpen.set(false);
+  }
+
+  async onPackageFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.isUploading.set(true);
+    try {
+      const base64 = await this.configService.uploadFile(file);
+      this.tempPackageItem.update(item => ({ ...item, image: base64 }));
+      this.toastService.show('Gambar paket diunggah', 'success');
+    } catch (e) {
+      this.toastService.show('Gagal upload gambar', 'error');
+    } finally {
+      this.isUploading.set(false);
+    }
+  }
+
+  savePackageItem() {
+    const branchIndex = this.selectedPackageBranchIndex();
+    const itemToSave = { ...this.tempPackageItem() };
+    itemToSave.items = this.tempPackageItemsString().split('\n').filter(line => line.trim() !== '');
+    const editIndex = this.editingPackageItemIndex();
+
+    this.config.update(c => {
+      const newBranches = [...c.branches];
+      const branchToUpdate = { ...newBranches[branchIndex] };
+      const newPackages = [...(branchToUpdate.packages || [])];
+
+      if (editIndex !== null) {
+        newPackages[editIndex] = itemToSave;
+      } else {
+        newPackages.push(itemToSave);
+      }
+      
+      branchToUpdate.packages = newPackages;
+      newBranches[branchIndex] = branchToUpdate;
+
+      return { ...c, branches: newBranches };
+    });
+
+    this.toastService.show('Paket berhasil disimpan!', 'success');
+    this.closePackageModal();
+  }
+
+  deletePackageItem(index: number) {
+    if (!confirm('Apakah Anda yakin ingin menghapus item paket ini?')) return;
+
+    const branchIndex = this.selectedPackageBranchIndex();
+    this.config.update(c => {
+      const newBranches = [...c.branches];
+      const branchToUpdate = { ...newBranches[branchIndex] };
+      const newPackages = [...(branchToUpdate.packages || [])];
+      newPackages.splice(index, 1);
+      
+      branchToUpdate.packages = newPackages;
+      newBranches[branchIndex] = branchToUpdate;
+
+      return { ...c, branches: newBranches };
+    });
+
+    this.toastService.show('Paket berhasil dihapus.', 'info');
+  }
+
 
   saveFirebaseSetup() { 
     this.configService.saveStoredFirebaseConfig(this.tempConfig);
