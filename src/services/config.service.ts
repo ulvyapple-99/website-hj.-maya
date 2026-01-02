@@ -267,6 +267,15 @@ export interface AppConfig {
     buttonText: string;
     note: string;
   };
+  jobApplication: {
+    enabled: boolean;
+    title: string;
+    subtitle: string;
+    buttonText: string;
+    email: string;
+    emailSubject: string;
+    emailBody: string;
+  };
   branches: Branch[]; 
   gallery: string[];
   testimonials: Testimonial[];
@@ -539,6 +548,15 @@ export class ConfigService {
       subtitle: 'Silakan klik tombol di bawah untuk melanjutkan ke halaman absensi online. Pastikan Anda masuk dengan akun yang terdaftar.',
       buttonText: 'Buka Halaman Absensi',
       note: 'Jika mengalami kendala, hubungi Manajer Cabang.'
+    },
+    jobApplication: {
+      enabled: true,
+      title: 'Bergabung Bersama Kami',
+      subtitle: 'Kami selalu mencari talenta terbaik untuk bergabung dengan keluarga besar Sate Maranggi Hj. Maya. Kirim lamaran Anda melalui email.',
+      buttonText: 'Kirim Lamaran via Email',
+      email: 'hrd@satemaranggi.com',
+      emailSubject: 'Lamaran Kerja - [Posisi yang Dilamar]',
+      emailBody: 'Dengan hormat,\n\nSaya yang bertanda tangan di bawah ini:\nNama: \nPosisi yang dilamar: \n\nDengan ini mengajukan lamaran pekerjaan. Sebagai bahan pertimbangan, saya lampirkan CV saya.\n\nTerima kasih.'
     },
     branches: [
       {
@@ -960,6 +978,7 @@ export class ConfigService {
             testimonialStyles: { ...current.testimonialStyles, reviewStyle: text(data.testimonialStyles?.reviewStyle), nameStyle: text(data.testimonialStyles?.nameStyle), roleStyle: text(data.testimonialStyles?.roleStyle) },
             footer: { ...current.footer, ...(data.footer || {}), descriptionStyle: text(data.footer?.descriptionStyle), copyrightStyle: text(data.footer?.copyrightStyle), brandStyle: text(data.footer?.brandStyle), socialMediaHeaderStyle: text(data.footer?.socialMediaHeaderStyle), style: ensure(data.footer?.style, current.footer.style) },
             attendancePage: ensure(data.attendancePage, current.attendancePage),
+            jobApplication: ensure(data.jobApplication, current.jobApplication),
             branches: updatedBranches,
             instagramProfile: data.instagramProfile || current.instagramProfile,
             gallery: data.gallery || current.gallery,

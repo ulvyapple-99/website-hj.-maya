@@ -1478,6 +1478,48 @@ import { ToastService } from '../services/toast.service';
                             </div>
                          </div>
                       </div>
+
+                      <!-- Job Application Settings -->
+                      <div class="admin-card">
+                         <div class="admin-card-header bg-blue-800 text-white">Pengaturan Lamaran Kerja</div>
+                         <div class="p-6 space-y-6">
+                            <label class="flex items-center gap-2 cursor-pointer font-bold text-sm select-none">
+                                <input type="checkbox" [(ngModel)]="config().jobApplication.enabled" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"> 
+                                Aktifkan Fitur Lamaran Kerja
+                            </label>
+                            
+                            <div class="border-t pt-4 space-y-4">
+                               <div class="grid grid-cols-2 gap-4">
+                                  <div>
+                                     <label class="form-label">Judul Halaman</label>
+                                     <input [(ngModel)]="config().jobApplication.title" class="form-input">
+                                  </div>
+                                  <div>
+                                     <label class="form-label">Teks Tombol</label>
+                                     <input [(ngModel)]="config().jobApplication.buttonText" class="form-input">
+                                  </div>
+                               </div>
+                               <div>
+                                  <label class="form-label">Deskripsi</label>
+                                  <textarea [(ngModel)]="config().jobApplication.subtitle" class="form-input" rows="2"></textarea>
+                               </div>
+                               <div class="grid grid-cols-2 gap-4">
+                                  <div>
+                                     <label class="form-label">Email Tujuan (HRD)</label>
+                                     <input [(ngModel)]="config().jobApplication.email" class="form-input" placeholder="hrd@email.com">
+                                  </div>
+                                  <div>
+                                     <label class="form-label">Subjek Email</label>
+                                     <input [(ngModel)]="config().jobApplication.emailSubject" class="form-input">
+                                  </div>
+                               </div>
+                               <div>
+                                  <label class="form-label">Template Body Email</label>
+                                  <textarea [(ngModel)]="config().jobApplication.emailBody" class="form-input font-mono text-xs" rows="4"></textarea>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
                    }
 
                    <!-- ... Placeholder for other tabs ... -->
