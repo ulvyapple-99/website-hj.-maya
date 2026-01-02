@@ -1,4 +1,3 @@
-
 import { Component, inject, signal, effect, CUSTOM_ELEMENTS_SCHEMA, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -923,63 +922,296 @@ import { ToastService } from '../services/toast.service';
                          </div>
                       </div>
 
-                      <!-- Operational Settings -->
+                      <!-- Operational Settings (Per Branch) -->
                       <div class="admin-card">
                          <div class="admin-card-header">Operational Settings</div>
-                         <div class="p-6 space-y-6">
-                            <div class="grid grid-cols-3 gap-4">
-                               <div><label class="form-label">Min Pax (Regular)</label><input type="number" [(ngModel)]="config().reservation.minPaxRegular" class="form-input"></div>
-                               <div><label class="form-label">Min Pax (Ramadan)</label><input type="number" [(ngModel)]="config().reservation.minPaxRamadan" class="form-input"></div>
-                               <div><label class="form-label">Max Capacity</label><input type="number" [(ngModel)]="config().reservation.maxPax" class="form-input"></div>
+                         @if (config().branches.length > 0) {
+                            <div class="p-6 border-b">
+                               <label class="form-label">Edit Pengaturan untuk Cabang:</label>
+                               <select [(ngModel)]="selectedReservationBranchIndex" class="form-select">
+                                  @for (branch of config().branches; track $index) {
+                                     <option [value]="$index">{{ branch.name }}</option>
+                                  }
+                               </select>
                             </div>
                             
-                            <div class="grid grid-cols-3 gap-4 border-t pt-4">
-                               <div><label class="form-label">Booking Lead Time (Hours)</label><input type="number" [(ngModel)]="config().reservation.bookingLeadTimeHours" class="form-input"></div>
-                               <div><label class="form-label">DP Percentage (%)</label><input type="number" [(ngModel)]="config().reservation.downPaymentPercentage" class="form-input"></div>
-                            </div>
+                            <div class="p-6 space-y-6">
+                               <div class="grid grid-cols-3 gap-4">
+                                  <div><label class="form-label">Min Pax (Regular)</label><input type="number" [(ngModel)]="config().branches[selectedReservationBranchIndex()].minPaxRegular" class="form-input"></div>
+                                  <div><label class="form-label">Min Pax (Ramadan)</label><input type="number" [(ngModel)]="config().branches[selectedReservationBranchIndex()].minPaxRamadan" class="form-input"></div>
+                                  <div><label class="form-label">Max Capacity</label><input type="number" [(ngModel)]="config().branches[selectedReservationBranchIndex()].maxPax" class="form-input"></div>
+                               </div>
+                               
+                               <div class="grid grid-cols-3 gap-4 border-t pt-4">
+                                  <div><label class="form-label">Booking Lead Time (Hours)</label><input type="number" [(ngModel)]="config().branches[selectedReservationBranchIndex()].bookingLeadTimeHours" class="form-input"></div>
+                                  <div><label class="form-label">DP Percentage (%)</label><input type="number" [(ngModel)]="config().branches[selectedReservationBranchIndex()].downPaymentPercentage" class="form-input"></div>
+                               </div>
 
-                            <div class="flex gap-6 border-t pt-4">
-                               <label class="flex items-center gap-2 cursor-pointer font-bold text-sm"><input type="checkbox" [(ngModel)]="config().reservation.enableSpecialRequest"> Enable Special Request</label>
-                               <label class="flex items-center gap-2 cursor-pointer font-bold text-sm"><input type="checkbox" [(ngModel)]="config().reservation.requireEmail"> Require Email</label>
-                               <label class="flex items-center gap-2 cursor-pointer font-bold text-sm"><input type="checkbox" [(ngModel)]="config().reservation.enableDownPaymentCalc"> Show DP Calculator</label>
-                            </div>
+                               <div class="flex gap-6 border-t pt-4">
+                                  <label class="flex items-center gap-2 cursor-pointer font-bold text-sm"><input type="checkbox" [(ngModel)]="config().branches[selectedReservationBranchIndex()].enableSpecialRequest"> Enable Special Request</label>
+                                  <label class="flex items-center gap-2 cursor-pointer font-bold text-sm"><input type="checkbox" [(ngModel)]="config().branches[selectedReservationBranchIndex()].requireEmail"> Require Email</label>
+                                  <label class="flex items-center gap-2 cursor-pointer font-bold text-sm"><input type="checkbox" [(ngModel)]="config().branches[selectedReservationBranchIndex()].enableDownPaymentCalc"> Show DP Calculator</label>
+                               </div>
 
-                            <!-- Table Types -->
-                            <div class="bg-gray-50 p-4 rounded border">
-                               <label class="form-label mb-2">Table / Area Types</label>
-                               <div class="space-y-2">
-                                  @for (type of config().reservation.tableTypes; track $index) {
-                                     <div class="flex gap-2">
-                                        <input [(ngModel)]="config().reservation.tableTypes[$index]" class="form-input">
-                                        <button (click)="removeTableType($index)" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200">✕</button>
-                                     </div>
-                                  }
-                                  <button (click)="addTableType()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded hover:bg-blue-100">+ Add Area Type</button>
+                               <!-- Table Types -->
+                               <div class="bg-gray-50 p-4 rounded border">
+                                  <label class="form-label mb-2">Table / Area Types</label>
+                                  <div class="space-y-2">
+                                     @for (type of config().branches[selectedReservationBranchIndex()].tableTypes; track $index) {
+                                        <div class="flex gap-2">
+                                           <input [(ngModel)]="config().branches[selectedReservationBranchIndex()].tableTypes[$index]" class="form-input">
+                                           <button (click)="removeTableType($index)" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200">✕</button>
+                                        </div>
+                                     }
+                                     <button (click)="addTableType()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded hover:bg-blue-100">+ Add Area Type</button>
+                                  </div>
                                </div>
                             </div>
-                         </div>
+                         } @else {
+                            <div class="p-6 text-center text-gray-500">Buat cabang terlebih dahulu.</div>
+                         }
                       </div>
 
-                      <!-- Terms & Messaging -->
+                      <!-- Terms & Messaging (Per Cabang) -->
                       <div class="admin-card">
-                         <div class="admin-card-header">Terms & Messaging</div>
-                         <div class="p-6 space-y-4">
-                            <div>
-                               <label class="form-label">Terms & Conditions (Newline for bullet points)</label>
-                               <textarea [(ngModel)]="config().reservation.termsAndConditions" class="form-input" rows="4"></textarea>
+                         <div class="admin-card-header">Terms & Messaging (Per Cabang)</div>
+                         @if (config().branches.length > 0) {
+                            <div class="p-6 border-b">
+                               <label class="form-label">Edit Pengaturan untuk Cabang:</label>
+                               <select [(ngModel)]="selectedReservationBranchIndex" class="form-select">
+                                  @for (branch of config().branches; track $index) {
+                                     <option [value]="$index">{{ branch.name }}</option>
+                                  }
+                               </select>
                             </div>
-                            <div>
-                               <label class="form-label">WhatsApp Template</label>
-                               <p class="text-[10px] text-gray-500 mb-1">Variables: {{ '{name}, {contact}, {date}, {time}, {pax}, {branch}, {tableType}, {notes}' }}</p>
-                               <textarea [(ngModel)]="config().reservation.whatsappTemplate" class="form-input font-mono text-xs" rows="6"></textarea>
+                            <div class="p-6 space-y-4">
+                               <div>
+                                   <label class="form-label">Nomor WhatsApp Reservasi Cabang</label>
+                                   <input [(ngModel)]="config().branches[selectedReservationBranchIndex()].whatsappNumber" class="form-input" placeholder="e.g., 628123456789">
+                               </div>
+                               <div class="border-t pt-4">
+                                   <label class="form-label">Terms & Conditions (Newline for bullet points)</label>
+                                   <textarea [(ngModel)]="config().branches[selectedReservationBranchIndex()].termsAndConditions" class="form-input" rows="4"></textarea>
+                               </div>
+                               <div class="border-t pt-4">
+                                   <label class="form-label">WhatsApp Template</label>
+                                   <p class="text-[10px] text-gray-500 mb-1">Variables: {{ '{name}, {contact}, {date}, {time}, {pax}, {branch}, {tableType}, {notes}' }}</p>
+                                   <textarea [(ngModel)]="config().branches[selectedReservationBranchIndex()].whatsappTemplate" class="form-input font-mono text-xs" rows="6"></textarea>
+                               </div>
                             </div>
-                         </div>
+                         } @else {
+                            <div class="p-6 text-center text-gray-500">Buat cabang terlebih dahulu.</div>
+                         }
+                      </div>
+                   }
+
+                   <!-- === 7. LOCATION SETTINGS === -->
+                   @if (currentTab() === 'location') {
+                      <!-- Header Text & Fonts -->
+                      <div class="admin-card">
+                          <div class="admin-card-header bg-purple-800 text-white">Header & Typography</div>
+                          <div class="p-6 space-y-6">
+                              <!-- Title -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Section Title</div>
+                                  <div class="col-span-2"><label class="form-label">Title Text</label><input [(ngModel)]="config().locationPage.title" class="form-input"></div>
+                                  <div><label class="form-label">Font Family</label><input [(ngModel)]="config().locationPage.titleStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Size</label><input [(ngModel)]="config().locationPage.titleStyle.fontSize" class="form-input"></div>
+                                  <div class="col-span-4 mt-2">
+                                      <label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().locationPage.titleStyle.color" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().locationPage.titleStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+
+                              <!-- Subtitle -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Subtitle</div>
+                                  <div class="col-span-2"><label class="form-label">Text</label><textarea [(ngModel)]="config().locationPage.subtitle" class="form-input" rows="2"></textarea></div>
+                                  <div><label class="form-label">Font Family</label><input [(ngModel)]="config().locationPage.subtitleStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Size</label><input [(ngModel)]="config().locationPage.subtitleStyle.fontSize" class="form-input"></div>
+                                  <div class="col-span-4 mt-2">
+                                      <label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().locationPage.subtitleStyle.color" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().locationPage.subtitleStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+                          </div>
                       </div>
 
+                      <!-- Page & Card Styling -->
+                      <div class="admin-card">
+                          <div class="admin-card-header">Page & Card Styling</div>
+                          <div class="p-6 grid grid-cols-3 gap-6">
+                              <div>
+                                  <label class="form-label">Background Color</label>
+                                  <div class="flex gap-2"><input type="color" [(ngModel)]="config().locationPage.style.backgroundColor" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().locationPage.style.backgroundColor" class="form-input"></div>
+                              </div>
+                              <div>
+                                  <label class="form-label">Page Text Color</label>
+                                  <div class="flex gap-2"><input type="color" [(ngModel)]="config().locationPage.style.textColor" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().locationPage.style.textColor" class="form-input"></div>
+                              </div>
+                              <div>
+                                  <label class="form-label">Accent Color</label>
+                                  <div class="flex gap-2"><input type="color" [(ngModel)]="config().locationPage.style.accentColor" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().locationPage.style.accentColor" class="form-input"></div>
+                              </div>
+                              <div>
+                                  <label class="form-label">Section Padding Y</label>
+                                  <input [(ngModel)]="config().locationPage.style.sectionPaddingY" class="form-input">
+                              </div>
+                              <div>
+                                  <label class="form-label">Card Border Radius</label>
+                                  <input [(ngModel)]="config().locationPage.cardBorderRadius" class="form-input">
+                              </div>
+                              <div>
+                                  <label class="form-label">Map Image Height</label>
+                                  <input [(ngModel)]="config().locationPage.mapHeight" class="form-input">
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <!-- Granular Typography -->
+                      <div class="admin-card">
+                          <div class="admin-card-header bg-gray-700 text-white">Granular Typography</div>
+                          <div class="p-6 space-y-6">
+                              <!-- Label -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Top Label ("Temukan Kami")</div>
+                                  <div class="col-span-2"><label class="form-label">Font Family</label><input [(ngModel)]="config().locationPage.labelStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Font Size</label><input [(ngModel)]="config().locationPage.labelStyle.fontSize" class="form-input"></div>
+                                  <div><label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().locationPage.labelStyle.color" class="h-8 w-8 p-0 border"><input [(ngModel)]="config().locationPage.labelStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+                              <!-- Branch Name -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Branch Name</div>
+                                  <div class="col-span-2"><label class="form-label">Font Family</label><input [(ngModel)]="config().locationPage.branchNameStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Font Size</label><input [(ngModel)]="config().locationPage.branchNameStyle.fontSize" class="form-input"></div>
+                                  <div><label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().locationPage.branchNameStyle.color" class="h-8 w-8 p-0 border"><input [(ngModel)]="config().locationPage.branchNameStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+                              <!-- Branch Details -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Branch Details (Address, etc)</div>
+                                  <div class="col-span-2"><label class="form-label">Font Family</label><input [(ngModel)]="config().locationPage.branchDetailStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Font Size</label><input [(ngModel)]="config().locationPage.branchDetailStyle.fontSize" class="form-input"></div>
+                                  <div><label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().locationPage.branchDetailStyle.color" class="h-8 w-8 p-0 border"><input [(ngModel)]="config().locationPage.branchDetailStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                   }
+
+                   <!-- === 8. FOOTER SETTINGS === -->
+                   @if (currentTab() === 'footer') {
+                      <!-- Content & Links -->
+                      <div class="admin-card">
+                          <div class="admin-card-header bg-gray-800 text-white">Content & Social Links</div>
+                          <div class="p-6 space-y-4">
+                              <div>
+                                  <label class="form-label">Footer Description (supports newlines)</label>
+                                  <textarea [(ngModel)]="config().footer.description" class="form-input" rows="3"></textarea>
+                              </div>
+                              <div>
+                                  <label class="form-label">Copyright Text</label>
+                                  <input [(ngModel)]="config().footer.copyrightText" class="form-input">
+                              </div>
+                              <div class="grid grid-cols-3 gap-4 border-t pt-4">
+                                  <div>
+                                      <label class="form-label">Global Instagram Link</label>
+                                      <input [(ngModel)]="config().footer.instagramLink" class="form-input">
+                                  </div>
+                                  <div>
+                                      <label class="form-label">Global Facebook Link</label>
+                                      <input [(ngModel)]="config().footer.facebookLink" class="form-input">
+                                  </div>
+                                  <div>
+                                      <label class="form-label">Global TikTok Link</label>
+                                      <input [(ngModel)]="config().footer.tiktokLink" class="form-input">
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
+                      <!-- Typography (Granular) -->
+                      <div class="admin-card">
+                          <div class="admin-card-header">Typography</div>
+                          <div class="p-6 space-y-6">
+                          
+                              <!-- Brand Style -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Brand Name Style</div>
+                                  <div class="col-span-2"><label class="form-label">Font Family</label><input [(ngModel)]="config().footer.brandStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Size</label><input [(ngModel)]="config().footer.brandStyle.fontSize" class="form-input"></div>
+                                  <div><label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().footer.brandStyle.color" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().footer.brandStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+
+                              <!-- Description Style -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Description Style</div>
+                                  <div class="col-span-2"><label class="form-label">Font Family</label><input [(ngModel)]="config().footer.descriptionStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Size</label><input [(ngModel)]="config().footer.descriptionStyle.fontSize" class="form-input"></div>
+                                  <div><label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().footer.descriptionStyle.color" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().footer.descriptionStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+
+                              <!-- Social Media Header Style -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">"Media Sosial" Header Style</div>
+                                  <div class="col-span-2"><label class="form-label">Font Family</label><input [(ngModel)]="config().footer.socialMediaHeaderStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Size</label><input [(ngModel)]="config().footer.socialMediaHeaderStyle.fontSize" class="form-input"></div>
+                                  <div><label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().footer.socialMediaHeaderStyle.color" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().footer.socialMediaHeaderStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+
+                              <!-- Copyright Style -->
+                              <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                                  <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Copyright Text Style</div>
+                                  <div class="col-span-2"><label class="form-label">Font Family</label><input [(ngModel)]="config().footer.copyrightStyle.fontFamily" class="form-input"></div>
+                                  <div><label class="form-label">Size</label><input [(ngModel)]="config().footer.copyrightStyle.fontSize" class="form-input"></div>
+                                  <div><label class="form-label">Color</label>
+                                      <div class="flex gap-2"><input type="color" [(ngModel)]="config().footer.copyrightStyle.color" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().footer.copyrightStyle.color" class="form-input"></div>
+                                  </div>
+                              </div>
+
+                          </div>
+                      </div>
+
+                      <!-- Page Styling -->
+                      <div class="admin-card">
+                          <div class="admin-card-header">Page Styling</div>
+                          <div class="p-6 grid grid-cols-3 gap-6">
+                              <div>
+                                  <label class="form-label">Background Color</label>
+                                  <div class="flex gap-2"><input type="color" [(ngModel)]="config().footer.style.backgroundColor" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().footer.style.backgroundColor" class="form-input"></div>
+                              </div>
+                              <div>
+                                  <label class="form-label">Main Text Color</label>
+                                  <div class="flex gap-2"><input type="color" [(ngModel)]="config().footer.style.textColor" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().footer.style.textColor" class="form-input"></div>
+                              </div>
+                              <div>
+                                  <label class="form-label">Accent Color (Links)</label>
+                                  <div class="flex gap-2"><input type="color" [(ngModel)]="config().footer.style.accentColor" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().footer.style.accentColor" class="form-input"></div>
+                              </div>
+                               <div>
+                                  <label class="form-label">Section Padding Y</label>
+                                  <input [(ngModel)]="config().footer.style.sectionPaddingY" class="form-input">
+                              </div>
+                               <div>
+                                  <label class="form-label">Default Font Family</label>
+                                  <input [(ngModel)]="config().footer.style.fontFamily" class="form-input">
+                              </div>
+                          </div>
+                      </div>
                    }
 
                    <!-- ... Placeholder for other tabs ... -->
-                   @if (currentTab() !== 'hero' && currentTab() !== 'global' && currentTab() !== 'about' && currentTab() !== 'menu' && currentTab() !== 'packages' && currentTab() !== 'reservation') {
+                   @if (currentTab() !== 'hero' && currentTab() !== 'global' && currentTab() !== 'about' && currentTab() !== 'menu' && currentTab() !== 'packages' && currentTab() !== 'reservation' && currentTab() !== 'location' && currentTab() !== 'footer') {
                       <div class="text-center py-20 text-gray-400">
                          <p>Select a tab to edit.</p>
                          <p class="text-xs mt-2">(Other sections are hidden in this specific view but functional)</p>
@@ -1009,6 +1241,7 @@ export class AdminComponent {
   loginError = signal<string | null>(null);
   
   selectedBranchIndex = signal(0);
+  selectedReservationBranchIndex = signal(0);
   
   isAuthenticated = computed(() => this.configService.currentUser() !== null || this.configService.isDemoMode());
   firestoreError = this.configService.firestoreError;
@@ -1121,16 +1354,30 @@ export class AdminComponent {
   
   addTableType() {
     this.config.update(c => {
-      const types = [...c.reservation.tableTypes, 'Area Baru'];
-      return { ...c, reservation: { ...c.reservation, tableTypes: types } };
+      const branches = [...c.branches];
+      const branchIndex = this.selectedReservationBranchIndex();
+      if (branches[branchIndex]) {
+        const branch = { ...branches[branchIndex] };
+        const types = [...(branch.tableTypes || []), 'Area Baru'];
+        branch.tableTypes = types;
+        branches[branchIndex] = branch;
+      }
+      return { ...c, branches: branches };
     });
   }
 
   removeTableType(index: number) {
     this.config.update(c => {
-      const types = [...c.reservation.tableTypes];
-      types.splice(index, 1);
-      return { ...c, reservation: { ...c.reservation, tableTypes: types } };
+      const branches = [...c.branches];
+      const branchIndex = this.selectedReservationBranchIndex();
+      if (branches[branchIndex]) {
+        const branch = { ...branches[branchIndex] };
+        const types = [...(branch.tableTypes || [])];
+        types.splice(index, 1);
+        branch.tableTypes = types;
+        branches[branchIndex] = branch;
+      }
+      return { ...c, branches: branches };
     });
   }
 }

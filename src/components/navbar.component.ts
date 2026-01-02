@@ -64,6 +64,9 @@ import { ConfigService } from '../services/config.service';
             <a routerLink="/location" routerLinkActive="font-bold underline" 
                [style.fontSize]="config().global.navLinkFontSize"
                class="hover:opacity-80 transition-colors font-medium cursor-pointer">Lokasi</a>
+            <a routerLink="/attendance" routerLinkActive="font-bold underline" 
+               [style.fontSize]="config().global.navLinkFontSize"
+               class="hover:opacity-80 transition-colors font-medium cursor-pointer">Absensi</a>
           </div>
 
           <!-- Mobile Button -->
@@ -93,6 +96,7 @@ import { ConfigService } from '../services/config.service';
             }
             <a routerLink="/reservation" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Reservasi</a>
             <a routerLink="/location" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Lokasi</a>
+            <a routerLink="/attendance" (click)="closeMenu()" class="block px-3 py-2 rounded-md text-base font-medium hover:opacity-80">Absensi</a>
           </div>
         </div>
       }

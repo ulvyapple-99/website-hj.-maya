@@ -1,4 +1,3 @@
-
 import { Component, signal, inject, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -88,7 +87,7 @@ interface GuestOrder {
                 </div>
 
                 <!-- Blind Spot 5: Optional Email -->
-                @if (config().reservation.requireEmail) {
+                @if (currentBranch().requireEmail) {
                    <div>
                       <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Email</label>
                       <input type="email" [(ngModel)]="formEmail"
@@ -135,18 +134,18 @@ interface GuestOrder {
                    <div class="flex flex-col gap-2">
                      <label class="flex items-center gap-2 cursor-pointer">
                        <input type="radio" name="evtType" [value]="false" [(ngModel)]="isRamadan">
-                       <span class="text-sm font-medium">Reguler (Min {{ config().reservation.minPaxRegular }})</span>
+                       <span class="text-sm font-medium">Reguler (Min {{ currentBranch().minPaxRegular }})</span>
                      </label>
                      <label class="flex items-center gap-2 cursor-pointer">
                        <input type="radio" name="evtType" [value]="true" [(ngModel)]="isRamadan">
-                       <span class="text-sm font-medium">Buka Puasa (Min {{ config().reservation.minPaxRamadan }})</span>
+                       <span class="text-sm font-medium">Buka Puasa (Min {{ currentBranch().minPaxRamadan }})</span>
                      </label>
                    </div>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Jumlah Pax (Max {{ config().reservation.maxPax }})</label>
-                  <input type="number" [(ngModel)]="formPax" min="1" [max]="config().reservation.maxPax"
+                  <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Jumlah Pax (Max {{ currentBranch().maxPax }})</label>
+                  <input type="number" [(ngModel)]="formPax" min="1" [max]="currentBranch().maxPax"
                          class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1"
                          [class.border-red-500]="paxError()"
                          [ngStyle]="config().reservation.inputStyle"
@@ -159,7 +158,7 @@ interface GuestOrder {
                 </div>
                 
                 <!-- Table Type Selection -->
-                @if (config().reservation.tableTypes.length > 0) {
+                @if (currentBranch().tableTypes.length > 0) {
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Pilih Area</label>
                         <select [(ngModel)]="selectedTableType"
@@ -169,7 +168,7 @@ interface GuestOrder {
                                 [style.borderRadius]="config().reservation.inputBorderRadius"
                                 [style.borderColor]="config().reservation.style.accentColor + '40'">
                             <option value="">-- Pilih Area --</option>
-                            @for (type of config().reservation.tableTypes; track $index) {
+                            @for (type of currentBranch().tableTypes; track $index) {
                                 <option [value]="type">{{ type }}</option>
                             }
                         </select>
@@ -177,7 +176,7 @@ interface GuestOrder {
                 }
 
                 <!-- Special Request -->
-                @if (config().reservation.enableSpecialRequest) {
+                @if (currentBranch().enableSpecialRequest) {
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" [ngStyle]="config().reservation.labelStyle">Catatan Khusus</label>
                         <textarea [(ngModel)]="specialRequest" class="w-full border px-3 py-2 text-sm bg-white text-gray-800 focus:outline-none focus:ring-1"
@@ -190,10 +189,10 @@ interface GuestOrder {
                 }
 
                 <!-- Terms & Conditions -->
-                @if (config().reservation.termsAndConditions) {
+                @if (currentBranch().termsAndConditions) {
                     <div class="bg-yellow-50 border border-yellow-200 p-3 rounded text-xs text-gray-700">
                         <p class="mb-2 font-bold text-yellow-800">Syarat & Ketentuan:</p>
-                        <p class="whitespace-pre-line mb-2">{{ config().reservation.termsAndConditions }}</p>
+                        <p class="whitespace-pre-line mb-2">{{ currentBranch().termsAndConditions }}</p>
                         <label class="flex items-center gap-2 cursor-pointer font-bold">
                             <input type="checkbox" [(ngModel)]="agreedToTerms"> Saya Setuju
                         </label>
@@ -206,11 +205,11 @@ interface GuestOrder {
                    <div class="text-2xl font-bold mb-2" [ngStyle]="config().reservation.summaryStyle">{{ formatRupiah(grandTotal()) }}</div>
                    
                    <!-- Blind Spot 10: DP Calculation -->
-                   @if (config().reservation.enableDownPaymentCalc) {
+                   @if (currentBranch().enableDownPaymentCalc) {
                       <div class="text-xs bg-black/20 p-2 rounded mb-4">
                          <div class="flex justify-between">
-                            <span [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">Wajib DP ({{ config().reservation.downPaymentPercentage }}%):</span>
-                            <span class="font-bold" [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">{{ formatRupiah(grandTotal() * (config().reservation.downPaymentPercentage / 100)) }}</span>
+                            <span [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">Wajib DP ({{ currentBranch().downPaymentPercentage }}%):</span>
+                            <span class="font-bold" [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">{{ formatRupiah(grandTotal() * (currentBranch().downPaymentPercentage / 100)) }}</span>
                          </div>
                       </div>
                    }
@@ -435,14 +434,13 @@ export class ReservationComponent {
      );
   });
 
-  minPax = computed(() => this.isRamadan() ? this.config().reservation.minPaxRamadan : this.config().reservation.minPaxRegular);
+  minPax = computed(() => this.isRamadan() ? this.currentBranch().minPaxRamadan : this.currentBranch().minPaxRegular);
 
   timeError = computed(() => {
     const time = this.formTime();
     if (!time) return null;
     
-    // Blind Spot 2 & 3: Past Time & Lead Time Validation
-    const leadHours = this.config().reservation.bookingLeadTimeHours || 0;
+    const leadHours = this.currentBranch().bookingLeadTimeHours || 0;
     const now = new Date();
     const selectedDateTime = new Date(`${this.formDate()}T${time}`);
     
@@ -478,7 +476,7 @@ export class ReservationComponent {
   paxError = computed(() => {
       const pax = this.formPax();
       const min = this.minPax();
-      const max = this.config().reservation.maxPax;
+      const max = this.currentBranch().maxPax;
       
       if (pax < min) return `Minimal ${min} orang untuk reservasi ini.`;
       if (pax > max) return `Maksimal kapasitas ${max} orang. Hubungi admin untuk acara besar.`;
@@ -491,9 +489,9 @@ export class ReservationComponent {
     this.formDate() !== '' && 
     this.paxError() === null &&
     this.timeError() === null &&
-    (this.config().reservation.termsAndConditions ? this.agreedToTerms() : true) &&
-    (this.config().reservation.tableTypes.length > 0 ? this.selectedTableType() !== '' : true) &&
-    (!this.config().reservation.requireEmail || (this.config().reservation.requireEmail && this.formEmail() !== ''))
+    (this.currentBranch().termsAndConditions ? this.agreedToTerms() : true) &&
+    (this.currentBranch().tableTypes.length > 0 ? this.selectedTableType() !== '' : true) &&
+    (!this.currentBranch().requireEmail || (this.currentBranch().requireEmail && this.formEmail() !== ''))
   );
 
   grandTotal = computed(() => {
@@ -564,7 +562,7 @@ export class ReservationComponent {
 
   constructMessage(): string {
     const b = this.currentBranch();
-    let msg = this.config().reservation.whatsappTemplate || 'Halo Admin, reservasi {name}';
+    let msg = b.whatsappTemplate || 'Halo Admin, reservasi {name}';
     
     // Construct Contact Info
     let contact = this.formPhone();
@@ -590,9 +588,9 @@ export class ReservationComponent {
     const total = this.grandTotal();
     msg += `\n*Total Estimasi: ${this.formatRupiah(total)}*`;
     
-    if (this.config().reservation.enableDownPaymentCalc) {
-        const dp = total * (this.config().reservation.downPaymentPercentage / 100);
-        msg += `\n*Perkiraan DP (${this.config().reservation.downPaymentPercentage}%): ${this.formatRupiah(dp)}*`;
+    if (this.currentBranch().enableDownPaymentCalc) {
+        const dp = total * (this.currentBranch().downPaymentPercentage / 100);
+        msg += `\n*Perkiraan DP (${this.currentBranch().downPaymentPercentage}%): ${this.formatRupiah(dp)}*`;
     }
     
     msg += `\n\n*Status: Menunggu Konfirmasi Admin*`; 

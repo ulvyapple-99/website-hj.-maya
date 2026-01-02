@@ -1,4 +1,3 @@
-
 import { Injectable, signal, effect, computed } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, Auth, User } from 'firebase/auth';
@@ -54,6 +53,18 @@ export interface Branch {
   tiktokLink?: string;
   menu: MenuItem[];
   packages?: PackageItem[];
+  // Reservation Settings per branch
+  minPaxRegular: number;
+  minPaxRamadan: number;
+  maxPax: number;
+  tableTypes: string[];
+  enableSpecialRequest: boolean;
+  bookingLeadTimeHours: number;
+  requireEmail: boolean;
+  enableDownPaymentCalc: boolean;
+  downPaymentPercentage: number;
+  termsAndConditions: string;
+  whatsappTemplate: string;
 }
 
 export interface Testimonial {
@@ -200,17 +211,6 @@ export interface AppConfig {
     titleStyle: TextStyle;
     subtitle: string;
     subtitleStyle: TextStyle;
-    minPaxRegular: number;
-    minPaxRamadan: number;
-    maxPax: number;
-    tableTypes: string[];
-    enableSpecialRequest: boolean;
-    termsAndConditions: string;
-    whatsappTemplate: string;
-    bookingLeadTimeHours: number;
-    requireEmail: boolean;
-    enableDownPaymentCalc: boolean;
-    downPaymentPercentage: number;
     style: PageStyle;
     cardBorderRadius: string;
     cardBackgroundColor: string; 
@@ -455,17 +455,6 @@ export class ConfigService {
       titleStyle: { fontFamily: 'Oswald', fontSize: '2.25rem', color: '#3E2723' },
       subtitle: 'Amankan meja Anda untuk acara spesial',
       subtitleStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#5D4037' },
-      minPaxRegular: 5,
-      minPaxRamadan: 10,
-      maxPax: 100,
-      tableTypes: ['Indoor (AC)', 'Outdoor (Smoking Area)', 'Lesehan', 'VIP Room'],
-      enableSpecialRequest: true,
-      termsAndConditions: '1. DP 50% wajib dibayarkan maksimal 1x24 jam setelah konfirmasi admin.\n2. Pembatalan H-1 uang muka hangus.\n3. Datang tepat waktu, toleransi keterlambatan 15 menit.',
-      whatsappTemplate: 'Halo Admin *{branch}*,\nSaya mau reservasi meja:\n\nNama: *{name}*\nKontak: {contact}\nTanggal: {date}\nJam: {time}\nJumlah: {pax} orang\nArea: {tableType}\nCatatan: {notes}\n\nMohon konfirmasinya.',
-      bookingLeadTimeHours: 2,
-      requireEmail: false,
-      enableDownPaymentCalc: true,
-      downPaymentPercentage: 50,
       style: {
         backgroundColor: '#F5F5F5',
         textColor: '#3E2723', 
@@ -557,7 +546,18 @@ export class ConfigService {
         packages: [
            { name: 'Paket Botram 4', price: 'Rp 250.000', description: 'Cukup untuk 4-5 orang', items: ['40 Tusuk Sate Sapi', '4 Nasi Timbel', '1 Sop Iga Besar', '4 Es Teh Manis', 'Lalapan & Sambal'], image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=400' },
            { name: 'Paket Keluarga 10', price: 'Rp 600.000', description: 'Pesta sate untuk keluarga besar', items: ['100 Tusuk Sate Campur', '2 Bakul Nasi', '3 Sop Iga Besar', '10 Minuman', 'Buah Potong'], image: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=400' }
-        ]
+        ],
+        minPaxRegular: 5,
+        minPaxRamadan: 10,
+        maxPax: 100,
+        tableTypes: ['Indoor (AC)', 'Outdoor (Smoking Area)', 'Lesehan', 'VIP Room'],
+        enableSpecialRequest: true,
+        bookingLeadTimeHours: 2,
+        requireEmail: false,
+        enableDownPaymentCalc: true,
+        downPaymentPercentage: 50,
+        termsAndConditions: '1. DP 50% wajib dibayarkan maksimal 1x24 jam setelah konfirmasi admin.\n2. Pembatalan H-1 uang muka hangus.\n3. Datang tepat waktu, toleransi keterlambatan 15 menit.',
+        whatsappTemplate: 'Halo Admin *{branch}*,\nSaya mau reservasi meja:\n\nNama: *{name}*\nKontak: {contact}\nTanggal: {date}\nJam: {time}\nJumlah: {pax} orang\nArea: {tableType}\nCatatan: {notes}\n\nMohon konfirmasinya.'
       }
     ],
     gallery: [
@@ -905,9 +905,28 @@ export class ConfigService {
       if (this.isDemoMode()) return;
       this.firestoreError.set(null);
       if (docSnap.exists()) {
-        const data = docSnap.data() as AppConfig;
+        const data = docSnap.data() as any; // Use any to handle old structure
+        const current = this.config();
         const ensure = (obj: any, def: any) => ({ ...def, ...(obj || {}) });
         const text = (obj: any) => ensure(obj, {fontFamily:'Lato',fontSize:'1rem',color:'#000'});
+
+        const updatedBranches = (data.branches || current.branches).map((branch: any) => {
+            const oldGlobalSettings = data.reservation || {};
+            return {
+                ...branch,
+                minPaxRegular: branch.minPaxRegular ?? oldGlobalSettings.minPaxRegular ?? 5,
+                minPaxRamadan: branch.minPaxRamadan ?? oldGlobalSettings.minPaxRamadan ?? 10,
+                maxPax: branch.maxPax ?? oldGlobalSettings.maxPax ?? 100,
+                tableTypes: branch.tableTypes ?? oldGlobalSettings.tableTypes ?? ['Indoor (AC)', 'Outdoor (Smoking Area)', 'Lesehan', 'VIP Room'],
+                enableSpecialRequest: branch.enableSpecialRequest ?? oldGlobalSettings.enableSpecialRequest ?? true,
+                bookingLeadTimeHours: branch.bookingLeadTimeHours ?? oldGlobalSettings.bookingLeadTimeHours ?? 2,
+                requireEmail: branch.requireEmail ?? oldGlobalSettings.requireEmail ?? false,
+                enableDownPaymentCalc: branch.enableDownPaymentCalc ?? oldGlobalSettings.enableDownPaymentCalc ?? true,
+                downPaymentPercentage: branch.downPaymentPercentage ?? oldGlobalSettings.downPaymentPercentage ?? 50,
+                termsAndConditions: branch.termsAndConditions ?? oldGlobalSettings.termsAndConditions ?? '',
+                whatsappTemplate: branch.whatsappTemplate ?? oldGlobalSettings.whatsappTemplate ?? ''
+            };
+        });
 
         this.config.update(current => ({
             ...current,
@@ -919,31 +938,11 @@ export class ConfigService {
             about: { ...current.about, ...(data.about || {}), titleStyle: text(data.about?.titleStyle), descriptionStyle: text(data.about?.descriptionStyle), stats: ensure(data.about?.stats, current.about.stats), statsStyle: text(data.about?.statsStyle), statsLabelStyle: text(data.about?.statsLabelStyle), ctaText: data.about?.ctaText || 'Lihat Menu', ctaLink: data.about?.ctaLink || '/menu', quote: data.about?.quote || '', founderName: data.about?.founderName || '', trustedLogos: data.about?.trustedLogos || [], showPattern: data.about?.showPattern ?? true, enableGlassEffect: data.about?.enableGlassEffect ?? false, style: ensure(data.about?.style, current.about.style) },
             menuPage: { ...current.menuPage, ...(data.menuPage || {}), titleStyle: text(data.menuPage?.titleStyle), subtitleStyle: text(data.menuPage?.subtitleStyle), style: ensure(data.menuPage?.style, current.menuPage.style) },
             packagesPage: { ...current.packagesPage, ...(data.packagesPage || {}), titleStyle: text(data.packagesPage?.titleStyle), subtitleStyle: text(data.packagesPage?.subtitleStyle), style: ensure(data.packagesPage?.style, current.packagesPage.style) },
-            reservation: { 
-                ...current.reservation, 
-                ...(data.reservation || {}),
-                titleStyle: text(data.reservation?.titleStyle),
-                subtitleStyle: text(data.reservation?.subtitleStyle),
-                // Ensure defaults for new fields
-                maxPax: data.reservation?.maxPax || 100,
-                tableTypes: data.reservation?.tableTypes || ['Indoor (AC)', 'Outdoor'],
-                enableSpecialRequest: data.reservation?.enableSpecialRequest ?? true,
-                termsAndConditions: data.reservation?.termsAndConditions || '',
-                // New Blind Spot Logic Defaults
-                bookingLeadTimeHours: data.reservation?.bookingLeadTimeHours ?? 2,
-                requireEmail: data.reservation?.requireEmail ?? false,
-                enableDownPaymentCalc: data.reservation?.enableDownPaymentCalc ?? true,
-                downPaymentPercentage: data.reservation?.downPaymentPercentage ?? 50,
-                // Granular Styles Defaults
-                labelStyle: text(data.reservation?.labelStyle),
-                inputStyle: text(data.reservation?.inputStyle),
-                summaryStyle: text(data.reservation?.summaryStyle),
-                style: ensure(data.reservation?.style, current.reservation.style)
-            },
+            reservation: { ...current.reservation, ...(data.reservation || {}), titleStyle: text(data.reservation?.titleStyle), subtitleStyle: text(data.reservation?.subtitleStyle), labelStyle: text(data.reservation?.labelStyle), inputStyle: text(data.reservation?.inputStyle), summaryStyle: text(data.reservation?.summaryStyle), style: ensure(data.reservation?.style, current.reservation.style) },
             locationPage: { ...current.locationPage, ...(data.locationPage || {}), titleStyle: text(data.locationPage?.titleStyle), subtitleStyle: text(data.locationPage?.subtitleStyle), labelStyle: text(data.locationPage?.labelStyle), branchNameStyle: text(data.locationPage?.branchNameStyle), branchDetailStyle: text(data.locationPage?.branchDetailStyle), style: ensure(data.locationPage?.style, current.locationPage.style) },
             testimonialStyles: { ...current.testimonialStyles, reviewStyle: text(data.testimonialStyles?.reviewStyle), nameStyle: text(data.testimonialStyles?.nameStyle), roleStyle: text(data.testimonialStyles?.roleStyle) },
             footer: { ...current.footer, ...(data.footer || {}), descriptionStyle: text(data.footer?.descriptionStyle), copyrightStyle: text(data.footer?.copyrightStyle), brandStyle: text(data.footer?.brandStyle), socialMediaHeaderStyle: text(data.footer?.socialMediaHeaderStyle), style: ensure(data.footer?.style, current.footer.style) },
-            branches: data.branches || current.branches,
+            branches: updatedBranches,
             instagramProfile: data.instagramProfile || current.instagramProfile,
             gallery: data.gallery || current.gallery,
             testimonials: data.testimonials || current.testimonials,

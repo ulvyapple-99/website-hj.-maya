@@ -12,6 +12,7 @@ import { MenuComponent } from './src/components/menu.component';
 import { PackagesComponent } from './src/components/packages.component';
 import { LocationComponent } from './src/components/location.component';
 import { ReservationComponent } from './src/components/reservation.component';
+import { AttendanceComponent } from './src/components/attendance.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'packages', component: PackagesComponent },
   { path: 'reservation', component: ReservationComponent },
   { path: 'location', component: LocationComponent },
+  { path: 'attendance', component: AttendanceComponent },
   { path: '**', redirectTo: '' }
 ];
 
