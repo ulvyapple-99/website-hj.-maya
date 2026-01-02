@@ -49,6 +49,7 @@ export interface Branch {
   hours: string;
   mapImage: string;
   instagramLink?: string;
+  instagramLinkText?: string;
   facebookLink?: string;
   tiktokLink?: string;
   socialLinkColor?: string;
@@ -599,6 +600,7 @@ export class ConfigService {
         hours: '10.00 - 22.00',
         mapImage: 'https://picsum.photos/600/400',
         instagramLink: 'https://instagram.com/satemaranggihjmayacimahi',
+        instagramLinkText: 'Instagram',
         socialLinkColor: '#FFFFFF',
         menu: [
            { name: 'Sate Sapi (10 Tusuk)', price: 'Rp 45.000', desc: 'Sate sapi maranggi empuk dengan bumbu meresap.', category: 'Sate', image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=400', favorite: true, spicyLevel: 1 },
@@ -998,7 +1000,8 @@ export class ConfigService {
                 downPaymentPercentage: branch.downPaymentPercentage ?? oldGlobalSettings.downPaymentPercentage ?? 50,
                 termsAndConditions: branch.termsAndConditions ?? oldGlobalSettings.termsAndConditions ?? '',
                 whatsappTemplate: branch.whatsappTemplate ?? oldGlobalSettings.whatsappTemplate ?? '',
-                socialLinkColor: branch.socialLinkColor ?? current.footer.brandStyle.color
+                socialLinkColor: branch.socialLinkColor ?? current.footer.brandStyle.color,
+                instagramLinkText: branch.instagramLinkText || 'Instagram'
             };
         });
 

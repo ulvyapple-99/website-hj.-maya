@@ -1456,10 +1456,14 @@ import { ToastService } from '../services/toast.service';
                                                   <input type="color" [(ngModel)]="config().branches[$index].socialLinkColor" class="h-8 w-8 border cursor-pointer p-0 rounded">
                                               </div>
                                           </div>
-                                          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                               <div>
                                                   <label class="form-label">Instagram Link</label>
                                                   <input [(ngModel)]="config().branches[$index].instagramLink" class="form-input" placeholder="https://instagram.com/...">
+                                              </div>
+                                              <div>
+                                                  <label class="form-label">Instagram Text</label>
+                                                  <input [(ngModel)]="config().branches[$index].instagramLinkText" class="form-input" placeholder="Instagram">
                                               </div>
                                               <div>
                                                   <label class="form-label">Facebook Link</label>
