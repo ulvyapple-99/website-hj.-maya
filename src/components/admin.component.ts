@@ -1365,8 +1365,45 @@ import { ToastService } from '../services/toast.service';
                       </div>
                    }
 
+                   <!-- === 9. AI SETTINGS === -->
+                   @if (currentTab() === 'ai') {
+                      <!-- AI Assistant Settings -->
+                      <div class="admin-card">
+                         <div class="admin-card-header bg-cyan-800 text-white">Pengaturan Asisten AI</div>
+                         <div class="p-6 space-y-6">
+                            <div>
+                               <label class="form-label">System Instruction (Prompt Utama)</label>
+                               <p class="text-xs text-gray-500 mb-1">Aturan dan konteks utama yang diberikan ke AI. Daftar menu akan ditambahkan secara otomatis.</p>
+                               <textarea [(ngModel)]="config().ai.systemInstruction" class="form-input font-mono text-xs" rows="5"></textarea>
+                            </div>
+                            <div>
+                               <label class="form-label">Pesan Pembuka</label>
+                               <textarea [(ngModel)]="config().ai.initialMessage" class="form-input" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-6 border-t pt-6">
+                               <div>
+                                  <label class="form-label">Warna Tombol & Header</label>
+                                  <div class="flex items-center gap-2">
+                                     <input type="color" [(ngModel)]="config().ai.buttonColor" class="h-9 w-9 border cursor-pointer p-0 rounded">
+                                     <input [(ngModel)]="config().ai.buttonColor" class="form-input">
+                                  </div>
+                               </div>
+                               <div>
+                                  <label class="form-label">Ukuran Tombol (e.g. 60px)</label>
+                                  <input [(ngModel)]="config().ai.buttonSize" class="form-input">
+                               </div>
+                               <div>
+                                  <label class="form-label">Lebar Jendela Chat (e.g. 360px)</label>
+                                  <input [(ngModel)]="config().ai.windowWidth" class="form-input">
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   }
+
                    <!-- ... Placeholder for other tabs ... -->
-                   @if (currentTab() !== 'hero' && currentTab() !== 'global' && currentTab() !== 'about' && currentTab() !== 'menu' && currentTab() !== 'packages' && currentTab() !== 'reservation' && currentTab() !== 'location' && currentTab() !== 'footer') {
+                   @if (currentTab() !== 'hero' && currentTab() !== 'global' && currentTab() !== 'about' && currentTab() !== 'menu' && currentTab() !== 'packages' && currentTab() !== 'reservation' && currentTab() !== 'location' && currentTab() !== 'footer' && currentTab() !== 'ai') {
                       <div class="text-center py-20 text-gray-400">
                          <p>Select a tab to edit.</p>
                          <p class="text-xs mt-2">(Other sections are hidden in this specific view but functional)</p>
@@ -1519,6 +1556,7 @@ export class AdminComponent {
     { id: 'reservation', label: 'Reservasi', icon: '📅' },
     { id: 'location', label: 'Lokasi', icon: '📍' },
     { id: 'footer', label: 'Footer', icon: '🔗' },
+    { id: 'ai', label: 'AI Assistant', icon: '🤖' },
   ];
 
   tempConfig: FirebaseConfig = { apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: '' };
