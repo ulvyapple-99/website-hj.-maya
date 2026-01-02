@@ -241,6 +241,13 @@ export interface AppConfig {
     cardBorderRadius: string;
     mapHeight: string;
   };
+  testimonialsPage: {
+    title: string;
+    subtitle: string;
+    titleStyle: TextStyle;
+    subtitleStyle: TextStyle;
+    style: PageStyle;
+  };
   testimonialStyles: {
     reviewStyle: TextStyle;
     nameStyle: TextStyle;
@@ -518,6 +525,20 @@ export class ConfigService {
       cardBorderRadius: '20px',
       mapHeight: '220px'
     },
+    testimonialsPage: {
+      title: 'Kata Pelanggan Kami',
+      subtitle: 'Apa kata mereka tentang kelezatan Sate Maranggi Hj. Maya?',
+      titleStyle: { fontFamily: 'Oswald', fontSize: '2.5rem', color: '#3E2723' },
+      subtitleStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#5D4037' },
+      style: {
+        backgroundColor: '#F9FAFB',
+        textColor: '#374151',
+        accentColor: '#D84315',
+        fontFamily: 'Lato',
+        sectionPaddingY: '80px',
+        borderRadius: '16px'
+      }
+    },
     testimonialStyles: {
       reviewStyle: { fontFamily: 'Lato', fontSize: '1rem', color: '#4B5563' },
       nameStyle: { fontFamily: 'Oswald', fontSize: '1rem', color: '#111827' },
@@ -724,6 +745,7 @@ export class ConfigService {
             ...parsed,
             intro: { ...c.intro, ...(parsed.intro || {}) },
             packagesPage: { ...c.packagesPage, ...(parsed.packagesPage || {}) },
+            testimonialsPage: { ...c.testimonialsPage, ...(parsed.testimonialsPage || {}) },
             global: { ...c.global, ...(parsed.global || {}) },
             hero: { ...c.hero, ...(parsed.hero || {}), 
                badgeStyle: this.ensureStyle(parsed.hero?.badgeStyle, c.hero.badgeStyle),
@@ -992,6 +1014,7 @@ export class ConfigService {
             packagesPage: { ...current.packagesPage, ...(data.packagesPage || {}), titleStyle: text(data.packagesPage?.titleStyle), subtitleStyle: text(data.packagesPage?.subtitleStyle), style: ensure(data.packagesPage?.style, current.packagesPage.style) },
             reservation: { ...current.reservation, ...(data.reservation || {}), titleStyle: text(data.reservation?.titleStyle), subtitleStyle: text(data.reservation?.subtitleStyle), labelStyle: text(data.reservation?.labelStyle), inputStyle: text(data.reservation?.inputStyle), summaryStyle: text(data.reservation?.summaryStyle), style: ensure(data.reservation?.style, current.reservation.style) },
             locationPage: { ...current.locationPage, ...(data.locationPage || {}), titleStyle: text(data.locationPage?.titleStyle), subtitleStyle: text(data.locationPage?.subtitleStyle), labelStyle: text(data.locationPage?.labelStyle), branchNameStyle: text(data.locationPage?.branchNameStyle), branchDetailStyle: text(data.locationPage?.branchDetailStyle), style: ensure(data.locationPage?.style, current.locationPage.style) },
+            testimonialsPage: { ...current.testimonialsPage, ...(data.testimonialsPage || {}), titleStyle: text(data.testimonialsPage?.titleStyle), subtitleStyle: text(data.testimonialsPage?.subtitleStyle), style: ensure(data.testimonialsPage?.style, current.testimonialsPage.style) },
             testimonialStyles: { ...current.testimonialStyles, reviewStyle: text(data.testimonialStyles?.reviewStyle), nameStyle: text(data.testimonialStyles?.nameStyle), roleStyle: text(data.testimonialStyles?.roleStyle) },
             footer: { ...current.footer, ...(data.footer || {}), descriptionStyle: text(data.footer?.descriptionStyle), copyrightStyle: text(data.footer?.copyrightStyle), brandStyle: text(data.footer?.brandStyle), socialMediaHeaderStyle: text(data.footer?.socialMediaHeaderStyle), style: ensure(data.footer?.style, current.footer.style) },
             attendancePage: ensure(data.attendancePage, current.attendancePage),

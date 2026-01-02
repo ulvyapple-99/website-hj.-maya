@@ -1336,7 +1336,82 @@ import { ToastService } from '../services/toast.service';
                       </div>
                    }
 
-                   <!-- === 8. FOOTER SETTINGS === -->
+                   <!-- === 8. TESTIMONIALS SETTINGS === -->
+                   @if (currentTab() === 'testimonials') {
+                      <!-- Header & Styling -->
+                      <div class="admin-card">
+                         <div class="admin-card-header bg-yellow-800 text-white">Testimonials Header & Styling</div>
+                         <div class="p-6 space-y-6">
+                            <!-- Page Titles -->
+                            <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                               <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Section Title</div>
+                               <div class="col-span-2"><label class="form-label">Title Text</label><input [(ngModel)]="config().testimonialsPage.title" class="form-input"></div>
+                               <div><label class="form-label">Font Family</label><input [(ngModel)]="config().testimonialsPage.titleStyle.fontFamily" class="form-input"></div>
+                               <div><label class="form-label">Font Size</label><input [(ngModel)]="config().testimonialsPage.titleStyle.fontSize" class="form-input"></div>
+                               <div class="col-span-4 mt-2">
+                                   <label class="form-label">Title Color</label>
+                                   <div class="flex gap-2"><input type="color" [(ngModel)]="config().testimonialsPage.titleStyle.color" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().testimonialsPage.titleStyle.color" class="form-input"></div>
+                               </div>
+                            </div>
+                            <div class="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+                               <div class="col-span-4 font-bold text-xs uppercase text-gray-400">Section Subtitle</div>
+                               <div class="col-span-2"><label class="form-label">Subtitle Text</label><textarea [(ngModel)]="config().testimonialsPage.subtitle" class="form-input" rows="2"></textarea></div>
+                               <div><label class="form-label">Font Family</label><input [(ngModel)]="config().testimonialsPage.subtitleStyle.fontFamily" class="form-input"></div>
+                               <div><label class="form-label">Font Size</label><input [(ngModel)]="config().testimonialsPage.subtitleStyle.fontSize" class="form-input"></div>
+                               <div class="col-span-4 mt-2">
+                                   <label class="form-label">Subtitle Color</label>
+                                   <div class="flex gap-2"><input type="color" [(ngModel)]="config().testimonialsPage.subtitleStyle.color" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().testimonialsPage.subtitleStyle.color" class="form-input"></div>
+                               </div>
+                            </div>
+                            <!-- Page Styling -->
+                            <div class="border-t pt-4">
+                               <div class="grid grid-cols-3 gap-4">
+                                  <div>
+                                     <label class="form-label">Background Color</label>
+                                     <div class="flex gap-2"><input type="color" [(ngModel)]="config().testimonialsPage.style.backgroundColor" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().testimonialsPage.style.backgroundColor" class="form-input"></div>
+                                  </div>
+                                  <div>
+                                     <label class="form-label">Accent Color (Stars)</label>
+                                     <div class="flex gap-2"><input type="color" [(ngModel)]="config().testimonialsPage.style.accentColor" class="h-9 w-9 p-0 border"><input [(ngModel)]="config().testimonialsPage.style.accentColor" class="form-input"></div>
+                                  </div>
+                                  <div>
+                                     <label class="form-label">Card Radius</label>
+                                     <input [(ngModel)]="config().testimonialsPage.style.borderRadius" class="form-input">
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+
+                      <!-- Manage Testimonials -->
+                      <div class="admin-card">
+                         <div class="admin-card-header">Kelola Testimoni</div>
+                         <div class="p-6">
+                            <button (click)="addTestimonial()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6">+ Tambah Testimoni</button>
+                            <div class="space-y-4">
+                               @for (t of config().testimonials; track $index) {
+                                  <div class="bg-white p-4 rounded-lg border border-gray-200 relative">
+                                     <button (click)="removeTestimonial($index)" class="absolute top-2 right-2 bg-red-100 text-red-600 w-6 h-6 rounded-full font-bold hover:bg-red-200">✕</button>
+                                     <div class="grid grid-cols-12 gap-4">
+                                        <div class="col-span-12 md:col-span-5">
+                                           <label class="form-label">Ulasan</label>
+                                           <textarea [(ngModel)]="config().testimonials[$index].text" class="form-input" rows="3"></textarea>
+                                        </div>
+                                        <div class="col-span-12 md:col-span-7 grid grid-cols-2 gap-4">
+                                           <div><label class="form-label">Nama</label><input [(ngModel)]="config().testimonials[$index].name" class="form-input"></div>
+                                           <div><label class="form-label">Peran</label><input [(ngModel)]="config().testimonials[$index].role" class="form-input"></div>
+                                           <div class="col-span-2"><label class="form-label">Rating (1-5)</label><input type="number" min="1" max="5" [(ngModel)]="config().testimonials[$index].rating" class="form-input"></div>
+                                        </div>
+                                     </div>
+                                  </div>
+                               }
+                            </div>
+                         </div>
+                      </div>
+                   }
+
+
+                   <!-- === 9. FOOTER SETTINGS === -->
                    @if (currentTab() === 'footer') {
                       <!-- Content & Links -->
                       <div class="admin-card">
@@ -1479,7 +1554,7 @@ import { ToastService } from '../services/toast.service';
                       </div>
                    }
 
-                   <!-- === 9. AI SETTINGS === -->
+                   <!-- === 10. AI SETTINGS === -->
                    @if (currentTab() === 'ai') {
                       <!-- AI Assistant Settings -->
                       <div class="admin-card">
@@ -1516,7 +1591,7 @@ import { ToastService } from '../services/toast.service';
                       </div>
                    }
 
-                   <!-- === ATTENDANCE SETTINGS === -->
+                   <!-- === 11. ATTENDANCE SETTINGS === -->
                    @if (currentTab() === 'attendance') {
                       <div class="admin-card">
                          <div class="admin-card-header bg-gray-800 text-white">Pengaturan Halaman Absensi</div>
@@ -1590,7 +1665,7 @@ import { ToastService } from '../services/toast.service';
                    }
 
                    <!-- ... Placeholder for other tabs ... -->
-                   @if (currentTab() !== 'hero' && currentTab() !== 'global' && currentTab() !== 'about' && currentTab() !== 'menu' && currentTab() !== 'packages' && currentTab() !== 'reservation' && currentTab() !== 'location' && currentTab() !== 'footer' && currentTab() !== 'ai' && currentTab() !== 'attendance') {
+                   @if (currentTab() !== 'hero' && currentTab() !== 'global' && currentTab() !== 'about' && currentTab() !== 'menu' && currentTab() !== 'packages' && currentTab() !== 'reservation' && currentTab() !== 'location' && currentTab() !== 'testimonials' && currentTab() !== 'footer' && currentTab() !== 'ai' && currentTab() !== 'attendance') {
                       <div class="text-center py-20 text-gray-400">
                          <p>Select a tab to edit.</p>
                          <p class="text-xs mt-2">(Other sections are hidden in this specific view but functional)</p>
@@ -1743,6 +1818,7 @@ export class AdminComponent {
     { id: 'packages', label: 'Paket', icon: '📦' },
     { id: 'reservation', label: 'Reservasi', icon: '📅' },
     { id: 'location', label: 'Lokasi', icon: '📍' },
+    { id: 'testimonials', label: 'Testimoni', icon: '💬' },
     { id: 'footer', label: 'Footer', icon: '🔗' },
     { id: 'ai', label: 'AI Assistant', icon: '🤖' },
     { id: 'attendance', label: 'Absensi', icon: '⏰' },
@@ -2044,6 +2120,24 @@ export class AdminComponent {
         branches[branchIndex] = branch;
       }
       return { ...c, branches: branches };
+    });
+  }
+
+  // === TESTIMONIALS CRUD METHODS ===
+  addTestimonial() {
+    this.config.update(c => {
+      const newTestimonials = [...(c.testimonials || [])];
+      newTestimonials.push({ name: 'Nama Baru', text: 'Ulasan baru...', role: 'Pelanggan', rating: 5 });
+      return { ...c, testimonials: newTestimonials };
+    });
+  }
+
+  removeTestimonial(index: number) {
+    if (!confirm('Hapus testimoni ini?')) return;
+    this.config.update(c => {
+      const newTestimonials = [...c.testimonials];
+      newTestimonials.splice(index, 1);
+      return { ...c, testimonials: newTestimonials };
     });
   }
 }
