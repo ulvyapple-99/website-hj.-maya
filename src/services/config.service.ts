@@ -51,6 +51,7 @@ export interface Branch {
   instagramLink?: string;
   facebookLink?: string;
   tiktokLink?: string;
+  socialLinkColor?: string;
   menu: MenuItem[];
   packages?: PackageItem[];
   // Reservation Settings per branch
@@ -536,6 +537,7 @@ export class ConfigService {
         hours: '10.00 - 22.00',
         mapImage: 'https://picsum.photos/600/400',
         instagramLink: 'https://instagram.com/satemaranggihjmayacimahi',
+        socialLinkColor: '#FFFFFF',
         menu: [
            { name: 'Sate Sapi (10 Tusuk)', price: 'Rp 45.000', desc: 'Sate sapi maranggi empuk dengan bumbu meresap.', category: 'Sate', image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=400', favorite: true, spicyLevel: 1 },
            { name: 'Sate Kambing (10 Tusuk)', price: 'Rp 50.000', desc: 'Sate kambing muda, tidak prengus.', category: 'Sate', image: 'https://images.unsplash.com/photo-1603088549155-6ae9395b928f?q=80&w=400', favorite: false, spicyLevel: 2 },
@@ -924,7 +926,8 @@ export class ConfigService {
                 enableDownPaymentCalc: branch.enableDownPaymentCalc ?? oldGlobalSettings.enableDownPaymentCalc ?? true,
                 downPaymentPercentage: branch.downPaymentPercentage ?? oldGlobalSettings.downPaymentPercentage ?? 50,
                 termsAndConditions: branch.termsAndConditions ?? oldGlobalSettings.termsAndConditions ?? '',
-                whatsappTemplate: branch.whatsappTemplate ?? oldGlobalSettings.whatsappTemplate ?? ''
+                whatsappTemplate: branch.whatsappTemplate ?? oldGlobalSettings.whatsappTemplate ?? '',
+                socialLinkColor: branch.socialLinkColor ?? current.footer.brandStyle.color
             };
         });
 
