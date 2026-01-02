@@ -13,7 +13,7 @@ import { ToastService } from '../services/toast.service';
     <!-- Trigger Button -->
     <button 
       (click)="togglePanel()"
-      class="fixed bottom-6 left-6 z-50 bg-gray-900 text-white p-3.5 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white/20 group"
+      class="fixed bottom-6 left-6 z-50 bg-gray-900 text-white p-3.5 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white/20 group opacity-5 hover:opacity-100"
       title="Admin Dashboard"
     >
       @if (firestoreError()) {
