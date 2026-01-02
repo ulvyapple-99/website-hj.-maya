@@ -162,6 +162,53 @@ import { ToastService } from '../services/toast.service';
                          </div>
                       </div>
 
+                      <!-- Intro Video -->
+                      <div class="admin-card">
+                        <div class="admin-card-header bg-indigo-800 text-white">Intro Video Settings</div>
+                        <div class="p-6 space-y-6">
+                            <label class="flex items-center gap-2 cursor-pointer font-bold text-sm select-none">
+                                <input type="checkbox" [(ngModel)]="config().intro.enabled" class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"> 
+                                Aktifkan Video Intro
+                            </label>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-4">
+                                <!-- Upload & Preview -->
+                                <div>
+                                    <label class="form-label">Upload Video (.mp4)</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" (change)="onFileSelected($event, 'introVideo')" class="form-input text-xs" accept="video/mp4,video/webm">
+                                        @if(config().intro.videoUrl) {
+                                            <button (click)="removeIntroVideo()" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200" title="Hapus Video">✕</button>
+                                        }
+                                    </div>
+                                    @if(config().intro.videoUrl) {
+                                        <div class="mt-2 h-32 bg-gray-900 rounded border overflow-hidden">
+                                            <video [src]="config().intro.videoUrl" class="w-full h-full object-contain" controls muted></video>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                <!-- Settings -->
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="form-label">Auto-skip setelah (detik)</label>
+                                        <input type="number" [(ngModel)]="config().intro.duration" class="form-input" min="1">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Efek Transisi Keluar</label>
+                                        <select [(ngModel)]="config().intro.fadeOut" class="form-select">
+                                            <option value="none">Tidak ada</option>
+                                            <option value="fade">Fade Out</option>
+                                            <option value="slide-up">Slide Up</option>
+                                            <option value="slide-down">Slide Down</option>
+                                            <option value="zoom-out">Zoom Out</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+
                       <!-- Navigation Bar Settings -->
                       <div class="admin-card">
                          <div class="admin-card-header">Navigation Bar Styling</div>
@@ -1402,8 +1449,39 @@ import { ToastService } from '../services/toast.service';
                       </div>
                    }
 
+                   <!-- === ATTENDANCE SETTINGS === -->
+                   @if (currentTab() === 'attendance') {
+                      <div class="admin-card">
+                         <div class="admin-card-header bg-gray-800 text-white">Pengaturan Halaman Absensi</div>
+                         <div class="p-6 space-y-4">
+                            <div>
+                               <label class="form-label">URL Halaman Absensi Eksternal</label>
+                               <input [(ngModel)]="config().attendancePage.url" class="form-input" placeholder="https://your-attendance-app.com">
+                            </div>
+                            <div class="border-t pt-4 grid grid-cols-2 gap-4">
+                                <div>
+                                   <label class="form-label">Judul Halaman</label>
+                                   <input [(ngModel)]="config().attendancePage.title" class="form-input">
+                                </div>
+                                <div>
+                                   <label class="form-label">Teks Tombol</label>
+                                   <input [(ngModel)]="config().attendancePage.buttonText" class="form-input">
+                                </div>
+                            </div>
+                            <div>
+                               <label class="form-label">Subjudul/Deskripsi</label>
+                               <textarea [(ngModel)]="config().attendancePage.subtitle" class="form-input" rows="3"></textarea>
+                            </div>
+                            <div>
+                               <label class="form-label">Catatan Kaki</label>
+                               <input [(ngModel)]="config().attendancePage.note" class="form-input">
+                            </div>
+                         </div>
+                      </div>
+                   }
+
                    <!-- ... Placeholder for other tabs ... -->
-                   @if (currentTab() !== 'hero' && currentTab() !== 'global' && currentTab() !== 'about' && currentTab() !== 'menu' && currentTab() !== 'packages' && currentTab() !== 'reservation' && currentTab() !== 'location' && currentTab() !== 'footer' && currentTab() !== 'ai') {
+                   @if (currentTab() !== 'hero' && currentTab() !== 'global' && currentTab() !== 'about' && currentTab() !== 'menu' && currentTab() !== 'packages' && currentTab() !== 'reservation' && currentTab() !== 'location' && currentTab() !== 'footer' && currentTab() !== 'ai' && currentTab() !== 'attendance') {
                       <div class="text-center py-20 text-gray-400">
                          <p>Select a tab to edit.</p>
                          <p class="text-xs mt-2">(Other sections are hidden in this specific view but functional)</p>
@@ -1557,6 +1635,7 @@ export class AdminComponent {
     { id: 'location', label: 'Lokasi', icon: '📍' },
     { id: 'footer', label: 'Footer', icon: '🔗' },
     { id: 'ai', label: 'AI Assistant', icon: '🤖' },
+    { id: 'attendance', label: 'Absensi', icon: '⏰' },
   ];
 
   tempConfig: FirebaseConfig = { apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: '' };
@@ -1632,6 +1711,15 @@ export class AdminComponent {
     } finally {
       this.isUploading.set(false);
     }
+  }
+
+  removeIntroVideo() {
+    if (!confirm('Apakah Anda yakin ingin menghapus video intro?')) return;
+    this.config.update(c => ({
+      ...c,
+      intro: { ...c.intro, videoUrl: '' }
+    }));
+    this.toastService.show('Video intro dihapus', 'info');
   }
 
   // === MENU CRUD METHODS ===

@@ -260,6 +260,13 @@ export interface AppConfig {
     bio: string;
     profilePic: string;
   };
+  attendancePage: {
+    url: string;
+    title: string;
+    subtitle: string;
+    buttonText: string;
+    note: string;
+  };
   branches: Branch[]; 
   gallery: string[];
   testimonials: Testimonial[];
@@ -525,6 +532,13 @@ export class ConfigService {
       followingCount: '21',
       bio: 'Sate Maranggi Hj. Maya Cimahi\nFood & Beverage\n📍 Jl. Mahar Martanegara No. 123, Cimahi\nBuka Setiap Hari 10.00 - 22.00',
       profilePic: 'https://ui-avatars.com/api/?name=Hj+Maya&background=D84315&color=fff'
+    },
+    attendancePage: {
+      url: 'https://gen-lang-client-0329168072.web.app/',
+      title: 'Portal Absensi Karyawan',
+      subtitle: 'Silakan klik tombol di bawah untuk melanjutkan ke halaman absensi online. Pastikan Anda masuk dengan akun yang terdaftar.',
+      buttonText: 'Buka Halaman Absensi',
+      note: 'Jika mengalami kendala, hubungi Manajer Cabang.'
     },
     branches: [
       {
@@ -945,6 +959,7 @@ export class ConfigService {
             locationPage: { ...current.locationPage, ...(data.locationPage || {}), titleStyle: text(data.locationPage?.titleStyle), subtitleStyle: text(data.locationPage?.subtitleStyle), labelStyle: text(data.locationPage?.labelStyle), branchNameStyle: text(data.locationPage?.branchNameStyle), branchDetailStyle: text(data.locationPage?.branchDetailStyle), style: ensure(data.locationPage?.style, current.locationPage.style) },
             testimonialStyles: { ...current.testimonialStyles, reviewStyle: text(data.testimonialStyles?.reviewStyle), nameStyle: text(data.testimonialStyles?.nameStyle), roleStyle: text(data.testimonialStyles?.roleStyle) },
             footer: { ...current.footer, ...(data.footer || {}), descriptionStyle: text(data.footer?.descriptionStyle), copyrightStyle: text(data.footer?.copyrightStyle), brandStyle: text(data.footer?.brandStyle), socialMediaHeaderStyle: text(data.footer?.socialMediaHeaderStyle), style: ensure(data.footer?.style, current.footer.style) },
+            attendancePage: ensure(data.attendancePage, current.attendancePage),
             branches: updatedBranches,
             instagramProfile: data.instagramProfile || current.instagramProfile,
             gallery: data.gallery || current.gallery,

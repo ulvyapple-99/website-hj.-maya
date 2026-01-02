@@ -1,4 +1,3 @@
-
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfigService } from '../services/config.service';
@@ -15,14 +14,14 @@ import { ConfigService } from '../services/config.service';
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <h2 class="mt-6 text-3xl font-extrabold text-gray-900 font-serif">
-            Portal Absensi Karyawan
+            {{ config().attendancePage.title }}
           </h2>
           <p class="mt-2 text-sm text-gray-600">
-            Silakan klik tombol di bawah untuk melanjutkan ke halaman absensi online. Pastikan Anda masuk dengan akun yang terdaftar.
+            {{ config().attendancePage.subtitle }}
           </p>
         </div>
         <div class="mt-8">
-          <a href="https://gen-lang-client-0329168072.web.app/" 
+          <a [href]="config().attendancePage.url" 
              target="_blank" 
              rel="noopener noreferrer"
              class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors shadow-md hover:shadow-lg">
@@ -31,11 +30,11 @@ import { ConfigService } from '../services/config.service';
                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
               </svg>
             </span>
-            Buka Halaman Absensi
+            {{ config().attendancePage.buttonText }}
           </a>
         </div>
         <p class="mt-4 text-xs text-gray-500">
-          Jika mengalami kendala, hubungi Manajer Cabang.
+          {{ config().attendancePage.note }}
         </p>
       </div>
     </section>
