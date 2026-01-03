@@ -1,7 +1,8 @@
 import { Injectable, signal, effect, computed } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, Auth, User } from 'firebase/auth';
-import { getFirestore, doc, setDoc, Firestore, onSnapshot } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, Firestore, onSnapshot, addDoc, collection, serverTimestamp, deleteDoc, getDocs, query, where, documentId } from 'firebase/firestore';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 // INTERFACES
 export interface FirebaseConfig {
@@ -147,8 +148,8 @@ export interface AppConfig {
     buttonText2: string;
     button2Link: string;
     button2Style: TextStyle; 
-    bgImage: string;
-    fallbackImage: string; 
+    backgroundSlides: string[];
+    slideDuration: number;
     overlayOpacity: number; 
     textAlign: 'left' | 'center' | 'right'; 
     height: string; 
@@ -323,11 +324,13 @@ export class ConfigService {
   
   firestoreError = signal<string | null>(null);
 
+  slideshowContent = signal<{id: string; content: string}[]>([]);
+
   private defaultFirebaseConfig: FirebaseConfig = {
     apiKey: "AIzaSyDKnk7ypRSI5UFB-eI3WW-ZwakRfMSbz0U", 
     authDomain: "sate-maranggi-app.firebaseapp.com",
     projectId: "sate-maranggi-app",
-    storageBucket: "sate-maranggi-app.firebasestorage.app",
+    storageBucket: "sate-maranggi-app.appspot.com",
     messagingSenderId: "463298798562",
     appId: "1:463298798562:web:1f409a1aceb1e9cacb0fbb"
   };
@@ -388,8 +391,8 @@ export class ConfigService {
       buttonText2: 'Booking Meja',
       button2Link: '/reservation',
       button2Style: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFFFFF' },
-      bgImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920',
-      fallbackImage: '',
+      backgroundSlides: ['placeholder-id-1'],
+      slideDuration: 7,
       overlayOpacity: 0.6,
       textAlign: 'center',
       height: '95vh',
@@ -652,6 +655,10 @@ export class ConfigService {
     this.initFirebase();
 
     effect(() => {
+      this.fetchSlideshowMedia(this.config().hero.backgroundSlides);
+    });
+
+    effect(() => {
        const c = this.config();
        const root = document.documentElement;
        root.style.setProperty('--color-brand-brown', c.hero.style.backgroundColor);
@@ -688,7 +695,7 @@ export class ConfigService {
        this.setMeta('keywords', c.global.metaKeywords || 'sate maranggi, kuliner cimahi, sate enak');
        this.setMeta('og:title', c.global.logoText, 'property');
        this.setMeta('og:description', c.global.metaDescription, 'property');
-       this.setMeta('og:image', c.global.logoImage || c.hero.bgImage, 'property');
+       this.setMeta('og:image', c.global.logoImage || this.slideshowContent()?.[0]?.content, 'property');
        this.setMeta('theme-color', c.global.navbarColor);
 
        if (c.global.favicon) {
@@ -829,6 +836,15 @@ export class ConfigService {
       const configToUse = customConfig || this.defaultFirebaseConfig;
 
       this.app = initializeApp(configToUse);
+
+      // Initialize App Check
+      if (typeof window !== 'undefined') {
+        initializeAppCheck(this.app, {
+          provider: new ReCaptchaV3Provider('6Lewfj4sAAAAAEAoNckg0U0NYimijrDyEnBX2HRc'),
+          isTokenAutoRefreshEnabled: true
+        });
+      }
+
       this.auth = getAuth(this.app);
       this.db = getFirestore(this.app);
       
@@ -879,7 +895,7 @@ export class ConfigService {
     }
   }
   
-  async uploadFile(file: File): Promise<string> {
+  private convertFileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
         if (file.type.startsWith('video/')) {
             const reader = new FileReader();
@@ -897,7 +913,7 @@ export class ConfigService {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                const MAX_DIMENSION = 1600; 
+                const MAX_DIMENSION = 1920; 
                 if (width > height) {
                     if (width > MAX_DIMENSION) {
                         height *= MAX_DIMENSION / width;
@@ -914,7 +930,6 @@ export class ConfigService {
                 const ctx = canvas.getContext('2d');
                 ctx?.drawImage(img, 0, 0, width, height);
                 let dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                if (dataUrl.length > 950000) dataUrl = canvas.toDataURL('image/jpeg', 0.65);
                 resolve(dataUrl);
             };
             img.onerror = () => reject(new Error("Invalid image"));
@@ -922,6 +937,68 @@ export class ConfigService {
         reader.onerror = (e) => reject(e);
         reader.readAsDataURL(file);
     });
+  }
+
+  async addSlideshowItem(file: File): Promise<string> {
+      if (!this.db) throw new Error("Database not initialized.");
+      
+      const base64String = await this.convertFileToBase64(file);
+  
+      if (base64String.length > 1048487) { // 1MB limit minus some buffer
+        throw new Error("File is too large (>1MB) to be stored in the database, even as a single item.");
+      }
+  
+      const docRef = await addDoc(collection(this.db, 'slideshow_media'), {
+          content: base64String,
+          createdAt: serverTimestamp()
+      });
+      
+      return docRef.id;
+  }
+
+  async deleteSlideshowItem(id: string): Promise<void> {
+      if (!this.db) throw new Error("Database not initialized.");
+      const docRef = doc(this.db, 'slideshow_media', id);
+      await deleteDoc(docRef);
+  }
+
+  private async fetchSlideshowMedia(ids: string[]) {
+    if (!this.db || !ids || ids.length === 0) {
+      if (ids?.length === 1 && ids[0] === 'placeholder-id-1') {
+        this.slideshowContent.set([{ id: 'placeholder-id-1', content: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1920' }]);
+      } else {
+        this.slideshowContent.set([]);
+      }
+      return;
+    }
+    
+    const CHUNK_SIZE = 30;
+    const contentMap = new Map<string, string>();
+    
+    try {
+      for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+          const chunkIds = ids.slice(i, i + CHUNK_SIZE);
+          if (chunkIds.length === 0) continue;
+          const q = query(collection(this.db, 'slideshow_media'), where(documentId(), 'in', chunkIds));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+              contentMap.set(doc.id, doc.data()['content']);
+          });
+      }
+  
+      const orderedContent = ids
+        .map(id => ({ id, content: contentMap.get(id) }))
+        .filter((item): item is { id: string; content: string } => !!item.content);
+      this.slideshowContent.set(orderedContent);
+
+    } catch (e) {
+      console.error("Error fetching slideshow media:", e);
+      this.slideshowContent.set([]);
+    }
+  }
+
+  async uploadFile(file: File): Promise<string> {
+    return this.convertFileToBase64(file);
   }
 
   formatPhoneNumber(phone: string): string {
@@ -941,7 +1018,8 @@ export class ConfigService {
   isVideo(url: string): boolean {
     if (!url) return false;
     if (url.startsWith('data:video')) return true;
-    return url.endsWith('.mp4') || url.endsWith('.webm') || (url.includes('firebasestorage') && (url.includes('video')));
+    const lowerUrl = url.toLowerCase();
+    return lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.webm') || (url.includes('firebasestorage') && (url.includes('video')));
   }
 
   is3D(url: string): boolean {
@@ -1007,13 +1085,21 @@ export class ConfigService {
             };
         });
 
+        const heroData = data.hero || {};
+        // This migration logic is no longer needed as we now use IDs
+        // if (heroData.bgImage && !heroData.backgroundSlides) {
+        //     heroData.backgroundSlides = [heroData.bgImage];
+        //     delete heroData.bgImage;
+        //     delete heroData.fallbackImage;
+        // }
+
         this.config.update(current => ({
             ...current,
             ...data,
             features: ensure(data.features, current.features),
             global: { ...current.global, ...(data.global || {}), logoStyle: text(data.global?.logoStyle), metaStyle: text(data.global?.metaStyle) },
             intro: ensure(data.intro, current.intro),
-            hero: { ...current.hero, ...(data.hero || {}), badgeStyle: text(data.hero?.badgeStyle), titleStyle: text(data.hero?.titleStyle), highlightStyle: text(data.hero?.highlightStyle), subtitleStyle: text(data.hero?.subtitleStyle), button1Style: text(data.hero?.button1Style), button2Style: text(data.hero?.button2Style), style: ensure(data.hero?.style, current.hero.style) },
+            hero: { ...current.hero, ...heroData, badgeStyle: text(data.hero?.badgeStyle), titleStyle: text(data.hero?.titleStyle), highlightStyle: text(data.hero?.highlightStyle), subtitleStyle: text(data.hero?.subtitleStyle), button1Style: text(data.hero?.button1Style), button2Style: text(data.hero?.button2Style), style: ensure(data.hero?.style, current.hero.style) },
             about: { ...current.about, ...(data.about || {}), titleStyle: text(data.about?.titleStyle), descriptionStyle: text(data.about?.descriptionStyle), quoteStyle: text(data.about?.quoteStyle), founderNameStyle: text(data.about?.founderNameStyle), ctaStyle: ensure(data.about?.ctaStyle, current.about.ctaStyle), stats: ensure(data.about?.stats, current.about.stats), statsStyle: text(data.about?.statsStyle), statsLabelStyle: text(data.about?.statsLabelStyle), ctaText: data.about?.ctaText || 'Lihat Menu', ctaLink: data.about?.ctaLink || '/menu', quote: data.about?.quote || '', founderName: data.about?.founderName || '', trustedLogos: data.about?.trustedLogos || [], showPattern: data.about?.showPattern ?? true, enableGlassEffect: data.about?.enableGlassEffect ?? false, style: ensure(data.about?.style, current.about.style) },
             menuPage: { ...current.menuPage, ...(data.menuPage || {}), titleStyle: text(data.menuPage?.titleStyle), subtitleStyle: text(data.menuPage?.subtitleStyle), style: ensure(data.menuPage?.style, current.menuPage.style) },
             packagesPage: { ...current.packagesPage, ...(data.packagesPage || {}), titleStyle: text(data.packagesPage?.titleStyle), subtitleStyle: text(data.packagesPage?.subtitleStyle), style: ensure(data.packagesPage?.style, current.packagesPage.style) },

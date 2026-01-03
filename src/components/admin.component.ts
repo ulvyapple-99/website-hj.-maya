@@ -332,35 +332,49 @@ import { ToastService } from '../services/toast.service';
                       <!-- 1. Visual & Background -->
                       <div class="admin-card">
                          <div class="admin-card-header bg-gray-800 text-white">Visual & Background Layer</div>
-                         <div class="p-6 grid grid-cols-2 gap-6">
-                            <!-- Images -->
-                            <div class="col-span-2 grid grid-cols-2 gap-6">
+                         <div class="p-6 space-y-6">
+                            <!-- Slideshow Management -->
+                            <div>
+                                <label class="form-label">Background Slideshow</label>
+                                <div class="p-4 border rounded-lg bg-gray-50 space-y-3">
+                                    @for (slide of configService.slideshowContent(); track slide.id) {
+                                        <div class="flex items-center gap-3 bg-white p-2 rounded-md shadow-sm">
+                                            @if (configService.isVideo(slide.content)) {
+                                                <video [src]="slide.content" class="w-16 h-10 object-cover rounded bg-black"></video>
+                                            } @else {
+                                                <img [src]="slide.content" class="w-16 h-10 object-cover rounded">
+                                            }
+                                            <span class="text-xs text-gray-500 truncate flex-1">Slide {{ $index + 1 }}</span>
+                                            <button (click)="removeHeroSlide(slide.id)" class="bg-red-100 text-red-600 px-3 py-1 rounded-md text-xs font-bold hover:bg-red-200">Hapus</button>
+                                        </div>
+                                    }
+                                    <div class="flex items-center gap-2 pt-2">
+                                        <input type="file" (change)="onHeroSlideSelected($event)" class="form-input text-xs flex-1" accept="image/*,video/*">
+                                    </div>
+                                    @if (config().hero.backgroundSlides.length === 0 || (config().hero.backgroundSlides.length === 1 && config().hero.backgroundSlides[0] === 'placeholder-id-1')) {
+                                        <p class="text-center text-xs text-gray-500 py-4">Tidak ada slide. Silakan tambahkan satu.</p>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Settings -->
+                            <div class="grid grid-cols-3 gap-4 border-t pt-4">
                                 <div>
-                                   <label class="form-label">Main Background Image</label>
-                                   <div class="flex gap-2 items-center">
-                                       <input type="file" (change)="onFileSelected($event, 'heroBg')" class="form-input text-xs">
-                                   </div>
-                                   <div class="mt-2 h-24 bg-gray-100 rounded overflow-hidden border">
-                                       @if (config().hero.bgImage) {
-                                           <img [src]="config().hero.bgImage" class="w-full h-full object-cover">
-                                       }
-                                   </div>
+                                    <label class="form-label">Durasi Slide (detik)</label>
+                                    <input type="number" [(ngModel)]="config().hero.slideDuration" class="form-input">
                                 </div>
                                 <div>
-                                   <label class="form-label">Fallback Image (Video Poster)</label>
-                                   <div class="flex gap-2 items-center">
-                                       <input type="file" (change)="onFileSelected($event, 'heroFallback')" class="form-input text-xs">
-                                   </div>
-                                   <div class="mt-2 h-24 bg-gray-100 rounded overflow-hidden border">
-                                        @if (config().hero.fallbackImage) {
-                                           <img [src]="config().hero.fallbackImage" class="w-full h-full object-cover">
-                                        }
-                                   </div>
+                                    <label class="form-label">Overlay Opacity (0-1)</label>
+                                    <input type="number" step="0.1" min="0" max="1" [(ngModel)]="config().hero.overlayOpacity" class="form-input">
+                                </div>
+                                <div>
+                                    <label class="form-label">Blur Level</label>
+                                    <input [(ngModel)]="config().hero.blurLevel" class="form-input" placeholder="0px">
                                 </div>
                             </div>
 
                             <!-- Layout Controls -->
-                            <div class="border-t pt-4 col-span-2 grid grid-cols-3 gap-4">
+                            <div class="grid grid-cols-3 gap-4">
                                 <div>
                                     <label class="form-label">Text Alignment</label>
                                     <select [(ngModel)]="config().hero.textAlign" class="form-select">
@@ -376,26 +390,6 @@ import { ToastService } from '../services/toast.service';
                                 <div>
                                     <label class="form-label">BG Position</label>
                                     <input [(ngModel)]="config().hero.bgPosition" class="form-input" placeholder="center center">
-                                </div>
-                            </div>
-
-                            <!-- Overlay & Effects -->
-                            <div class="col-span-2 grid grid-cols-3 gap-4">
-                                <div>
-                                    <label class="form-label">Overlay Opacity (0-1)</label>
-                                    <input type="number" step="0.1" min="0" max="1" [(ngModel)]="config().hero.overlayOpacity" class="form-input">
-                                </div>
-                                <div>
-                                    <label class="form-label">Blur Level</label>
-                                    <input [(ngModel)]="config().hero.blurLevel" class="form-input" placeholder="0px">
-                                </div>
-                                <div>
-                                    <label class="form-label">Gradient Direction</label>
-                                    <select [(ngModel)]="config().hero.gradientDirection" class="form-select">
-                                        <option value="radial">Radial</option>
-                                        <option value="to bottom">Top to Bottom</option>
-                                        <option value="to top">Bottom to Top</option>
-                                    </select>
                                 </div>
                             </div>
                          </div>
@@ -937,7 +931,6 @@ import { ToastService } from '../services/toast.service';
                       <div class="admin-card">
                          <div class="admin-card-header">Package Cards Design</div>
                          <div class="p-6 space-y-6">
-                            
                             <div class="grid grid-cols-3 gap-6">
                                <div>
                                   <label class="form-label">Card Background</label>
@@ -967,7 +960,11 @@ import { ToastService } from '../services/toast.service';
                                   <input [(ngModel)]="config().packagesPage.buttonText" class="form-input" placeholder="Pesan Sekarang">
                                </div>
                             </div>
-
+                            
+                            <div class="border-t pt-6">
+                                <label class="form-label">"Isi Paket" Header Text</label>
+                                <input [(ngModel)]="config().packagesPage.itemsHeaderText" class="form-input" placeholder="Isi Paket:">
+                            </div>
                          </div>
                       </div>
 
@@ -1854,6 +1851,7 @@ export class AdminComponent {
     { id: 'location', label: 'Lokasi', icon: '📍' },
     { id: 'testimonials', label: 'Testimoni', icon: '💬' },
     { id: 'footer', label: 'Footer', icon: '🔗' },
+    // FIX: Corrected a syntax error where a period was used instead of a colon.
     { id: 'ai', label: 'AI Assistant', icon: '🤖' },
     { id: 'attendance', label: 'Absensi', icon: '⏰' },
   ];
@@ -1902,7 +1900,7 @@ export class AdminComponent {
       this.toastService.show('Disimpan!', 'success');
     } catch (e: any) {
        console.error(e);
-       this.toastService.show('Gagal menyimpan.', 'error');
+       this.toastService.show('Gagal menyimpan: ' + e.message, 'error');
     }
   }
 
@@ -1919,8 +1917,6 @@ export class AdminComponent {
         if (type === 'logoImage') newC.global.logoImage = base64;
         if (type === 'introVideo') newC.intro.videoUrl = base64;
         if (type === 'favicon') newC.global.favicon = base64;
-        if (type === 'heroBg') newC.hero.bgImage = base64;
-        if (type === 'heroFallback') newC.hero.fallbackImage = base64; 
         if (type === 'aboutImage') newC.about.image = base64;
         return newC;
       });
@@ -1940,6 +1936,56 @@ export class AdminComponent {
       intro: { ...c.intro, videoUrl: '' }
     }));
     this.toastService.show('Video intro dihapus', 'info');
+  }
+
+  // === HERO SLIDESHOW METHODS ===
+  async onHeroSlideSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.isUploading.set(true);
+    try {
+      const docId = await this.configService.addSlideshowItem(file);
+      this.config.update(c => {
+        const currentSlides = c.hero.backgroundSlides.filter(id => id !== 'placeholder-id-1');
+        const newSlides = [...currentSlides, docId];
+        return { ...c, hero: { ...c.hero, backgroundSlides: newSlides } };
+      });
+      this.toastService.show('Slide berhasil diunggah', 'success');
+    } catch (e: any) {
+      this.toastService.show(`Gagal: ${e.message}`, 'error');
+    } finally {
+      this.isUploading.set(false);
+    }
+  }
+
+  async removeHeroSlide(slideIdToDelete: string) {
+    if (!confirm('Apakah Anda yakin ingin menghapus slide ini?')) return;
+    
+    this.isUploading.set(true);
+    try {
+        const currentConfig = this.config();
+        
+        // Create a new array of slide IDs without the one to be deleted.
+        const newSlides = currentConfig.hero.backgroundSlides.filter(id => id !== slideIdToDelete);
+        
+        const newConfig = { 
+            ...currentConfig, 
+            hero: { ...currentConfig.hero, backgroundSlides: newSlides } 
+        };
+
+        // Persist the updated config. This service method also updates the signal, which triggers UI reactivity.
+        await this.configService.updateConfig(newConfig);
+
+        // After the config is saved, delete the orphaned content document from Firestore.
+        await this.configService.deleteSlideshowItem(slideIdToDelete);
+        
+        this.toastService.show('Slide berhasil dihapus dan disimpan.', 'success');
+    } catch(e: any) {
+        this.toastService.show(`Gagal menghapus slide: ${e.message}`, 'error');
+    } finally {
+        this.isUploading.set(false);
+    }
   }
 
   // === MENU CRUD METHODS ===

@@ -1,6 +1,6 @@
-
 import { Injectable, inject } from '@angular/core';
-import { GoogleGenAI } from '@google/genai';
+// FIX: Imported GenerateContentResponse for proper response typing.
+import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -10,9 +10,6 @@ export class GeminiService {
   private ai: GoogleGenAI | null = null;
   private configService = inject(ConfigService);
   
-  // GANTI DENGAN API KEY GOOGLE AI STUDIO ANDA JIKA 'process.env' ERROR DI DEPLOYMENT
-  private HARDCODED_API_KEY = ''; 
-  
   // Rate Limiting
   private lastCallTime = 0;
   private MIN_INTERVAL_MS = 3000; // 3 seconds delay
@@ -21,20 +18,16 @@ export class GeminiService {
     this.initAI();
   }
 
+  // FIX: Refactored to remove hardcoded API key and rely solely on process.env as per guidelines.
   private initAI() {
-    let apiKey = this.HARDCODED_API_KEY;
-    
-    // Try to get from env if available (local dev)
     try {
-      if (!apiKey && typeof process !== 'undefined' && process.env) {
-        apiKey = process.env['API_KEY'] || '';
+      if (typeof process !== 'undefined' && process.env && process.env['API_KEY']) {
+        this.ai = new GoogleGenAI({ apiKey: process.env['API_KEY'] });
+      } else {
+        console.warn("Gemini API key not found in process.env.API_KEY. AI features will be disabled.");
       }
     } catch (e) {
-      // Ignore env errors
-    }
-
-    if (apiKey) {
-      this.ai = new GoogleGenAI({ apiKey });
+      console.error("Error initializing Gemini AI:", e);
     }
   }
 
@@ -46,11 +39,9 @@ export class GeminiService {
     }
     this.lastCallTime = now;
 
+    // FIX: Simplified AI availability check to provide a generic user-friendly message.
     if (!this.ai) {
-      this.initAI(); // Try to init again
-      if (!this.ai) {
-         return "Maaf, sistem AI belum dikonfigurasi (API Key Missing). Silakan hubungi admin.";
-      }
+       return "Maaf, sistem AI sedang tidak tersedia saat ini.";
     }
 
     try {
@@ -75,12 +66,14 @@ export class GeminiService {
         Pelanggan bertanya: "${query}"
       `;
 
-      const response = await this.ai.models.generateContent({
+      const response: GenerateContentResponse = await this.ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
       });
 
-      return response.text || "Maaf, saya sedang berpikir keras tapi tidak menemukan jawaban. Coba tanya lagi ya!";
+      // FIX: Use the response.text getter and provide a fallback for empty strings.
+      const text = response.text;
+      return text || "Maaf, saya sedang berpikir keras tapi tidak menemukan jawaban. Coba tanya lagi ya!";
     } catch (error) {
       console.error('Gemini Error:', error);
       return "Waduh, koneksi ke dapur AI terputus. Silakan pilih menu Sate Sapi saja, pasti enak!";

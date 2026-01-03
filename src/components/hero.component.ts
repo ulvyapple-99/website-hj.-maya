@@ -1,5 +1,4 @@
-
-import { Component, inject, HostListener, signal } from '@angular/core';
+import { Component, inject, HostListener, signal, OnInit, OnDestroy, effect } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ConfigService } from '../services/config.service';
 import { CommonModule } from '@angular/common';
@@ -16,29 +15,32 @@ import { CommonModule } from '@angular/common';
       [style.color]="config().hero.style.textColor"
       [style.fontFamily]="config().hero.style.fontFamily"
     >
-      <!-- Background overlay image with Parallax & Blur -->
+      <!-- Background Slideshow with Parallax & Blur -->
       <div class="absolute inset-0 overflow-hidden">
         <div class="absolute inset-0 scale-110 will-change-transform" 
              [style.transform]="'translateY(' + scrollY() * 0.5 + 'px)'"
              [style.filter]="'blur(' + (config().hero.blurLevel || '0px') + ')'">
            
-           @if (isVideo(config().hero.bgImage)) {
-              <video 
-                [src]="config().hero.bgImage" 
-                [poster]="config().hero.fallbackImage" 
-                autoplay muted loop playsinline
-                class="w-full h-full object-cover"
-                [style.opacity]="1 - config().hero.overlayOpacity"
-                [style.objectPosition]="config().hero.bgPosition || 'center center'"
-              ></video>
-           } @else {
-              <img [src]="config().hero.bgImage" 
-                   fetchpriority="high"
-                   decoding="async"
-                   alt="Hero Background" 
-                   class="w-full h-full object-cover" 
-                   [style.opacity]="1 - config().hero.overlayOpacity"
-                   [style.objectPosition]="config().hero.bgPosition || 'center center'">
+           @for (slide of slides(); track slide.id) {
+              <div class="absolute inset-0 transition-opacity duration-1000" [style.opacity]="$index === currentSlideIndex() ? 1 : 0">
+                @if (isVideo(slide.content)) {
+                    <video 
+                      [src]="slide.content" 
+                      autoplay muted loop playsinline
+                      class="w-full h-full object-cover"
+                      [style.opacity]="1 - config().hero.overlayOpacity"
+                      [style.objectPosition]="config().hero.bgPosition || 'center center'"
+                    ></video>
+                } @else {
+                    <img [src]="slide.content" 
+                        fetchpriority="high"
+                        decoding="async"
+                        alt="Hero Background Slide" 
+                        class="w-full h-full object-cover" 
+                        [style.opacity]="1 - config().hero.overlayOpacity"
+                        [style.objectPosition]="config().hero.bgPosition || 'center center'">
+                }
+              </div>
            }
         </div>
         
@@ -171,10 +173,43 @@ import { CommonModule } from '@angular/common';
     .animate-width-grow { animation: width-grow 1s ease-out forwards; animation-delay: 0.2s; }
   `]
 })
-export class HeroComponent {
+export class HeroComponent implements OnInit, OnDestroy {
   configService = inject(ConfigService);
   config = this.configService.config;
+  slides = this.configService.slideshowContent;
   scrollY = signal(0);
+  currentSlideIndex = signal(0);
+  private slideInterval: any;
+
+  constructor() {
+    effect(() => {
+      this.setupInterval();
+    });
+  }
+
+  ngOnInit() {
+    this.setupInterval();
+  }
+
+  ngOnDestroy() {
+    if (this.slideInterval) {
+      clearInterval(this.slideInterval);
+    }
+  }
+
+  setupInterval() {
+    if (this.slideInterval) {
+      clearInterval(this.slideInterval);
+    }
+    const currentSlides = this.slides();
+    const duration = (this.config().hero.slideDuration || 7) * 1000;
+
+    if (currentSlides && currentSlides.length > 1) {
+      this.slideInterval = setInterval(() => {
+        this.currentSlideIndex.update(i => (i + 1) % currentSlides.length);
+      }, duration);
+    }
+  }
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
