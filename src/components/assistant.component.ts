@@ -1,8 +1,16 @@
 import { Component, signal, inject, ViewChild, ElementRef, AfterViewChecked, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GeminiService } from '../services/gemini.service';
+import { GeminiService, AIResponse } from '../services/gemini.service';
 import { ConfigService } from '../services/config.service';
+
+// NEW: Updated interface for chat history
+interface ChatMessage {
+  role: 'user' | 'ai';
+  text: string;
+  link?: string;
+  linkText?: string;
+}
 
 @Component({
   selector: 'app-assistant',
@@ -129,15 +137,29 @@ import { ConfigService } from '../services/config.service';
                    {{ msg.role === 'user' ? 'U' : 'AI' }}
                 </div>
                 
-                <!-- Bubble -->
-                <div class="p-3 rounded-2xl text-sm max-w-[85%] shadow-sm leading-relaxed"
-                     [class.rounded-tl-none]="msg.role === 'ai'"
-                     [class.rounded-tr-none]="msg.role === 'user'"
-                     [class.bg-white]="msg.role === 'ai'"
-                     [class.text-gray-800]="msg.role === 'ai'"
-                     [class.text-white]="msg.role === 'user'"
-                     [style.backgroundColor]="msg.role === 'user' ? (config().ai.buttonColor || brandColor) : ''">
-                  {{ msg.text }}
+                <!-- Bubble with potential action button -->
+                <div class="max-w-[85%]">
+                  <div class="p-3 rounded-2xl text-sm shadow-sm leading-relaxed inline-block"
+                       [class.rounded-tl-none]="msg.role === 'ai'"
+                       [class.rounded-tr-none]="msg.role === 'user'"
+                       [class.bg-white]="msg.role === 'ai'"
+                       [class.text-gray-800]="msg.role === 'ai'"
+                       [class.text-white]="msg.role === 'user'"
+                       [style.backgroundColor]="msg.role === 'user' ? (config().ai.buttonColor || brandColor) : ''">
+                    {{ msg.text }}
+                  </div>
+                  
+                  <!-- NEW: Actionable Link Button -->
+                  @if (msg.link && msg.linkText) {
+                    <div class="mt-2" [class.text-right]="msg.role === 'user'">
+                      <a [href]="msg.link.startsWith('/') ? '#' + msg.link : msg.link" 
+                         [target]="msg.link.startsWith('/') ? '_self' : '_blank'"
+                         (click)="isChatOpen.set(false)"
+                         class="inline-block bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md transition transform hover:scale-105 active:scale-95">
+                         {{ msg.linkText }}
+                      </a>
+                    </div>
+                  }
                 </div>
              </div>
            }
@@ -206,14 +228,12 @@ export class AssistantComponent implements AfterViewChecked {
   isFabMenuOpen = signal(false);
   isChatOpen = signal(false);
   userInput = signal('');
-  chatHistory = signal<{role: 'user'|'ai', text: string}[]>([]);
+  chatHistory = signal<ChatMessage[]>([]); // Use new interface
   isLoading = signal(false);
   
-  // Brand color fallback
   brandColor = '#D84315'; 
 
   constructor() {
-     // Persist Chat History
      try {
        const saved = localStorage.getItem('ai_chat_history');
        if(saved) this.chatHistory.set(JSON.parse(saved));
@@ -264,11 +284,16 @@ export class AssistantComponent implements AfterViewChecked {
     this.userInput.set('');
     this.isLoading.set(true);
 
-    // Call Gemini
-    const reply = await this.geminiService.getRecommendation(text);
+    // Call Gemini for a structured response
+    const reply: AIResponse = await this.geminiService.getRecommendation(text);
 
-    // Add AI reply
-    this.chatHistory.update(history => [...history, {role: 'ai', text: reply}]);
+    // Add structured AI reply to history
+    this.chatHistory.update(history => [...history, {
+      role: 'ai', 
+      text: reply.response,
+      link: reply.actionableLink,
+      linkText: reply.linkText
+    }]);
     this.isLoading.set(false);
   }
 }

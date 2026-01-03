@@ -1,7 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-// FIX: Imported GenerateContentResponse for proper response typing.
-import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
+import { GoogleGenAI, GenerateContentResponse, Type } from '@google/genai';
 import { ConfigService } from './config.service';
+
+// NEW: Interface for structured AI response
+export interface AIResponse {
+  intent: 'MENU_RECOMMENDATION' | 'LOCATION_INFO' | 'OPERATIONAL_HOURS' | 'RESERVATION_INQUIRY' | 'GENERAL_FAQ' | 'UNKNOWN';
+  response: string;
+  actionableLink?: string;
+  linkText?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -10,15 +17,13 @@ export class GeminiService {
   private ai: GoogleGenAI | null = null;
   private configService = inject(ConfigService);
   
-  // Rate Limiting
   private lastCallTime = 0;
-  private MIN_INTERVAL_MS = 3000; // 3 seconds delay
+  private MIN_INTERVAL_MS = 3000;
 
   constructor() {
     this.initAI();
   }
 
-  // FIX: Refactored to remove hardcoded API key and rely solely on process.env as per guidelines.
   private initAI() {
     try {
       if (typeof process !== 'undefined' && process.env && process.env['API_KEY']) {
@@ -31,52 +36,114 @@ export class GeminiService {
     }
   }
 
-  async getRecommendation(query: string): Promise<string> {
-    // Rate Limit Check
+  // NEW: Helper to get branch context
+  private getBranchContext(): string {
+    const branches = this.configService.config().branches;
+    return branches.map(b => 
+      `- Cabang: ${b.name}\n  Alamat: ${b.address}\n  Jam Buka: ${b.hours}\n  Link Google Maps: ${b.googleMapsUrl}`
+    ).join('\n');
+  }
+
+  // NEW: Helper to get reservation context
+  private getReservationContext(): string {
+    const branches = this.configService.config().branches;
+    return branches.map(b => 
+      `- Cabang ${b.name}: Reservasi reguler min. ${b.minPaxRegular} orang, Buka Puasa min. ${b.minPaxRamadan} orang.`
+    ).join('\n');
+  }
+
+  // UPGRADED: Method now returns a structured AIResponse object
+  async getRecommendation(query: string): Promise<AIResponse> {
     const now = Date.now();
     if (now - this.lastCallTime < this.MIN_INTERVAL_MS) {
-       return "Mohon tunggu sebentar sebelum mengirim pesan lagi ya...";
+       return { intent: 'UNKNOWN', response: "Mohon tunggu sebentar sebelum mengirim pesan lagi ya..." };
     }
     this.lastCallTime = now;
 
-    // FIX: Simplified AI availability check to provide a generic user-friendly message.
     if (!this.ai) {
-       return "Maaf, sistem AI sedang tidak tersedia saat ini.";
+       return { intent: 'UNKNOWN', response: "Maaf, sistem AI sedang tidak tersedia saat ini." };
     }
 
     try {
       const config = this.configService.config();
       const menuList = this.configService.getMenuContext();
+      const branchInfo = this.getBranchContext();
+      const reservationInfo = this.getReservationContext();
+      
+      const systemInstruction = `
+        Anda adalah asisten virtual Sate Maranggi Hj. Maya yang cerdas dan multi-fungsi.
+        Tugas Anda adalah memahami niat pelanggan dan memberikan respons yang akurat dalam format JSON.
 
-      // INSTRUCTION TO PREVENT STOCK HALLUCINATION
-      const strictRules = `
         ATURAN PENTING:
-        1. JANGAN PERNAH menyebutkan stok (sisa porsi, tersedia/tidak). Anggap semua menu di list tersedia kecuali tertulis [HABIS].
-        2. Fokus pada rekomendasi rasa, bahan, dan kecocokan menu.
-        3. Jawab dengan ramah dan singkat.
-      `;
+        1. JANGAN PERNAH menyebutkan stok (sisa porsi, tersedia/tidak). Anggap semua menu di list tersedia.
+        2. Jawab dengan ramah, singkat, dan sopan dalam Bahasa Indonesia.
+        3. Gunakan data yang diberikan di bawah ini sebagai SATU-SATUNYA sumber kebenaran.
+        4. Jika pertanyaan di luar konteks (misal: cuaca, politik), setel intent ke 'UNKNOWN'.
 
-      const prompt = `
-        ${strictRules}
-        ${config.ai.systemInstruction}
-        
-        DATA MENU RESTORAN KAMI (Gunakan data ini untuk rekomendasi):
+        DATA RESTORAN:
+        ---
+        [DATA MENU]
         ${menuList}
-        
-        Pelanggan bertanya: "${query}"
+        ---
+        [DATA LOKASI & JAM OPERASIONAL]
+        ${branchInfo}
+        ---
+        [DATA RESERVASI]
+        ${reservationInfo}
+        ---
+        [FAQ UMUM]
+        - Halal: Ya, semua makanan dan minuman kami 100% Halal.
+        - Parkir: Tersedia area parkir yang luas untuk mobil dan motor.
+        - Pembayaran: Kami menerima tunai, QRIS, debit, dan kartu kredit.
+        ---
+
+        INSTRUKSI TUGAS:
+        Analisis pertanyaan pelanggan dan identifikasi niatnya. Kemudian, bentuk respons JSON berdasarkan skema yang ditentukan.
+        - Jika pelanggan bertanya tentang menu, rekomendasi, atau harga: set 'intent' ke 'MENU_RECOMMENDATION'.
+        - Jika pelanggan bertanya tentang lokasi, alamat, atau jam buka: set 'intent' ke 'LOCATION_INFO' atau 'OPERATIONAL_HOURS'. Jika relevan, sertakan Google Maps link di 'actionableLink'.
+        - Jika pelanggan bertanya tentang booking, reservasi, atau pesan tempat: set 'intent' ke 'RESERVATION_INQUIRY'. Berikan informasi minimal pax dan arahkan ke halaman reservasi dengan 'actionableLink' ke '/reservation'.
+        - Jika pertanyaan umum (halal, parkir, dll.): set 'intent' ke 'GENERAL_FAQ'.
+        - Jika tidak relevan: set 'intent' ke 'UNKNOWN'.
       `;
 
-      const response: GenerateContentResponse = await this.ai.models.generateContent({
+      const responseSchema = {
+        type: Type.OBJECT,
+        properties: {
+          intent: { type: Type.STRING, enum: ['MENU_RECOMMENDATION', 'LOCATION_INFO', 'OPERATIONAL_HOURS', 'RESERVATION_INQUIRY', 'GENERAL_FAQ', 'UNKNOWN'] },
+          response: { type: Type.STRING, description: "Jawaban teks yang ramah untuk pelanggan." },
+          actionableLink: { type: Type.STRING, description: "URL relevan jika ada (misal: link Google Maps atau halaman reservasi '/reservation'). Kosongkan jika tidak ada." },
+          linkText: { type: Type.STRING, description: "Teks untuk tombol/link (misal: 'Buka Google Maps', 'Reservasi di Sini'). Kosongkan jika tidak ada link." }
+        },
+        required: ["intent", "response"]
+      };
+
+      const prompt = `Pelanggan bertanya: "${query}"`;
+
+      const geminiResponse: GenerateContentResponse = await this.ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
+        config: {
+          systemInstruction: systemInstruction,
+          responseMimeType: "application/json",
+          responseSchema: responseSchema
+        }
       });
 
-      // FIX: Use the response.text getter and provide a fallback for empty strings.
-      const text = response.text;
-      return text || "Maaf, saya sedang berpikir keras tapi tidak menemukan jawaban. Coba tanya lagi ya!";
+      const text = geminiResponse.text;
+      if (!text) {
+         throw new Error("Empty response from AI.");
+      }
+      
+      // Parse the JSON response
+      const parsedResponse: AIResponse = JSON.parse(text);
+      return parsedResponse;
+
     } catch (error) {
       console.error('Gemini Error:', error);
-      return "Waduh, koneksi ke dapur AI terputus. Silakan pilih menu Sate Sapi saja, pasti enak!";
+      return { 
+        intent: 'UNKNOWN', 
+        response: "Waduh, koneksi ke dapur AI terputus. Silakan coba lagi atau pilih menu Sate Sapi saja, pasti enak!" 
+      };
     }
   }
 }
