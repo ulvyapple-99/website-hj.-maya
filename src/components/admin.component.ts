@@ -182,6 +182,34 @@ import { ToastService } from '../services/toast.service';
                          </div>
                       </div>
 
+                      <!-- Background Music -->
+                      <div class="admin-card">
+                        <div class="admin-card-header bg-green-800 text-white">Background Music</div>
+                        <div class="p-6 space-y-6">
+                            <label class="flex items-center gap-2 cursor-pointer font-bold text-sm select-none">
+                                <input type="checkbox" [(ngModel)]="config().global.enableBackgroundMusic" class="w-5 h-5 text-green-600 rounded focus:ring-green-500"> 
+                                Aktifkan Musik Latar
+                            </label>
+
+                            <div class="border-t pt-4">
+                                <div>
+                                    <label class="form-label">Upload File Audio (.mp3, .wav, .ogg)</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" (change)="onFileSelected($event, 'backgroundMusic')" class="form-input text-xs" accept="audio/*">
+                                        @if(config().global.backgroundMusicUrl) {
+                                            <button (click)="removeBackgroundMusic()" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200" title="Hapus Musik">✕</button>
+                                        }
+                                    </div>
+                                    @if(config().global.backgroundMusicUrl) {
+                                        <div class="mt-2 p-2 bg-gray-100 rounded border overflow-hidden">
+                                            <audio [src]="config().global.backgroundMusicUrl" controls class="w-full"></audio>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+
                       <!-- Intro Video -->
                       <div class="admin-card">
                         <div class="admin-card-header bg-indigo-800 text-white">Intro Video Settings</div>
@@ -1919,6 +1947,7 @@ export class AdminComponent {
       this.config.update(c => {
         const newC = { ...c };
         if (type === 'logoImage') newC.global.logoImage = base64;
+        if (type === 'backgroundMusic') newC.global.backgroundMusicUrl = base64;
         if (type === 'introVideo') newC.intro.videoUrl = base64;
         if (type === 'favicon') newC.global.favicon = base64;
         if (type === 'aboutImage') newC.about.image = base64;
@@ -1940,6 +1969,15 @@ export class AdminComponent {
       intro: { ...c.intro, videoUrl: '' }
     }));
     this.toastService.show('Video intro dihapus', 'info');
+  }
+  
+  removeBackgroundMusic() {
+    if (!confirm('Apakah Anda yakin ingin menghapus musik latar?')) return;
+    this.config.update(c => ({
+      ...c,
+      global: { ...c.global, backgroundMusicUrl: '' }
+    }));
+    this.toastService.show('Musik latar dihapus', 'info');
   }
 
   // === HERO SLIDESHOW METHODS ===

@@ -6,6 +6,7 @@ import { FooterComponent } from './components/footer.component';
 import { AdminComponent } from './components/admin.component';
 import { CursorComponent } from './components/cursor.component';
 import { ToastComponent } from './components/toast.component';
+import { MusicPlayerComponent } from './components/music-player.component';
 import { ConfigService } from './services/config.service';
 
 @Component({
@@ -18,11 +19,13 @@ import { ConfigService } from './services/config.service';
     FooterComponent,
     AdminComponent,
     CursorComponent,
-    ToastComponent
+    ToastComponent,
+    MusicPlayerComponent
   ],
   template: `
     <app-cursor></app-cursor>
     <app-toast></app-toast>
+    <app-music-player></app-music-player>
     
     <!-- Maintenance Overlay -->
     @if (config().global.maintenanceMode) {

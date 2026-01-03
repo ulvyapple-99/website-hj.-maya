@@ -127,7 +127,9 @@ export interface AppConfig {
     customJs: string; 
     scrollbarColor: string; 
     floatingWhatsapp: string; 
-    enableSmoothScroll: boolean; 
+    enableSmoothScroll: boolean;
+    enableBackgroundMusic: boolean;
+    backgroundMusicUrl: string;
   };
   intro: {
     enabled: boolean;
@@ -373,7 +375,9 @@ export class ConfigService {
       customJs: '',
       scrollbarColor: '#D84315',
       floatingWhatsapp: '6281223456789',
-      enableSmoothScroll: true
+      enableSmoothScroll: true,
+      enableBackgroundMusic: false,
+      backgroundMusicUrl: ''
     },
     intro: {
       enabled: false,
@@ -906,7 +910,7 @@ export class ConfigService {
   
   private convertFileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
-        if (file.type.startsWith('video/')) {
+        if (file.type.startsWith('video/') || file.type.startsWith('audio/')) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = (event: any) => resolve(event.target.result);
