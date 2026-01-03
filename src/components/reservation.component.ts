@@ -424,11 +424,17 @@ export class ReservationComponent {
   }
 
   currentBranch = computed(() => this.config().branches[this.selectedBranchIndex()]);
-  currentBranchMenu = computed(() => this.currentBranch().menu);
+  
+  currentBranchMenu = computed(() => {
+    const branch = this.currentBranch();
+    if (!branch) return [];
+    return this.configService.menuItems().filter(item => item.branchId === branch.id);
+  });
   
   // Blind Spot 6: Search Logic
   filteredMenu = computed(() => {
      const query = this.menuSearch().toLowerCase();
+     if(!this.currentBranchMenu()) return [];
      return this.currentBranchMenu().filter(m => 
         m.name.toLowerCase().includes(query) || (m.desc && m.desc.toLowerCase().includes(query))
      );
