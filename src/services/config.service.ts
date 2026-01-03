@@ -1,7 +1,7 @@
 import { Injectable, signal, effect, computed } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, Auth, User } from 'firebase/auth';
-import { getFirestore, doc, setDoc, Firestore, onSnapshot, addDoc, collection, serverTimestamp, deleteDoc, getDocs, query, where, documentId } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, Firestore, onSnapshot, addDoc, collection, serverTimestamp, deleteDoc, getDocs, query, where, documentId, updateDoc, Unsubscribe } from 'firebase/firestore';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 // INTERFACES
@@ -21,6 +21,8 @@ export interface TextStyle {
 }
 
 export interface MenuItem {
+  id?: string;
+  branchId: string;
   name: string;
   desc: string;
   price: string;
@@ -54,7 +56,7 @@ export interface Branch {
   facebookLink?: string;
   tiktokLink?: string;
   socialLinkColor?: string;
-  menu: MenuItem[];
+  // menu: MenuItem[]; // Removed from here
   packages?: PackageItem[];
   // Reservation Settings per branch
   minPaxRegular: number;
@@ -315,6 +317,7 @@ export class ConfigService {
   
   private DOC_ID = 'main_config';
   private LOCAL_STORAGE_KEY = 'app_config_local';
+  private menuItemsUnsubscribe: Unsubscribe | null = null;
 
   // Auth State
   currentUser = signal<User | null>(null);
@@ -325,6 +328,7 @@ export class ConfigService {
   firestoreError = signal<string | null>(null);
 
   slideshowContent = signal<{id: string; content: string}[]>([]);
+  menuItems = signal<MenuItem[]>([]);
 
   private defaultFirebaseConfig: FirebaseConfig = {
     apiKey: "AIzaSyDKnk7ypRSI5UFB-eI3WW-ZwakRfMSbz0U", 
@@ -391,7 +395,7 @@ export class ConfigService {
       buttonText2: 'Booking Meja',
       button2Link: '/reservation',
       button2Style: { fontFamily: 'Lato', fontSize: '1rem', color: '#FFFFFF' },
-      backgroundSlides: ['placeholder-id-1'],
+      backgroundSlides: [],
       slideDuration: 7,
       overlayOpacity: 0.6,
       textAlign: 'center',
@@ -607,13 +611,6 @@ export class ConfigService {
         instagramLink: 'https://instagram.com/satemaranggihjmayacimahi',
         instagramLinkText: 'Instagram',
         socialLinkColor: '#FFFFFF',
-        menu: [
-           { name: 'Sate Sapi (10 Tusuk)', price: 'Rp 45.000', desc: 'Sate sapi maranggi empuk dengan bumbu meresap.', category: 'Sate', image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=400', favorite: true, spicyLevel: 1 },
-           { name: 'Sate Kambing (10 Tusuk)', price: 'Rp 50.000', desc: 'Sate kambing muda, tidak prengus.', category: 'Sate', image: 'https://images.unsplash.com/photo-1603088549155-6ae9395b928f?q=80&w=400', favorite: false, spicyLevel: 2 },
-           { name: 'Sate Ayam (10 Tusuk)', price: 'Rp 35.000', desc: 'Sate ayam full daging.', category: 'Sate', image: 'https://images.unsplash.com/photo-1533267638706-e7e231154546?q=80&w=400', favorite: false },
-           { name: 'Sop Iga Sapi', price: 'Rp 40.000', desc: 'Sop iga dengan kuah kaldu gurih.', category: 'Sop', image: 'https://images.unsplash.com/photo-1551025595-6f98d1d6431f?q=80&w=400', favorite: true },
-           { name: 'Ketan Bakar', price: 'Rp 8.000', desc: 'Pelengkap sate paling pas.', category: 'Side', image: 'https://images.unsplash.com/photo-1626508035297-003616688757?q=80&w=400', favorite: true }
-        ],
         packages: [
            { name: 'Paket Botram 4', price: 'Rp 250.000', description: 'Cukup untuk 4-5 orang', items: ['40 Tusuk Sate Sapi', '4 Nasi Timbel', '1 Sop Iga Besar', '4 Es Teh Manis', 'Lalapan & Sambal'], image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=400' },
            { name: 'Paket Keluarga 10', price: 'Rp 600.000', description: 'Pesta sate untuk keluarga besar', items: ['100 Tusuk Sate Campur', '2 Bakul Nasi', '3 Sop Iga Besar', '10 Minuman', 'Buah Potong'], image: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=400' }
@@ -855,6 +852,7 @@ export class ConfigService {
       });
 
       this.subscribeToConfig();
+      this.subscribeToMenuItems();
 
     } catch (e) {
       console.error("Firebase Init Error:", e);
@@ -883,11 +881,16 @@ export class ConfigService {
       localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(newConfig));
     } catch(e) {}
 
-    if (this.isDemoMode()) return;
-    if (!this.db) return;
+    if (this.isDemoMode() || !this.db) return;
 
     try {
-       let cleanConfig = this.sanitizeObject(JSON.parse(JSON.stringify(newConfig)));
+       const configToSave = JSON.parse(JSON.stringify(newConfig));
+       if (configToSave.branches) {
+           configToSave.branches.forEach((branch: any) => {
+               delete branch.menu;
+           });
+       }
+       let cleanConfig = this.sanitizeObject(configToSave);
        await setDoc(doc(this.db, 'settings', this.DOC_ID), cleanConfig);
     } catch (error: any) {
       console.error("Error saving config:", error);
@@ -1009,10 +1012,14 @@ export class ConfigService {
   }
 
   getMenuContext(): string {
-    return this.config().branches.map(b => 
-      `CABANG: ${b.name}\n` + 
-      b.menu.map(m => `  - ${m.name} (${m.price}) ${m.soldOut ? '[HABIS]' : ''}`).join('\n')
-    ).join('\n\n');
+    const branches = this.config().branches;
+    const allMenuItems = this.menuItems();
+
+    return branches.map(b => {
+        const branchMenu = allMenuItems.filter(item => item.branchId === b.id);
+        const menuString = branchMenu.map(m => `  - ${m.name} (${m.price}) ${m.soldOut ? '[HABIS]' : ''}`).join('\n');
+        return `CABANG: ${b.name}\n${menuString}`;
+    }).join('\n\n');
   }
 
   isVideo(url: string): boolean {
@@ -1086,13 +1093,6 @@ export class ConfigService {
         });
 
         const heroData = data.hero || {};
-        // This migration logic is no longer needed as we now use IDs
-        // if (heroData.bgImage && !heroData.backgroundSlides) {
-        //     heroData.backgroundSlides = [heroData.bgImage];
-        //     delete heroData.bgImage;
-        //     delete heroData.fallbackImage;
-        // }
-
         this.config.update(current => ({
             ...current,
             ...data,
@@ -1121,5 +1121,38 @@ export class ConfigService {
        console.error("Firestore Listen Error:", error);
        this.firestoreError.set(error.message);
     });
+  }
+
+  subscribeToMenuItems() {
+    if (!this.db) return;
+    if (this.menuItemsUnsubscribe) this.menuItemsUnsubscribe();
+
+    const q = query(collection(this.db, 'menuItems'));
+    this.menuItemsUnsubscribe = onSnapshot(q, (querySnapshot) => {
+        const items: MenuItem[] = [];
+        querySnapshot.forEach((doc) => {
+            items.push({ id: doc.id, ...doc.data() } as MenuItem);
+        });
+        this.menuItems.set(items);
+    }, (error) => {
+        console.error("Error fetching menu items:", error);
+        this.firestoreError.set("Gagal memuat data menu.");
+    });
+  }
+
+  async addMenuItem(item: Omit<MenuItem, 'id'>) {
+    if (!this.db) throw new Error("Database not initialized.");
+    await addDoc(collection(this.db, 'menuItems'), item);
+  }
+
+  async updateMenuItem(itemId: string, itemData: Partial<MenuItem>) {
+    if (!this.db) throw new Error("Database not initialized.");
+    const docRef = doc(this.db, 'menuItems', itemId);
+    await updateDoc(docRef, itemData);
+  }
+
+  async deleteMenuItem(itemId: string) {
+    if (!this.db) throw new Error("Database not initialized.");
+    await deleteDoc(doc(this.db, 'menuItems', itemId));
   }
 }

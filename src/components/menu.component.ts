@@ -325,13 +325,10 @@ export class MenuComponent {
   cart = signal<Map<string, number>>(new Map());
   showCartModal = signal(false);
   
-  // Blind Spot 1: Search
   searchQuery = signal('');
-  // Blind Spot 2: Filter Category
   selectedCategory = signal('All');
 
   constructor() {
-    // 1. Load Cart from LocalStorage
     try {
       const saved = localStorage.getItem('cart_data');
       if (saved) {
@@ -339,7 +336,6 @@ export class MenuComponent {
       }
     } catch(e) { console.error('Failed to load cart', e); }
 
-    // 2. Persist Cart on Change
     effect(() => {
       try {
         const serialized = JSON.stringify(Array.from(this.cart().entries()));
@@ -350,16 +346,20 @@ export class MenuComponent {
 
   currentBranch = computed(() => this.config().branches[this.selectedBranchIndex()]);
   
-  // Blind Spot 2: Compute Categories from Menu Data
+  currentBranchMenu = computed(() => {
+    const branch = this.currentBranch();
+    if (!branch) return [];
+    return this.configService.menuItems().filter(item => item.branchId === branch.id);
+  });
+  
   categories = computed(() => {
-    const menus = this.currentBranch().menu;
+    const menus = this.currentBranchMenu();
     const cats = new Set(menus.map(m => m.category || 'Lainnya'));
     return Array.from(cats);
   });
 
-  // Filter Logic: Search + Category + Favorites
   filteredMenu = computed(() => {
-    let menu = this.currentBranch().menu;
+    let menu = this.currentBranchMenu();
     
     if (this.onlyFavorites()) {
       return menu.filter(item => item.favorite);
@@ -375,7 +375,6 @@ export class MenuComponent {
     });
   });
 
-  // Helper to generate unique key for cart items based on Branch + Name
   private getItemKey(item: MenuItem): string {
     return `${this.currentBranch().id}_${item.name}`;
   }
@@ -387,7 +386,7 @@ export class MenuComponent {
 
   cartItemsList = computed(() => {
     const list: {menu: MenuItem, qty: number}[] = [];
-    const fullMenu = this.currentBranch().menu;
+    const fullMenu = this.currentBranchMenu();
     const branchPrefix = this.currentBranch().id + '_';
     
     this.cart().forEach((qty, key) => { 
@@ -418,7 +417,7 @@ export class MenuComponent {
 
   totalPrice = computed(() => {
     let total = 0;
-    const fullMenu = this.currentBranch().menu;
+    const fullMenu = this.currentBranchMenu();
     const branchPrefix = this.currentBranch().id + '_';
 
     this.cart().forEach((qty, key) => { 
@@ -436,7 +435,6 @@ export class MenuComponent {
   setBranch(index: number) {
     if (this.selectedBranchIndex() !== index) {
       this.selectedBranchIndex.set(index);
-      // Blind Spot 6: Reset Filter & Scroll to top
       this.searchQuery.set('');
       this.selectedCategory.set('All');
       if (typeof window !== 'undefined') {
@@ -496,7 +494,6 @@ export class MenuComponent {
     });
   }
 
-  // Blind Spot 6: Direct Delete
   removeEntireItem(item: MenuItem) {
     const key = this.getItemKey(item);
     this.cart.update(currentMap => {
@@ -506,13 +503,11 @@ export class MenuComponent {
     });
   }
 
-  // Blind Spot 4: Clear Cart
   clearCart() {
     if(!confirm('Hapus semua item di keranjang?')) return;
     this.cart.update(currentMap => {
        const newMap = new Map<string, number>(currentMap);
        const branchPrefix = this.currentBranch().id + '_';
-       // Only clear items from current branch
        for (const key of newMap.keys()) {
           if (key.startsWith(branchPrefix)) newMap.delete(key);
        }
@@ -534,14 +529,12 @@ export class MenuComponent {
     this.selectedCategory.set('All');
   }
 
-  // Blind Spot 3: Fallback Image
   handleImageError(event: any) {
     event.target.src = 'https://placehold.co/400x400/eee/999?text=No+Image';
   }
 
   checkout() {
     const branch = this.currentBranch();
-    // Blind Spot 7: Better Message Format
     let message = `*Halo Sate Maranggi Hj. Maya (${branch.name}),*\nSaya mau pesan:\n\n`;
     this.cartItemsList().forEach(i => {
        message += `• ${i.qty}x ${i.menu.name} @ ${i.menu.price}\n`;

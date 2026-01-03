@@ -20,7 +20,7 @@ import { ToastService } from '../services/toast.service';
         <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
       }
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0 3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0 3.35a1.724 1.724 0 001.066 2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     </button>
@@ -810,8 +810,8 @@ import { ToastService } from '../services/toast.service';
                                            </tr>
                                        </thead>
                                        <tbody>
-                                          @if(config().branches[selectedMenuBranchIndex()]?.menu.length > 0) {
-                                            @for (item of config().branches[selectedMenuBranchIndex()].menu; track $index) {
+                                          @if(selectedBranchMenuItems().length > 0) {
+                                            @for (item of selectedBranchMenuItems(); track item.id) {
                                                 <tr class="bg-white border-b hover:bg-gray-50">
                                                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-3">
                                                         <div class="w-10 h-10 rounded-md bg-gray-100 overflow-hidden flex-shrink-0">
@@ -826,8 +826,8 @@ import { ToastService } from '../services/toast.service';
                                                         @if(item.favorite) { <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Favorit</span> }
                                                     </td>
                                                     <td class="px-6 py-4 text-right">
-                                                        <button (click)="openMenuModal(item, $index)" class="font-medium text-blue-600 hover:underline mr-4">Edit</button>
-                                                        <button (click)="deleteMenuItem($index)" class="font-medium text-red-600 hover:underline">Hapus</button>
+                                                        <button (click)="openMenuModal(item)" class="font-medium text-blue-600 hover:underline mr-4">Edit</button>
+                                                        <button (click)="deleteMenuItem(item)" class="font-medium text-red-600 hover:underline">Hapus</button>
                                                     </td>
                                                 </tr>
                                             }
@@ -1712,7 +1712,7 @@ import { ToastService } from '../services/toast.service';
             <div class="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
                 <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
                    <div class="p-5 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
-                       <h3 class="text-lg font-bold">{{ editingMenuItemIndex() === null ? 'Tambah' : 'Edit' }} Item Menu</h3>
+                       <h3 class="text-lg font-bold">{{ editingMenuItemId() === null ? 'Tambah' : 'Edit' }} Item Menu</h3>
                        <button (click)="closeMenuModal()" class="text-gray-400 hover:text-gray-600 font-bold">✕</button>
                    </div>
                    
@@ -1828,7 +1828,7 @@ export class AdminComponent {
   // === MENU CRUD SIGNALS ===
   selectedMenuBranchIndex = signal(0);
   isMenuModalOpen = signal(false);
-  editingMenuItemIndex = signal<number | null>(null);
+  editingMenuItemId = signal<string | null>(null);
   tempMenuItem = signal<MenuItem>(this.getNewMenuItem());
 
   // === PACKAGE CRUD SIGNALS ===
@@ -1851,12 +1851,18 @@ export class AdminComponent {
     { id: 'location', label: 'Lokasi', icon: '📍' },
     { id: 'testimonials', label: 'Testimoni', icon: '💬' },
     { id: 'footer', label: 'Footer', icon: '🔗' },
-    // FIX: Corrected a syntax error where a period was used instead of a colon.
     { id: 'ai', label: 'AI Assistant', icon: '🤖' },
     { id: 'attendance', label: 'Absensi', icon: '⏰' },
   ];
 
   tempConfig: FirebaseConfig = { apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: '' };
+
+  selectedBranchMenuItems = computed(() => {
+    const branchIndex = this.selectedMenuBranchIndex();
+    const selectedBranch = this.config().branches[branchIndex];
+    if (!selectedBranch) return [];
+    return this.configService.menuItems().filter(item => item.branchId === selectedBranch.id);
+  });
 
   constructor() {
     const current = this.configService.getStoredFirebaseConfig();
@@ -1966,7 +1972,6 @@ export class AdminComponent {
     try {
         const currentConfig = this.config();
         
-        // Create a new array of slide IDs without the one to be deleted.
         const newSlides = currentConfig.hero.backgroundSlides.filter(id => id !== slideIdToDelete);
         
         const newConfig = { 
@@ -1974,10 +1979,8 @@ export class AdminComponent {
             hero: { ...currentConfig.hero, backgroundSlides: newSlides } 
         };
 
-        // Persist the updated config. This service method also updates the signal, which triggers UI reactivity.
         await this.configService.updateConfig(newConfig);
 
-        // After the config is saved, delete the orphaned content document from Firestore.
         await this.configService.deleteSlideshowItem(slideIdToDelete);
         
         this.toastService.show('Slide berhasil dihapus dan disimpan.', 'success');
@@ -1991,15 +1994,15 @@ export class AdminComponent {
   // === MENU CRUD METHODS ===
 
   getNewMenuItem(): MenuItem {
-    return { name: '', desc: '', price: '', category: '', image: '', favorite: false, soldOut: false, spicyLevel: 0 };
+    return { branchId: '', name: '', desc: '', price: '', category: '', image: '', favorite: false, soldOut: false, spicyLevel: 0 };
   }
 
-  openMenuModal(item: MenuItem | null = null, index: number | null = null) {
-    if (item && index !== null) {
-      this.editingMenuItemIndex.set(index);
+  openMenuModal(item: MenuItem | null = null) {
+    if (item && item.id) {
+      this.editingMenuItemId.set(item.id);
       this.tempMenuItem.set({ ...item });
     } else {
-      this.editingMenuItemIndex.set(null);
+      this.editingMenuItemId.set(null);
       this.tempMenuItem.set(this.getNewMenuItem());
     }
     this.isMenuModalOpen.set(true);
@@ -2024,49 +2027,42 @@ export class AdminComponent {
     }
   }
 
-  saveMenuItem() {
+  async saveMenuItem() {
     const branchIndex = this.selectedMenuBranchIndex();
-    const itemToSave = this.tempMenuItem();
-    const editIndex = this.editingMenuItemIndex();
+    const branch = this.config().branches[branchIndex];
+    if (!branch) {
+      this.toastService.show('Cabang tidak valid.', 'error');
+      return;
+    }
+    
+    let itemToSave = this.tempMenuItem();
+    itemToSave.branchId = branch.id;
+    const editId = this.editingMenuItemId();
 
-    this.config.update(c => {
-      const newBranches = [...c.branches];
-      const branchToUpdate = { ...newBranches[branchIndex] };
-      const newMenu = [...(branchToUpdate.menu || [])];
-
-      if (editIndex !== null) {
-        newMenu[editIndex] = itemToSave;
+    try {
+      if (editId) {
+        const { id, ...dataToUpdate } = itemToSave;
+        await this.configService.updateMenuItem(editId, dataToUpdate);
       } else {
-        newMenu.push(itemToSave);
+        const { id, ...dataToAdd } = itemToSave;
+        await this.configService.addMenuItem(dataToAdd);
       }
-      
-      branchToUpdate.menu = newMenu;
-      newBranches[branchIndex] = branchToUpdate;
-
-      return { ...c, branches: newBranches };
-    });
-
-    this.toastService.show('Menu berhasil disimpan!', 'success');
-    this.closeMenuModal();
+      this.toastService.show('Menu berhasil disimpan!', 'success');
+      this.closeMenuModal();
+    } catch (e: any) {
+      this.toastService.show('Gagal menyimpan menu: ' + e.message, 'error');
+    }
   }
 
-  deleteMenuItem(index: number) {
-    if (!confirm('Apakah Anda yakin ingin menghapus item menu ini?')) return;
+  async deleteMenuItem(item: MenuItem) {
+    if (!item.id || !confirm('Apakah Anda yakin ingin menghapus item menu ini?')) return;
 
-    const branchIndex = this.selectedMenuBranchIndex();
-    this.config.update(c => {
-      const newBranches = [...c.branches];
-      const branchToUpdate = { ...newBranches[branchIndex] };
-      const newMenu = [...branchToUpdate.menu];
-      newMenu.splice(index, 1);
-      
-      branchToUpdate.menu = newMenu;
-      newBranches[branchIndex] = branchToUpdate;
-
-      return { ...c, branches: newBranches };
-    });
-
-    this.toastService.show('Menu berhasil dihapus.', 'info');
+    try {
+      await this.configService.deleteMenuItem(item.id);
+      this.toastService.show('Menu berhasil dihapus.', 'info');
+    } catch (e: any) {
+      this.toastService.show('Gagal menghapus menu: ' + e.message, 'error');
+    }
   }
 
   // === PACKAGE CRUD METHODS ===
