@@ -2245,7 +2245,9 @@ export class AdminComponent {
             return { ...c, branches: newBranches };
         });
         
-        this.toastService.show('Gambar lokasi dihapus', 'info');
+        // Immediately persist the change to the main config document
+        await this.saveChanges();
+        
       } catch (e: any) {
          this.toastService.show(`Gagal menghapus: ${e.message}`, 'error');
       } finally {
