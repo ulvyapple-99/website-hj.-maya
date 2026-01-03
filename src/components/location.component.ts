@@ -1,4 +1,4 @@
-import { Component, inject, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfigService } from '../services/config.service';
 
@@ -6,7 +6,6 @@ import { ConfigService } from '../services/config.service';
   selector: 'app-location',
   standalone: true,
   imports: [CommonModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <section class="min-h-screen transition-colors duration-500"
       [style.backgroundColor]="config().locationPage.style.backgroundColor"
@@ -93,17 +92,18 @@ import { ConfigService } from '../services/config.service';
               <div class="overflow-hidden relative shadow-inner bg-gray-800"
                    [style.height]="config().locationPage.mapHeight"
                    [style.borderRadius]="config().locationPage.cardBorderRadius">
-                @if (is3D(branch.mapImage)) {
-                  <model-viewer 
-                    [src]="branch.mapImage" 
-                    auto-rotate 
-                    camera-controls
-                    class="w-full h-full">
-                  </model-viewer>
-                } @else {
-                  <img [src]="branch.mapImage" alt="Map" class="w-full h-full object-cover opacity-80 hover:scale-110 transition duration-500">
-                }
                 
+                <!-- Slideshow images -->
+                @for(imageId of branch.locationImages; track imageId; let i = $index) {
+                  <img [src]="branchImageContent(imageId)" 
+                      alt="{{branch.name}} location image {{i + 1}}" 
+                      class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+                      [style.opacity]="currentSlideIndex(branch.id) === i ? 0.8 : 0">
+                }
+                @if (!branch.locationImages || branch.locationImages.length === 0) {
+                  <div class="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
+                }
+
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <a [href]="branch.googleMapsUrl" target="_blank" 
                      class="text-white px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 transition transform hover:scale-105 shadow-lg flex items-center gap-2 pointer-events-auto"
@@ -111,6 +111,19 @@ import { ConfigService } from '../services/config.service';
                     Buka Google Maps
                   </a>
                 </div>
+
+                <!-- Dots -->
+                @if (branch.locationImages && branch.locationImages.length > 1) {
+                  <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+                    @for(imageId of branch.locationImages; track imageId; let i = $index) {
+                      <button (click)="setSlide(branch.id, i)" 
+                              class="w-2 h-2 rounded-full transition"
+                              [class.bg-white]="currentSlideIndex(branch.id) === i"
+                              [class.bg-white/50]="currentSlideIndex(branch.id) !== i"
+                              [attr.aria-label]="'Go to slide ' + (i + 1)"></button>
+                    }
+                  </div>
+                }
               </div>
             </div>
           }
@@ -119,9 +132,69 @@ import { ConfigService } from '../services/config.service';
     </section>
   `
 })
-export class LocationComponent {
+export class LocationComponent implements OnInit, OnDestroy {
   configService = inject(ConfigService);
   config = this.configService.config;
 
-  is3D(url: string) { return this.configService.is3D(url); }
+  slideIndices = signal(new Map<string, number>());
+  private slideInterval: any;
+
+  constructor() {
+    effect(() => {
+      const branches = this.config().branches;
+      const newMap = new Map<string, number>();
+      branches.forEach(b => {
+        newMap.set(b.id, 0);
+      });
+      this.slideIndices.set(newMap);
+      this.setupInterval();
+    });
+  }
+
+  ngOnInit() {
+    this.setupInterval();
+  }
+
+  ngOnDestroy() {
+    if (this.slideInterval) {
+      clearInterval(this.slideInterval);
+    }
+  }
+
+  setupInterval() {
+    if (this.slideInterval) clearInterval(this.slideInterval);
+    
+    this.slideInterval = setInterval(() => {
+      const branchesWithImages = this.config().branches.filter(b => b.locationImages && b.locationImages.length > 1);
+      if (branchesWithImages.length > 0) {
+        // FIX: Explicitly type the 'currentMap' parameter to ensure correct type inference for 'currentIndex'.
+        this.slideIndices.update((currentMap: Map<string, number>) => {
+          const newMap = new Map(currentMap);
+          branchesWithImages.forEach(branch => {
+            const currentIndex = newMap.get(branch.id) ?? 0;
+            const nextIndex = (currentIndex + 1) % (branch.locationImages?.length || 1);
+            newMap.set(branch.id, nextIndex);
+          });
+          return newMap;
+        });
+      }
+    }, 5000);
+  }
+
+  currentSlideIndex(branchId: string): number {
+    return this.slideIndices().get(branchId) ?? 0;
+  }
+
+  setSlide(branchId: string, index: number) {
+    this.slideIndices.update(currentMap => {
+      const newMap = new Map(currentMap);
+      newMap.set(branchId, index);
+      return newMap;
+    });
+    this.setupInterval();
+  }
+
+  branchImageContent(id: string): string {
+    return this.configService.branchImagesContent().get(id) || '';
+  }
 }

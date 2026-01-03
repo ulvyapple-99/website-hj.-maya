@@ -50,7 +50,7 @@ export interface Branch {
   phone: string;
   whatsappNumber: string;
   hours: string;
-  mapImage: string;
+  locationImages?: string[];
   instagramLink?: string;
   instagramLinkText?: string;
   facebookLink?: string;
@@ -329,6 +329,7 @@ export class ConfigService {
 
   slideshowContent = signal<{id: string; content: string}[]>([]);
   menuItems = signal<MenuItem[]>([]);
+  branchImagesContent = signal<Map<string, string>>(new Map());
 
   private defaultFirebaseConfig: FirebaseConfig = {
     apiKey: "AIzaSyDKnk7ypRSI5UFB-eI3WW-ZwakRfMSbz0U", 
@@ -607,7 +608,7 @@ export class ConfigService {
         phone: '0812-2345-6789',
         whatsappNumber: '6281223456789',
         hours: '10.00 - 22.00',
-        mapImage: 'https://picsum.photos/600/400',
+        locationImages: [],
         instagramLink: 'https://instagram.com/satemaranggihjmayacimahi',
         instagramLinkText: 'Instagram',
         socialLinkColor: '#FFFFFF',
@@ -653,6 +654,11 @@ export class ConfigService {
 
     effect(() => {
       this.fetchSlideshowMedia(this.config().hero.backgroundSlides);
+    });
+
+    effect(() => {
+      const allImageIds = this.config().branches.flatMap(b => b.locationImages || []);
+      this.fetchBranchImages(allImageIds);
     });
 
     effect(() => {
@@ -1000,6 +1006,50 @@ export class ConfigService {
     }
   }
 
+  async addBranchImage(file: File): Promise<string> {
+    if (!this.db) throw new Error("Database not initialized.");
+    const base64String = await this.convertFileToBase64(file);
+    if (base64String.length > 1048487) {
+      throw new Error("File is too large (>1MB).");
+    }
+    const docRef = await addDoc(collection(this.db, 'branch_media'), {
+        content: base64String,
+        createdAt: serverTimestamp()
+    });
+    return docRef.id;
+  }
+
+  async deleteBranchImage(id: string): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized.");
+    const docRef = doc(this.db, 'branch_media', id);
+    await deleteDoc(docRef);
+  }
+
+  private async fetchBranchImages(ids: string[]) {
+    if (!this.db || !ids || ids.length === 0) {
+      this.branchImagesContent.set(new Map());
+      return;
+    }
+    
+    const CHUNK_SIZE = 30;
+    const contentMap = new Map<string, string>();
+    try {
+      for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+          const chunkIds = ids.slice(i, i + CHUNK_SIZE);
+          if (chunkIds.length === 0) continue;
+          const q = query(collection(this.db, 'branch_media'), where(documentId(), 'in', chunkIds));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+              contentMap.set(doc.id, doc.data()['content']);
+          });
+      }
+      this.branchImagesContent.set(contentMap);
+    } catch (e) {
+      console.error("Error fetching branch images:", e);
+      this.branchImagesContent.set(new Map());
+    }
+  }
+
   async uploadFile(file: File): Promise<string> {
     return this.convertFileToBase64(file);
   }
@@ -1074,8 +1124,10 @@ export class ConfigService {
 
         const updatedBranches = (data.branches || current.branches).map((branch: any) => {
             const oldGlobalSettings = data.reservation || {};
+            const { mapImage, ...restOfBranch } = branch; // Remove mapImage
             return {
-                ...branch,
+                ...restOfBranch,
+                locationImages: branch.locationImages || [], // Ensure it exists
                 minPaxRegular: branch.minPaxRegular ?? oldGlobalSettings.minPaxRegular ?? 5,
                 minPaxRamadan: branch.minPaxRamadan ?? oldGlobalSettings.minPaxRamadan ?? 10,
                 maxPax: branch.maxPax ?? oldGlobalSettings.maxPax ?? 100,

@@ -1341,18 +1341,16 @@ import { ToastService } from '../services/toast.service';
                                       <div class="p-4 rounded-lg border bg-gray-50/50">
                                           <h4 class="font-bold text-gray-800 mb-3 border-b pb-2">{{ branch.name }}</h4>
                                           <div>
-                                              <label class="form-label">Gambar Peta/Lokasi</label>
-                                              <div class="flex gap-2 items-center mb-2">
-                                                  <input type="file" (change)="onBranchFileSelected($event, $index)" class="form-input text-xs" accept="image/*">
-                                                  @if (branch.mapImage) {
-                                                      <button (click)="removeBranchMapImage($index)" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200" title="Hapus Gambar">✕</button>
-                                                  }
-                                              </div>
-                                              @if (branch.mapImage) {
-                                                  <div class="h-32 bg-gray-100 rounded border overflow-hidden">
-                                                      <img [src]="branch.mapImage" class="w-full h-full object-cover">
+                                              <label class="form-label">Gambar Lokasi (Slideshow)</label>
+                                              <div class="grid grid-cols-4 gap-2 mb-2">
+                                                @for(imageId of branch.locationImages; track imageId) {
+                                                  <div class="relative group">
+                                                    <img [src]="branchImageContent(imageId)" class="w-full h-24 object-cover rounded border">
+                                                    <button (click)="removeBranchLocationImage($index, imageId)" class="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-bold">✕</button>
                                                   </div>
-                                              }
+                                                }
+                                              </div>
+                                              <input type="file" (change)="onBranchFileSelected($event, $index)" class="form-input text-xs" accept="image/*" multiple>
                                           </div>
                                       </div>
                                   }
@@ -2200,40 +2198,59 @@ export class AdminComponent {
   }
 
   // === BRANCH IMAGE METHODS ===
+  branchImageContent(id: string): string {
+    return this.configService.branchImagesContent().get(id) || '';
+  }
+
   async onBranchFileSelected(event: any, index: number) {
-      const file = event.target.files[0];
-      if (!file) return;
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
 
       this.isUploading.set(true);
       try {
-          const base64 = await this.configService.uploadFile(file);
+          const uploadPromises = Array.from(files).map(file => this.configService.addBranchImage(file as File));
+          const imageIds = await Promise.all(uploadPromises);
           
           this.config.update(c => {
               const newBranches = [...c.branches];
               if (newBranches[index]) {
-                  newBranches[index] = { ...newBranches[index], mapImage: base64 };
+                  const updatedBranch = { ...newBranches[index] };
+                  updatedBranch.locationImages = [...(updatedBranch.locationImages || []), ...imageIds];
+                  newBranches[index] = updatedBranch;
               }
               return { ...c, branches: newBranches };
           });
           
-          this.toastService.show('Gambar lokasi berhasil diunggah', 'success');
-      } catch (e) {
-          this.toastService.show('Gagal mengunggah gambar', 'error');
+          this.toastService.show(`${files.length} gambar berhasil diunggah`, 'success');
+      } catch (e: any) {
+          this.toastService.show(`Gagal mengunggah gambar: ${e.message}`, 'error');
       } finally {
           this.isUploading.set(false);
+          event.target.value = '';
       }
   }
 
-  removeBranchMapImage(index: number) {
+  async removeBranchLocationImage(branchIndex: number, imageId: string) {
       if (!confirm('Apakah Anda yakin ingin menghapus gambar ini?')) return;
-      this.config.update(c => {
-          const newBranches = [...c.branches];
-          if (newBranches[index]) {
-              newBranches[index] = { ...newBranches[index], mapImage: '' };
-          }
-          return { ...c, branches: newBranches };
-      });
-      this.toastService.show('Gambar lokasi dihapus', 'info');
+      
+      this.isUploading.set(true);
+      try {
+        await this.configService.deleteBranchImage(imageId);
+
+        this.config.update(c => {
+            const newBranches = [...c.branches];
+            const branch = { ...newBranches[branchIndex] };
+            branch.locationImages = (branch.locationImages || []).filter(id => id !== imageId);
+            newBranches[branchIndex] = branch;
+            return { ...c, branches: newBranches };
+        });
+        
+        this.toastService.show('Gambar lokasi dihapus', 'info');
+      } catch (e: any) {
+         this.toastService.show(`Gagal menghapus: ${e.message}`, 'error');
+      } finally {
+        this.isUploading.set(false);
+      }
   }
 
   // === TESTIMONIALS CRUD METHODS ===
