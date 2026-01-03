@@ -909,12 +909,27 @@ export class ConfigService {
   }
   
   private convertFileToBase64(file: File): Promise<string> {
+    const MAX_SIZE_BYTES = 1048576;
+
     return new Promise((resolve, reject) => {
-        if (file.type.startsWith('video/') || file.type.startsWith('audio/')) {
+        if (file.type.startsWith('video/')) {
+            // Videos are not compressed, so check inflated size directly.
+            if (file.size * 1.37 > MAX_SIZE_BYTES) {
+                return reject(new Error("Video file is too large (>~700KB). Please compress it manually before uploading."));
+            }
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = (event: any) => resolve(event.target.result);
             reader.onerror = reject;
+            return;
+        }
+
+        if (file.type.startsWith('audio/')) {
+             // Check original size. If it's huge, compression might not be enough.
+            if (file.size > 5 * MAX_SIZE_BYTES) { // e.g., > 5MB
+                 return reject(new Error("Original audio file is too large (>5MB). Please compress it manually."));
+            }
+            this.compressAudio(file).then(resolve).catch(reject);
             return;
         }
 
@@ -950,6 +965,123 @@ export class ConfigService {
         reader.onerror = (e) => reject(e);
         reader.readAsDataURL(file);
     });
+  }
+
+  private setUint16(view: DataView, offset: number, val: number) {
+    view.setUint16(offset, val, true);
+  }
+
+  private setUint32(view: DataView, offset: number, val: number) {
+    view.setUint32(offset, val, true);
+  }
+
+  private bufferToWave(abuffer: AudioBuffer): Blob {
+    const numOfChan = abuffer.numberOfChannels;
+    const len = abuffer.length;
+    const length = len * numOfChan * 2 + 44;
+    const buffer = new ArrayBuffer(length);
+    const view = new DataView(buffer);
+    const channels = [];
+    let offset = 0;
+    let pos = 0;
+
+    // write WAVE header
+    this.setUint32(view, pos, 0x46464952); // "RIFF"
+    pos += 4;
+    this.setUint32(view, pos, length - 8); // file length - 8
+    pos += 4;
+    this.setUint32(view, pos, 0x45564157); // "WAVE"
+    pos += 4;
+    this.setUint32(view, pos, 0x20746d66); // "fmt " chunk
+    pos += 4;
+    this.setUint32(view, pos, 16); // length of fmt data
+    pos += 4;
+    this.setUint16(view, pos, 1); // PCM - integer samples
+    pos += 2;
+    this.setUint16(view, pos, numOfChan); // number of channels
+    pos += 2;
+    this.setUint32(view, pos, abuffer.sampleRate); // sample rate
+    pos += 4;
+    this.setUint32(view, pos, abuffer.sampleRate * 2 * numOfChan); // byte rate
+    pos += 4;
+    this.setUint16(view, pos, numOfChan * 2); // block align
+    pos += 2;
+    this.setUint16(view, pos, 16); // bits per sample
+    pos += 2;
+    this.setUint32(view, pos, 0x61746164); // "data" - chunk
+    pos += 4;
+    this.setUint32(view, pos, length - pos - 4); // data length
+    pos += 4;
+
+    // write interleaved data
+    for (let i = 0; i < abuffer.numberOfChannels; i++) {
+        channels.push(abuffer.getChannelData(i));
+    }
+
+    while (pos < length) {
+        for (let i = 0; i < numOfChan; i++) {
+            let sample = Math.max(-1, Math.min(1, (channels[i] as Float32Array)[offset])); // clamp
+            sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; // scale to 16-bit signed int
+            view.setInt16(pos, sample, true); // write 16-bit sample
+            pos += 2;
+        }
+        offset++;
+    }
+
+    return new Blob([buffer], { type: "audio/wav" });
+  }
+
+  private async compressAudio(file: File): Promise<string> {
+      const MAX_SIZE_BYTES = 1048576; // 1MB Firestore limit
+      const TARGET_SAMPLE_RATE = 22050; // Downsample to 22.05kHz to reduce size
+
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const arrayBuffer = await file.arrayBuffer();
+        const originalAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        const duration = originalAudioBuffer.duration;
+        const numberOfChannels = originalAudioBuffer.numberOfChannels;
+        
+        const effectiveSampleRate = originalAudioBuffer.sampleRate > TARGET_SAMPLE_RATE && duration > 5 
+            ? TARGET_SAMPLE_RATE 
+            : originalAudioBuffer.sampleRate;
+
+        const offlineContext = new OfflineAudioContext(
+            numberOfChannels, 
+            duration * effectiveSampleRate, 
+            effectiveSampleRate
+        );
+
+        const source = offlineContext.createBufferSource();
+        source.buffer = originalAudioBuffer;
+        source.connect(offlineContext.destination);
+        source.start();
+
+        const resampledAudioBuffer = await offlineContext.startRendering();
+        const wavBlob = this.bufferToWave(resampledAudioBuffer);
+
+        if (wavBlob.size * 1.37 > MAX_SIZE_BYTES) {
+            throw new Error(`Audio is still too large after compression (~${(wavBlob.size / (1024*1024)).toFixed(2)}MB). Try a shorter clip.`);
+        }
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(wavBlob);
+            reader.onload = (event: any) => resolve(event.target.result);
+            reader.onerror = reject;
+        });
+
+      } catch (error) {
+        console.warn("Audio compression failed, falling back to original file. Error:", error);
+        // Fallback: If compression fails, read the original file.
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event: any) => resolve(event.target.result);
+            reader.onerror = (err) => reject(new Error("Failed to read the audio file in fallback mode."));
+        });
+      }
   }
 
   async addSlideshowItem(file: File): Promise<string> {
