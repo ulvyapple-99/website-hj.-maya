@@ -169,7 +169,7 @@ export interface AppConfig {
     titleStyle: TextStyle; 
     description: string;
     descriptionStyle: TextStyle; 
-    image: string;
+    mediaSlides: string[];
     imageAlt: string; 
     imagePosition: 'left' | 'right'; 
     stats: {
@@ -330,6 +330,7 @@ export class ConfigService {
   firestoreError = signal<string | null>(null);
 
   slideshowContent = signal<{id: string; content: string}[]>([]);
+  aboutMediaContent = signal<{id: string; content: string}[]>([]);
   menuItems = signal<MenuItem[]>([]);
   branchImagesContent = signal<Map<string, string>>(new Map());
 
@@ -427,7 +428,7 @@ export class ConfigService {
       titleStyle: { fontFamily: 'Oswald', fontSize: '3rem', color: '#3E2723' },
       description: 'Sate Maranggi Hj. Maya menghadirkan cita rasa autentik yang telah melegenda. Daging sapi pilihan yang dimarinasi dengan bumbu rempah alami, dibakar dengan kematangan sempurna, disajikan dengan sambal oncom dan ketan bakar yang khas.\n\nKami berkomitmen menjaga kualitas rasa dan pelayanan untuk kepuasan pelanggan setia kami.',
       descriptionStyle: { fontFamily: 'Lato', fontSize: '1.125rem', color: '#5D4037' },
-      image: 'https://images.unsplash.com/photo-1529563021427-d8f8ead97f4c?q=80&w=1000',
+      mediaSlides: [],
       imageAlt: 'Sate Maranggi Hj. Maya Authentic Grill',
       imagePosition: 'right',
       stats: {
@@ -658,6 +659,10 @@ export class ConfigService {
 
     effect(() => {
       this.fetchSlideshowMedia(this.config().hero.backgroundSlides);
+    });
+
+    effect(() => {
+      this.fetchAboutMedia(this.config().about.mediaSlides);
     });
 
     effect(() => {
@@ -1139,6 +1144,53 @@ export class ConfigService {
     } catch (e) {
       console.error("Error fetching slideshow media:", e);
       this.slideshowContent.set([]);
+    }
+  }
+
+  async addAboutMediaItem(file: File): Promise<string> {
+      if (!this.db) throw new Error("Database not initialized.");
+      const base64String = await this.convertFileToBase64(file);
+      if (base64String.length > 1048487) {
+        throw new Error("File is too large (>1MB).");
+      }
+      const docRef = await addDoc(collection(this.db, 'about_media'), {
+          content: base64String,
+          createdAt: serverTimestamp()
+      });
+      return docRef.id;
+  }
+
+  async deleteAboutMediaItem(id: string): Promise<void> {
+      if (!this.db) throw new Error("Database not initialized.");
+      const docRef = doc(this.db, 'about_media', id);
+      await deleteDoc(docRef);
+  }
+
+  private async fetchAboutMedia(ids: string[]) {
+    if (!this.db || !ids || ids.length === 0) {
+      this.aboutMediaContent.set([]);
+      return;
+    }
+    
+    const CHUNK_SIZE = 30;
+    const contentMap = new Map<string, string>();
+    try {
+      for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+          const chunkIds = ids.slice(i, i + CHUNK_SIZE);
+          if (chunkIds.length === 0) continue;
+          const q = query(collection(this.db, 'about_media'), where(documentId(), 'in', chunkIds));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+              contentMap.set(doc.id, doc.data()['content']);
+          });
+      }
+      const orderedContent = ids
+        .map(id => ({ id, content: contentMap.get(id) }))
+        .filter((item): item is { id: string; content: string } => !!item.content);
+      this.aboutMediaContent.set(orderedContent);
+    } catch (e) {
+      console.error("Error fetching about media:", e);
+      this.aboutMediaContent.set([]);
     }
   }
 

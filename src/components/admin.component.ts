@@ -688,25 +688,33 @@ import { ToastService } from '../services/toast.service';
                                 </div>
                             </div>
 
-                            <!-- Main Image -->
+                            <!-- Media Slideshow -->
                             <div>
-                               <label class="form-label">Section Image</label>
-                               <div class="flex gap-2 items-center mb-2">
-                                   <input type="file" (change)="onFileSelected($event, 'aboutImage')" class="form-input text-xs">
-                               </div>
-                               @if (config().about.image) {
-                                  <div class="h-32 bg-gray-100 rounded border overflow-hidden">
-                                     <img [src]="config().about.image" class="w-full h-full object-cover">
-                                  </div>
-                               }
-                               <div class="mt-2 grid grid-cols-2 gap-2">
-                                  <div><label class="form-label">Image Position</label>
+                                <label class="form-label">Section Media (Slideshow)</label>
+                                <div class="p-4 border rounded-lg bg-gray-50 space-y-3">
+                                    @for (slide of config().about.mediaSlides; track $index) {
+                                        <div class="flex items-center gap-3 bg-white p-2 rounded-md shadow-sm">
+                                            @if (configService.isVideo(slide)) {
+                                                <video [src]="slide" class="w-16 h-10 object-cover rounded bg-black" muted playsinline></video>
+                                            } @else {
+                                                <img [src]="slide" class="w-16 h-10 object-cover rounded">
+                                            }
+                                            <span class="text-xs text-gray-500 truncate flex-1">Slide {{ $index + 1 }}</span>
+                                            <button (click)="removeAboutSlide($index)" class="bg-red-100 text-red-600 px-3 py-1 rounded-md text-xs font-bold hover:bg-red-200">Hapus</button>
+                                        </div>
+                                    }
+                                    <div class="flex items-center gap-2 pt-2">
+                                        <input type="file" (change)="onAboutSlideSelected($event)" class="form-input text-xs flex-1" accept="image/*,video/*">
+                                    </div>
+                                </div>
+                                <div class="mt-2 grid grid-cols-2 gap-2">
+                                  <div><label class="form-label">Media Position</label>
                                      <select [(ngModel)]="config().about.imagePosition" class="form-select">
                                         <option value="left">Left</option>
                                         <option value="right">Right</option>
                                      </select>
                                   </div>
-                                  <div><label class="form-label">Image Radius</label><input [(ngModel)]="config().about.style.borderRadius" class="form-input"></div>
+                                  <div><label class="form-label">Container Radius</label><input [(ngModel)]="config().about.style.borderRadius" class="form-input"></div>
                                </div>
                             </div>
                          </div>
@@ -1950,7 +1958,8 @@ export class AdminComponent {
         if (type === 'backgroundMusic') newC.global.backgroundMusicUrl = base64;
         if (type === 'introVideo') newC.intro.videoUrl = base64;
         if (type === 'favicon') newC.global.favicon = base64;
-        if (type === 'aboutImage') newC.about.image = base64;
+        // This is now handled by onAboutSlideSelected
+        // if (type === 'aboutImage') newC.about.image = base64;
         return newC;
       });
       
@@ -2025,6 +2034,36 @@ export class AdminComponent {
     } finally {
         this.isUploading.set(false);
     }
+  }
+
+  // === ABOUT SLIDESHOW METHODS ===
+  async onAboutSlideSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.isUploading.set(true);
+    try {
+      const base64 = await this.configService.uploadFile(file);
+      this.config.update(c => {
+        const newSlides = [...(c.about.mediaSlides || [])];
+        newSlides.push(base64);
+        return { ...c, about: { ...c.about, mediaSlides: newSlides } };
+      });
+      this.toastService.show('Media berhasil diunggah', 'success');
+    } catch (e: any) {
+      this.toastService.show(`Gagal unggah: ${e.message}`, 'error');
+    } finally {
+      this.isUploading.set(false);
+    }
+  }
+
+  removeAboutSlide(index: number) {
+    if (!confirm('Apakah Anda yakin ingin menghapus media ini?')) return;
+    this.config.update(c => {
+      const newSlides = [...c.about.mediaSlides];
+      newSlides.splice(index, 1);
+      return { ...c, about: { ...c.about, mediaSlides: newSlides } };
+    });
   }
 
   // === MENU CRUD METHODS ===

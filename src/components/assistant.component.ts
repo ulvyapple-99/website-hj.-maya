@@ -1,13 +1,11 @@
 import { Component, signal, inject, ViewChild, ElementRef, AfterViewChecked, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GeminiService, AIResponse } from '../services/gemini.service';
+import { GeminiService, AIResponse, ChatMessage } from '../services/gemini.service';
 import { ConfigService } from '../services/config.service';
 
 // NEW: Updated interface for chat history
-interface ChatMessage {
-  role: 'user' | 'ai';
-  text: string;
+interface ChatMessageWithLink extends ChatMessage {
   link?: string;
   linkText?: string;
 }
@@ -228,7 +226,7 @@ export class AssistantComponent implements AfterViewChecked {
   isFabMenuOpen = signal(false);
   isChatOpen = signal(false);
   userInput = signal('');
-  chatHistory = signal<ChatMessage[]>([]); // Use new interface
+  chatHistory = signal<ChatMessageWithLink[]>([]);
   isLoading = signal(false);
   
   brandColor = '#D84315'; 
@@ -284,8 +282,8 @@ export class AssistantComponent implements AfterViewChecked {
     this.userInput.set('');
     this.isLoading.set(true);
 
-    // Call Gemini for a structured response
-    const reply: AIResponse = await this.geminiService.getRecommendation(text);
+    // Call Gemini for a structured response, now with history
+    const reply: AIResponse = await this.geminiService.getRecommendation(text, this.chatHistory());
 
     // Add structured AI reply to history
     this.chatHistory.update(history => [...history, {

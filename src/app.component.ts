@@ -90,6 +90,23 @@ import { ConfigService } from './services/config.service';
       50% { transform: translateY(-5px); }
     }
     .animate-bounce-slow { animation: bounce-slow 3s infinite; }
+
+    /* Page Transition Animation */
+    :host ::ng-deep router-outlet + * {
+      display: block;
+      animation: route-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes route-enter {
+      from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0);
+      }
+    }
   `]
 })
 export class AppComponent {

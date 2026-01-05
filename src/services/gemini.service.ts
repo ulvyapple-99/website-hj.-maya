@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { GoogleGenAI, GenerateContentResponse, Type } from '@google/genai';
+import { GoogleGenAI, GenerateContentResponse, Type, Content } from '@google/genai';
 import { ConfigService } from './config.service';
 
 // NEW: Interface for structured AI response
@@ -8,6 +8,12 @@ export interface AIResponse {
   response: string;
   actionableLink?: string;
   linkText?: string;
+}
+
+// NEW: Interface for chat history messages, consistent with assistant component
+export interface ChatMessage {
+  role: 'user' | 'ai';
+  text: string;
 }
 
 @Injectable({
@@ -52,8 +58,8 @@ export class GeminiService {
     ).join('\n');
   }
 
-  // UPGRADED: Method now returns a structured AIResponse object
-  async getRecommendation(query: string): Promise<AIResponse> {
+  // UPGRADED: Method now accepts chat history for context
+  async getRecommendation(query: string, history: ChatMessage[] = []): Promise<AIResponse> {
     const now = Date.now();
     if (now - this.lastCallTime < this.MIN_INTERVAL_MS) {
        return { intent: 'UNKNOWN', response: "Mohon tunggu sebentar sebelum mengirim pesan lagi ya..." };
@@ -117,11 +123,24 @@ export class GeminiService {
         required: ["intent", "response"]
       };
 
-      const prompt = `Pelanggan bertanya: "${query}"`;
+      // CONSTRUCT CHAT HISTORY for Gemini
+      // Limit history to the last 6 messages to manage token count and keep context relevant.
+      const limitedHistory = history.slice(-6);
+      
+      const contents: Content[] = limitedHistory.map(msg => ({
+        role: msg.role === 'ai' ? 'model' : 'user',
+        parts: [{ text: msg.text }]
+      }));
+      
+      // Add the current user query
+      contents.push({
+        role: 'user',
+        parts: [{ text: query }]
+      });
 
       const geminiResponse: GenerateContentResponse = await this.ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: prompt,
+        contents: contents,
         config: {
           systemInstruction: systemInstruction,
           responseMimeType: "application/json",
