@@ -1,4 +1,4 @@
-import { Component, inject, computed, ElementRef, ViewChild, AfterViewInit, OnDestroy, signal, effect, OnInit } from '@angular/core';
+import { Component, inject, computed, ElementRef, ViewChild, AfterViewInit, OnDestroy, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ConfigService } from '../services/config.service';
@@ -49,18 +49,18 @@ import { ConfigService } from '../services/config.service';
                     }
 
                     <!-- Media Content -->
-                    @for(slide of slides(); track $index) {
+                    @for(slide of slides(); track slide.id) {
                       <div class="absolute inset-0 transition-opacity duration-700 ease-in-out" [style.opacity]="$index === currentSlideIndex() ? 1 : 0">
-                        @if (isVideo(slide) && !mediaError()) {
+                        @if (isVideo(slide.content) && !mediaError()) {
                            <video #videoPlayer 
-                              [src]="slide" 
+                              [src]="slide.content" 
                               autoplay muted loop playsinline 
                               class="w-full h-full object-cover"
                               (loadeddata)="onMediaLoad()"
                               (error)="onMediaError()"
                            ></video>
                          } @else {
-                           <img [src]="slide" 
+                           <img [src]="slide.content" 
                                 [alt]="config().about.imageAlt" 
                                 class="w-full h-full object-cover"
                                 (load)="onMediaLoad()"
@@ -109,7 +109,7 @@ import { ConfigService } from '../services/config.service';
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                         </button>
                         <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2" (click)="$event.stopPropagation()">
-                            @for (slide of slides(); track $index) {
+                            @for (slide of slides(); track slide.id) {
                                 <button (click)="goToSlide($index)" class="w-2.5 h-2.5 rounded-full transition-all duration-300" [class.bg-white]="currentSlideIndex() === $index" [class.bg-white/50]="currentSlideIndex() !== $index" [attr.aria-label]="'Go to slide ' + ($index + 1)"></button>
                             }
                         </div>
@@ -236,7 +236,7 @@ import { ConfigService } from '../services/config.service';
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   `]
 })
-export class AboutComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AboutComponent implements AfterViewInit, OnDestroy {
   configService = inject(ConfigService);
   config = this.configService.config;
   
@@ -260,18 +260,21 @@ export class AboutComponent implements OnInit, AfterViewInit, OnDestroy {
   private slideInterval: any;
 
   // Computeds
-  slides = computed(() => this.config().about.mediaSlides || []);
+  slides = computed(() => this.configService.aboutMediaContent());
   hasMedia = computed(() => this.slides().length > 0);
   currentSlide = computed(() => {
     const s = this.slides();
     if (!s || s.length === 0) return '';
-    return s[this.currentSlideIndex() % s.length];
+    const slide = s[this.currentSlideIndex() % s.length];
+    return slide ? slide.content : '';
   });
   
   private observer: IntersectionObserver | null = null;
 
-  ngOnInit() {
-    this.setupInterval();
+  constructor() {
+    effect(() => {
+      this.setupInterval();
+    });
   }
 
   ngAfterViewInit() {

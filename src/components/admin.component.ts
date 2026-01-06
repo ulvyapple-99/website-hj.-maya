@@ -338,6 +338,17 @@ import { ToastService } from '../services/toast.service';
                          </div>
                       </div>
                       
+                      <!-- Financial Settings -->
+                      <div class="admin-card">
+                          <div class="admin-card-header bg-green-800 text-white">Financial Settings</div>
+                          <div class="p-6 grid grid-cols-3 gap-6">
+                              <div>
+                                  <label class="form-label">Tax Percentage (%)</label>
+                                  <input type="number" [(ngModel)]="config().global.taxPercentage" class="form-input" min="0" max="100">
+                              </div>
+                          </div>
+                      </div>
+
                       <!-- Advanced (CSS/JS) -->
                       <div class="admin-card">
                          <div class="admin-card-header bg-gray-700 text-white">Advanced Customization</div>
@@ -692,20 +703,23 @@ import { ToastService } from '../services/toast.service';
                             <div>
                                 <label class="form-label">Section Media (Slideshow)</label>
                                 <div class="p-4 border rounded-lg bg-gray-50 space-y-3">
-                                    @for (slide of config().about.mediaSlides; track $index) {
+                                    @for (slide of configService.aboutMediaContent(); track slide.id) {
                                         <div class="flex items-center gap-3 bg-white p-2 rounded-md shadow-sm">
-                                            @if (configService.isVideo(slide)) {
-                                                <video [src]="slide" class="w-16 h-10 object-cover rounded bg-black" muted playsinline></video>
+                                            @if (configService.isVideo(slide.content)) {
+                                                <video [src]="slide.content" class="w-16 h-10 object-cover rounded bg-black" muted playsinline></video>
                                             } @else {
-                                                <img [src]="slide" class="w-16 h-10 object-cover rounded">
+                                                <img [src]="slide.content" class="w-16 h-10 object-cover rounded">
                                             }
                                             <span class="text-xs text-gray-500 truncate flex-1">Slide {{ $index + 1 }}</span>
-                                            <button (click)="removeAboutSlide($index)" class="bg-red-100 text-red-600 px-3 py-1 rounded-md text-xs font-bold hover:bg-red-200">Hapus</button>
+                                            <button (click)="removeAboutSlide(slide.id)" class="bg-red-100 text-red-600 px-3 py-1 rounded-md text-xs font-bold hover:bg-red-200">Hapus</button>
                                         </div>
                                     }
                                     <div class="flex items-center gap-2 pt-2">
                                         <input type="file" (change)="onAboutSlideSelected($event)" class="form-input text-xs flex-1" accept="image/*,video/*">
                                     </div>
+                                    @if(config().about.mediaSlides.length === 0) {
+                                      <p class="text-center text-xs text-gray-500 py-4">Tidak ada media. Silakan tambahkan satu.</p>
+                                    }
                                 </div>
                                 <div class="mt-2 grid grid-cols-2 gap-2">
                                   <div><label class="form-label">Media Position</label>
@@ -1958,8 +1972,6 @@ export class AdminComponent {
         if (type === 'backgroundMusic') newC.global.backgroundMusicUrl = base64;
         if (type === 'introVideo') newC.intro.videoUrl = base64;
         if (type === 'favicon') newC.global.favicon = base64;
-        // This is now handled by onAboutSlideSelected
-        // if (type === 'aboutImage') newC.about.image = base64;
         return newC;
       });
       
@@ -2043,27 +2055,44 @@ export class AdminComponent {
 
     this.isUploading.set(true);
     try {
-      const base64 = await this.configService.uploadFile(file);
+      const docId = await this.configService.addAboutMediaItem(file);
       this.config.update(c => {
-        const newSlides = [...(c.about.mediaSlides || [])];
-        newSlides.push(base64);
+        const newSlides = [...(c.about.mediaSlides || []), docId];
         return { ...c, about: { ...c.about, mediaSlides: newSlides } };
       });
       this.toastService.show('Media berhasil diunggah', 'success');
     } catch (e: any) {
-      this.toastService.show(`Gagal unggah: ${e.message}`, 'error');
+      this.toastService.show(`Gagal: ${e.message}`, 'error');
     } finally {
       this.isUploading.set(false);
+      (event.target as HTMLInputElement).value = '';
     }
   }
 
-  removeAboutSlide(index: number) {
+  async removeAboutSlide(slideIdToDelete: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus media ini?')) return;
-    this.config.update(c => {
-      const newSlides = [...c.about.mediaSlides];
-      newSlides.splice(index, 1);
-      return { ...c, about: { ...c.about, mediaSlides: newSlides } };
-    });
+    
+    this.isUploading.set(true);
+    try {
+        const currentConfig = this.config();
+        
+        const newSlides = currentConfig.about.mediaSlides.filter(id => id !== slideIdToDelete);
+        
+        const newConfig = { 
+            ...currentConfig, 
+            about: { ...currentConfig.about, mediaSlides: newSlides } 
+        };
+
+        await this.configService.updateConfig(newConfig);
+
+        await this.configService.deleteAboutMediaItem(slideIdToDelete);
+        
+        this.toastService.show('Media berhasil dihapus dan disimpan.', 'success');
+    } catch(e: any) {
+        this.toastService.show(`Gagal menghapus media: ${e.message}`, 'error');
+    } finally {
+        this.isUploading.set(false);
+    }
   }
 
   // === MENU CRUD METHODS ===

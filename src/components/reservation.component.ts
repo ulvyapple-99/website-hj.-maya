@@ -201,15 +201,32 @@ interface GuestOrder {
 
                 <!-- Submit Box -->
                 <div class="text-white p-4 mt-4" [style.backgroundColor]="config().reservation.style.accentColor" [style.borderRadius]="config().reservation.inputBorderRadius">
-                   <div class="flex justify-between text-sm mb-1 opacity-90" [ngStyle]="config().reservation.summaryStyle">Total Estimasi:</div>
-                   <div class="text-2xl font-bold mb-2" [ngStyle]="config().reservation.summaryStyle">{{ formatRupiah(grandTotal()) }}</div>
+                   <div class="text-sm opacity-90" [ngStyle]="config().reservation.summaryStyle">Rincian Estimasi:</div>
+                   
+                   <div class="space-y-1 my-2 text-sm border-t border-b border-white/20 py-2">
+                      <div class="flex justify-between">
+                         <span [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.8rem;">Subtotal</span>
+                         <span [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.8rem;">{{ formatRupiah(grandTotal()) }}</span>
+                      </div>
+                      @if (config().global.taxPercentage > 0) {
+                         <div class="flex justify-between">
+                           <span [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.8rem;">Pajak ({{config().global.taxPercentage}}%)</span>
+                           <span [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.8rem;">{{ formatRupiah(taxAmount()) }}</span>
+                         </div>
+                      }
+                   </div>
+
+                   <div class="flex justify-between items-center mb-2">
+                       <span class="font-bold" [ngStyle]="config().reservation.summaryStyle">Total</span>
+                       <span class="text-2xl font-bold" [ngStyle]="config().reservation.summaryStyle">{{ formatRupiah(grandTotalWithTax()) }}</span>
+                   </div>
                    
                    <!-- Blind Spot 10: DP Calculation -->
                    @if (currentBranch().enableDownPaymentCalc) {
                       <div class="text-xs bg-black/20 p-2 rounded mb-4">
                          <div class="flex justify-between">
                             <span [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">Wajib DP ({{ currentBranch().downPaymentPercentage }}%):</span>
-                            <span class="font-bold" [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">{{ formatRupiah(grandTotal() * (currentBranch().downPaymentPercentage / 100)) }}</span>
+                            <span class="font-bold" [ngStyle]="config().reservation.summaryStyle" style="font-size: 0.75rem;">{{ formatRupiah(grandTotalWithTax() * (currentBranch().downPaymentPercentage / 100)) }}</span>
                          </div>
                       </div>
                    }
@@ -506,6 +523,9 @@ export class ReservationComponent {
     return total;
   });
 
+  taxAmount = computed(() => this.grandTotal() * (this.config().global.taxPercentage / 100));
+  grandTotalWithTax = computed(() => this.grandTotal() + this.taxAmount());
+
   addGuest() {
     this.guests.update(l => [...l, { id: Date.now(), name: `Tamu ${l.length + 1}`, cart: new Map(), note: '' }]);
   }
@@ -591,8 +611,15 @@ export class ReservationComponent {
        }
     });
     
-    const total = this.grandTotal();
-    msg += `\n*Total Estimasi: ${this.formatRupiah(total)}*`;
+    const subtotal = this.grandTotal();
+    const total = this.grandTotalWithTax();
+
+    msg += `\n--------------------------------\n`;
+    msg += `Subtotal: ${this.formatRupiah(subtotal)}\n`;
+    if (this.config().global.taxPercentage > 0) {
+      msg += `Pajak (${this.config().global.taxPercentage}%): ${this.formatRupiah(this.taxAmount())}\n`;
+    }
+    msg += `*Total Estimasi: ${this.formatRupiah(total)}*`;
     
     if (this.currentBranch().enableDownPaymentCalc) {
         const dp = total * (this.currentBranch().downPaymentPercentage / 100);

@@ -130,6 +130,7 @@ export interface AppConfig {
     enableSmoothScroll: boolean;
     enableBackgroundMusic: boolean;
     backgroundMusicUrl: string;
+    taxPercentage: number;
   };
   intro: {
     enabled: boolean;
@@ -378,7 +379,8 @@ export class ConfigService {
       floatingWhatsapp: '6281223456789',
       enableSmoothScroll: true,
       enableBackgroundMusic: false,
-      backgroundMusicUrl: ''
+      backgroundMusicUrl: '',
+      taxPercentage: 10
     },
     intro: {
       enabled: false,

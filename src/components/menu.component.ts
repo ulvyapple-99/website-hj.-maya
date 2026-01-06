@@ -1,4 +1,3 @@
-
 import { Component, signal, inject, computed, effect, input, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -286,8 +285,16 @@ import { ToastService } from '../services/toast.service';
 
             <!-- Footer -->
             <div class="bg-white p-6 border-t shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-               <div class="flex justify-between items-center mb-6">
+               <div class="flex justify-between items-center mb-2">
                    <span class="text-gray-500 font-medium">Subtotal</span>
+                   <span class="font-bold text-lg text-gray-900">{{ formatRupiah(subTotal()) }}</span>
+               </div>
+               <div class="flex justify-between items-center mb-4">
+                   <span class="text-gray-500 font-medium">Pajak (10%)</span>
+                   <span class="font-bold text-lg text-gray-900">{{ formatRupiah(taxAmount()) }}</span>
+               </div>
+               <div class="flex justify-between items-center mb-6 border-t pt-4">
+                   <span class="text-gray-500 font-medium">Total</span>
                    <span class="font-bold text-2xl text-gray-900">{{ formatRupiah(totalPrice()) }}</span>
                </div>
                <button (click)="checkout()" [disabled]="cartItemsList().length === 0"
@@ -415,7 +422,7 @@ export class MenuComponent {
     return isNaN(num) ? 0 : num;
   }
 
-  totalPrice = computed(() => {
+  subTotal = computed(() => {
     let total = 0;
     const fullMenu = this.currentBranchMenu();
     const branchPrefix = this.currentBranch().id + '_';
@@ -431,6 +438,10 @@ export class MenuComponent {
     });
     return total;
   });
+
+  taxAmount = computed(() => this.subTotal() * 0.1);
+
+  totalPrice = computed(() => this.subTotal() * 1.1);
 
   setBranch(index: number) {
     if (this.selectedBranchIndex() !== index) {
@@ -540,6 +551,8 @@ export class MenuComponent {
        message += `• ${i.qty}x ${i.menu.name} @ ${i.menu.price}\n`;
     });
     message += `\n--------------------------------\n`;
+    message += `Subtotal: ${this.formatRupiah(this.subTotal())}\n`;
+    message += `Pajak (10%): ${this.formatRupiah(this.taxAmount())}\n`;
     message += `*Total Estimasi: ${this.formatRupiah(this.totalPrice())}*`;
     message += `\n--------------------------------\n`;
     message += `\nMohon info ketersediaan & ongkir. Hatur nuhun.`;
